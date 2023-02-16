@@ -22,7 +22,7 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 SERVER_IP = os.environ.get('SERVER_IP')
 DOMAIN = os.environ.get('DOMAIN')
 
@@ -81,8 +81,12 @@ WSGI_APPLICATION = 'website.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': str(os.environ.get('POSTGRES_DB')),
+        'USER': str(os.environ.get('POSTGRES_USER')),
+        'PASSWORD': str(os.environ.get('POSTGRES_PASSWORD')),
+        'HOST': str(os.environ.get('POSTGRES_HOST')),
+        'PORT': str(os.environ.get('POSTGRES_PORT'))
     }
 }
 
