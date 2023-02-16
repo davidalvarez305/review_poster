@@ -1,0 +1,18 @@
+package routes
+
+import (
+	"github.com/davidalvarez305/content_go/server/controllers"
+	"github.com/davidalvarez305/content_go/server/middleware"
+	"github.com/gofiber/fiber/v2"
+)
+
+func Router(app *fiber.App) {
+	api := app.Group("api", middleware.AuthMiddleware)
+	controllers.Paragraph(api)
+	controllers.Sentence(api)
+	controllers.Synonym(api)
+	controllers.Template(api)
+	controllers.Word(api)
+	controllers.User(api)
+	controllers.Content(api)
+}

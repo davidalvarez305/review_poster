@@ -1,0 +1,9 @@
+*.sql
+*.conf
+*.env
+*.json
+replicate-db.sh
+script.py
+images.py
+deploy.sh
+s3.py

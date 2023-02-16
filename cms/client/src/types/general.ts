@@ -1,0 +1,94 @@
+export type User = {
+  id: number;
+  username: string;
+  password: string;
+  email: string;
+  token: string;
+};
+
+export type Template = {
+  id: number;
+  name: string;
+  user_id: number;
+};
+
+export type Word = {
+  id: number;
+  name: string;
+  tag: string;
+  user_id: number;
+};
+
+export type Synonym = {
+  id: number | null;
+  synonym: string;
+  word_id: number;
+};
+
+export type Sentence = {
+  id: number | null;
+  sentence: string;
+  paragraph_id: number;
+  template_id: number;
+  user_id: number;
+};
+
+export type Paragraph = {
+  id: number | null;
+  name: string;
+  order?: number;
+  template_id: number;
+  user_id: number;
+};
+
+export type UpdateParagraph = {
+  id?: number;
+  name: string;
+  order: number | null;
+  template_id: number;
+};
+
+export type UpdateSynonym = {
+  id?: number;
+  synonym: string;
+  word_id: number;
+};
+
+export type UpdateSentence = {
+  id?: number;
+  sentence: string;
+  paragraph_id: number;
+  template_id: number;
+};
+
+export type JoinedParagraph = {
+  paragraph_id: number;
+  paragraph_name: string;
+  paragraph_order: number;
+  template_id: number;
+  template_name: string;
+};
+
+export type Content = {
+  sentences: string;
+  template: string;
+  paragraph: string;
+  order: number;
+};
+
+export type FinalizedContent = {
+  sentences: string[];
+  template: string;
+  paragraph: string;
+  order: number;
+};
+
+export type DictionaryResponse = {
+  name: string;
+  tag: string;
+  synonyms: string;
+};
+
+export type Dictionary = {
+  [key: string]: string[];
+};
