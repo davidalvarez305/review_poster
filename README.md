@@ -1,0 +1,1 @@
+A software project for crawling Amazon, and automating product reviews.

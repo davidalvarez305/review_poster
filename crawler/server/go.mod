@@ -1,4 +1,4 @@
-module github.com/davidalvarez305/soflo_go/server
+module github.com/davidalvarez305/review_poster/crawler/server
 
 go 1.17
 
