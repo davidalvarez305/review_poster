@@ -35,6 +35,7 @@ class CategoryView(MyBaseView):
         category = get_object_or_404(Category, slug=category_slug)
         related_sub_categories = SubCategory.objects.filter(category__slug=category_slug)
         context['related_sub_categories'] = related_sub_categories
+        context['category'] = category
         return context
 
 
