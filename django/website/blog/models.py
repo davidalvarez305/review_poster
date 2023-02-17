@@ -1,6 +1,6 @@
 from django.db import models
 
-class Category(models.Model):
+class Categorization(models.Model):
     name = models.CharField(max_length=250)
     slug = models.SlugField(db_index=True)
 
@@ -8,15 +8,21 @@ class Category(models.Model):
         return self.name
 
     class Meta:
+        abstract = True
+
+class Group(Categorization):
+
+    class Meta:
+        db_table = "group"
+
+class Category(Categorization):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+    class Meta:
         db_table = "category"
 
-class SubCategory(models.Model):
-    name = models.CharField(max_length=250)
-    slug = models.SlugField(db_index=True)
+class SubCategory(Categorization):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         db_table = "sub_category"
