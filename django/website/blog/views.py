@@ -1,5 +1,7 @@
 from datetime import date
+import math
 import os
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.db import connection
@@ -78,7 +80,7 @@ class CategoryView(MyBaseView):
         category = get_object_or_404(Category, slug=category_slug)
         sub_categories = SubCategory.objects.filter(category__slug=category_slug)
         example_posts = sub_categories.prefetch_related(Prefetch('review_post', queryset=ReviewPost.objects.first()))
-        context['example_posts'] = example_posts.prefetch_related('sub_category')
+        context['example_posts'] = example_posts
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
@@ -114,3 +116,73 @@ class ReviewPostView(MyBaseView):
         context['meta_description'] = review_post.description
         context['page_title'] = review_post.title
         return context
+
+def sitemap(request, *args, **kwargs):
+
+    sitemap_index = kwargs['int'] - 1
+
+    if sitemap_index < 0:
+        return HttpResponseBadRequest("Sitemap value must be greater than zero.")
+
+    offset = 5000 * sitemap_index
+
+    cursor = connection.cursor()
+    cursor.execute(
+        f"SELECT CONCAT('0.8'), slug FROM review_post LIMIT 5000 OFFSET {offset};")
+    rows = cursor.fetchall()
+    columns = ["priority", "slug"]
+    posts = [
+        dict(zip(columns, row))
+        for row in rows
+    ]
+
+    if len(posts) == 0:
+        return HttpResponseBadRequest("Bad Request: Exceeded post quantity.")
+
+    context = {
+        'posts': posts,
+        'domain': str(os.environ.get('DOMAIN')),
+        "current_year": date.today().year
+    }
+    return render(request, 'blog/sitemap.xml.gz', context, content_type="application/xhtml+xml")
+
+
+def sitemap_index(request, *args, **kwargs):
+
+    cursor = connection.cursor()
+    cursor.execute(
+        '''SELECT CONCAT('0.8'), slug FROM review_post;''')
+    rows = cursor.fetchall()
+    columns = ["priority", "slug"]
+    posts = [
+        dict(zip(columns, row))
+        for row in rows
+    ]
+
+    # Helpers for slicing sitemaps into chunks of 5000 (Google MAX: 50,0000)
+    start = 0
+    interval = 5000
+    i = 0
+
+    # Amount of times to slice the list
+    loops = math.ceil(len(posts) / interval)
+    sitemaps = []
+
+    while (i < loops):
+        sliced_sitemap = posts[start:start+interval]
+        sitemaps.append(sliced_sitemap)
+        start += 5000
+        i += 1
+
+    context = {
+        'sitemaps': sitemaps,
+        'domain': str(os.environ.get('DOMAIN')),
+        "current_year": date.today().year
+    }
+    return render(request, 'blog/sitemap_index.xml', context, content_type="application/xhtml+xml")
+
+class AffiliateDisclaimer(MyBaseView):
+    template = 'blog/affiliate_disclaimer.html'
+
+class PrivacyPolicy(MyBaseView):
+    template = 'blog/privacy_policy.html'
