@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.db import connection
 from .models import *
+from django.db.models import Prefetch
 
 class MyBaseView(View):
     groups = Group.objects.prefetch_related('category_set').all()
@@ -76,6 +77,8 @@ class CategoryView(MyBaseView):
         category_slug = kwargs['category']
         category = get_object_or_404(Category, slug=category_slug)
         sub_categories = SubCategory.objects.filter(category__slug=category_slug)
+        example_posts = sub_categories.prefetch_related(Prefetch('review_post', queryset=ReviewPost.objects.first()))
+        context['example_posts'] = example_posts.prefetch_related('sub_category')
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
