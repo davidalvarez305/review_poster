@@ -8,11 +8,14 @@ class MyBaseView(View):
     groups = Group.objects.all()
     domain = str(os.environ.get('DOMAIN'))
     current_year = date.today().year
+    google_analytics_id = str(os.environ.get('GOOGLE_ANALYTICS_ID'))
 
     context = {
         'domain': domain,
         'current_year': current_year,
         'groups': groups,
+        'google_analytics_id': google_analytics_id,
+        'google_analytics_src': "https://www.googletagmanager.com/gtag/js?id=" + google_analytics_id,
     }
 
     template_name = 'home.html'
