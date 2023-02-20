@@ -5,7 +5,7 @@ from django.views import View
 from .models import *
 
 class MyBaseView(View):
-    groups = Group.objects.all()
+    groups = Group.objects.prefetch_related('category_set').all()
     domain = str(os.environ.get('DOMAIN'))
     current_year = date.today().year
     google_analytics_id = str(os.environ.get('GOOGLE_ANALYTICS_ID'))
@@ -16,12 +16,19 @@ class MyBaseView(View):
         'groups': groups,
         'google_analytics_id': google_analytics_id,
         'google_analytics_src': "https://www.googletagmanager.com/gtag/js?id=" + google_analytics_id,
+        'meta_description': 'Get reviews for all things sports, fitness, outdoors, and everything in between!',
+        'page_title': str(os.environ.get('PAGE_TITLE')),
+        'site_name': str(os.environ.get('SITE_NAME'))
     }
 
     template_name = 'home.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, context=self.context)
+
+        ctx = self.context
+        ctx['path'] = request.path
+
+        return render(request, self.template_name, context=ctx)
 
 
 class HomeView(MyBaseView):
@@ -39,6 +46,7 @@ class CategoryView(MyBaseView):
         related_sub_categories = SubCategory.objects.filter(category__slug=category_slug)
         context['related_sub_categories'] = related_sub_categories
         context['category'] = category
+        context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
         return context
 
 
@@ -54,6 +62,7 @@ class SubCategoryView(MyBaseView):
         related_sub_categories = SubCategory.objects.filter(category__slug=category_slug)
         context['related_sub_categories'] = related_sub_categories
         context['sub_category'] = sub_category
+        context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
         return context
 
 class ReviewPostView(MyBaseView):
@@ -68,4 +77,6 @@ class ReviewPostView(MyBaseView):
         related_review_posts = ReviewPost.objects.filter(sub_category__slug=sub_category_slug)
         context['related_review_posts'] = related_review_posts
         context['review_post'] = review_post
+        context['meta_description'] = review_post.description
+        context['page_title'] = review_post.title
         return context

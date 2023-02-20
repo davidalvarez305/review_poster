@@ -76,17 +76,17 @@
                             <nav class="main-menu navbar-expand-md navbar-light">
                                 <div class="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
                                     <ul class="navigation clearfix">
-                                        {% for parent in parent_group %}
-                                        <li class="dropdown"><a href="#">{{ parent.name }}</a>
+                                        {% for group in groups %}
+                                        <li class="dropdown"><a href="#">{{ group.name }}</a>
                                             <div class="megamenu">
                                                 <div class="row clearfix">
-                                                    {% for cg in parent.category_group %}
+                                                    {% for category in group.categories %}
                                                     <div class="col-lg-6 column">
                                                         <ul>
                                                             <li>
                                                                 <h4>Subcategories</h4>
                                                             </li>
-                                                            {% for item in cg %}
+                                                            {% for item in category %}
                                                             <li><a href="/category-group/{{ item.name }}">{{ item.name }}</a>
                                                             </li>
                                                             {% endfor %}
