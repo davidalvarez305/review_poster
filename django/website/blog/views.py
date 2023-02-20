@@ -2,6 +2,7 @@ from datetime import date
 import os
 from django.shortcuts import render, get_object_or_404
 from django.views import View
+from django.db import connection
 from .models import *
 
 class MyBaseView(View):
@@ -34,6 +35,37 @@ class MyBaseView(View):
 class HomeView(MyBaseView):
     template_name = 'blog/home.html'
 
+    def get_context_data(self, **kwargs):
+        cursor = connection.cursor()
+        context = super().get_context_data(**kwargs)
+
+        sql = '''
+            SELECT JSON_AGG(TO_JSON(r)) FROM (
+                SELECT rp.title, rp.slug, rp.horizontalcardproductimageurl, rp."categoryId", sub.slug AS sub_category_slug, sub.name AS sub_category, cg.name AS category, cg.id AS category_id,
+                ROW_NUMBER() OVER (PARTITION BY cg.id ORDER BY cg.id) row_number
+                FROM review_post AS rp
+                LEFT JOIN sub_category AS sub
+                ON rp."categoryId" = sub.id
+                LEFT JOIN category AS cg
+                ON cg.id = sub.category_id
+                GROUP BY sub.id, rp.title, sub.name, sub.slug, cg.name, rp.slug, rp.horizontalcardproductimageurl, cg.id, rp."categoryId"
+                ORDER BY cg.id
+            ) AS r
+            WHERE r.row_number < 10
+        '''
+
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        desc = cursor.description
+        columns = [col[0] for col in desc]
+        example_posts = [
+            dict(zip(columns, row))
+            for row in rows
+        ]
+
+        context['example_posts'] = example_posts
+        return context
+
 
 class CategoryView(MyBaseView):
 
@@ -43,8 +75,8 @@ class CategoryView(MyBaseView):
         context = super().get_context_data(**kwargs)
         category_slug = kwargs['category']
         category = get_object_or_404(Category, slug=category_slug)
-        related_sub_categories = SubCategory.objects.filter(category__slug=category_slug)
-        context['related_sub_categories'] = related_sub_categories
+        sub_categories = SubCategory.objects.filter(category__slug=category_slug)
+        context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
         return context
@@ -57,10 +89,9 @@ class SubCategoryView(MyBaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sub_category_slug = kwargs['sub_category']
-        category_slug = kwargs['category']
         sub_category = get_object_or_404(SubCategory, sub_category_slug=sub_category_slug)
-        related_sub_categories = SubCategory.objects.filter(category__slug=category_slug)
-        context['related_sub_categories'] = related_sub_categories
+        posts = ReviewPost.objects.filter(sub_category__slug=sub_category.slug)
+        context['posts'] = posts
         context['sub_category'] = sub_category
         context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
         return context

@@ -1,0 +1,28 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<section class="collection-style-two sec-pad-2">
+    {% for post in posts %}
+    <div class="auto-container">
+        <div class="row clearfix">
+            {% for p in post %}
+            <div class="col-lg-4 col-md-6 col-sm-12 single-block">
+                <div class="single-item wow fadeInUp animated animated" data-wow-delay="00ms"
+                    data-wow-duration="1500ms">
+                    <div class="inner-box">
+                        <figure class="image-box"><img src="{{ p.horizontalcardproductimageurl }}"
+                                alt="{{ p.horizontalcardproductimagealt }}"></figure>
+                        <div class="lower-content">
+                            <div class="inner">
+                                <h3><a href="/{{ sub_category.slug }}/{{ p.slug }}"><br />{{ p.productname }}</a></h3>
+                                <div class="link"><a href="/{{ sub_category.slug }}/{{ p.slug }}">Learn More<i class="flaticon-right-1"></i></a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
