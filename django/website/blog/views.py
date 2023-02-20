@@ -151,7 +151,10 @@ def sitemap_index(request, *args, **kwargs):
 
     cursor = connection.cursor()
     cursor.execute(
-        '''SELECT CONCAT('0.8'), slug FROM review_post;''')
+        '''SELECT CONCAT('0.8'), slug, sc.slug AS sub_category_slug FROM review_post
+            LEFT JOIN sub_category AS sc
+            ON review_post.sub_category_id = sc.id;
+        ''')
     rows = cursor.fetchall()
     columns = ["priority", "slug"]
     posts = [
