@@ -53,3 +53,17 @@ class ReviewPost(models.Model):
 
     class Meta:
         db_table = "review_post"
+
+class Product(models.Model):
+    affiliate_url = models.CharField(max_length=250, db_index=True, unique=True)
+    product_price = models.CharField(max_length=250)
+    product_reviews = models.CharField(max_length=250)
+    product_ratings = models.CharField(max_length=250)
+    product_image = models.CharField(max_length=250)
+    review_post = models.ForeignKey(ReviewPost, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = "product"

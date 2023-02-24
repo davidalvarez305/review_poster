@@ -104,17 +104,32 @@ class SubCategoryView(MyBaseView):
 class ReviewPostView(MyBaseView):
 
     template_name = 'blog/review_post.html'
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = kwargs['slug']
         sub_category_slug = kwargs['sub_category']
         review_post = get_object_or_404(ReviewPost, slug=slug)
+        product = get_object_or_404(Product, affiliate_url=review_post.product_affiliate_url)
+
+        # Output Stars
+        i = 0
+        product_rating_stars = ""
+        if product.product_ratings == "":
+            product_rating_stars = 0
+        else:
+            while i < float(product.product_ratings):
+                product_rating_stars += '<li><i class="flaticon-star"></i></li>'
+                i += 1
+
         related_review_posts = ReviewPost.objects.filter(sub_category__slug=sub_category_slug)
         context['related_review_posts'] = related_review_posts
         context['review_post'] = review_post
         context['meta_description'] = review_post.description
         context['page_title'] = review_post.title
+        context['product'] = product
+        context['product_rating_stars'] = product_rating_stars
         return context
 
 def sitemap(request, *args, **kwargs):
