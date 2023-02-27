@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/actions"
@@ -10,16 +9,13 @@ import (
 )
 
 func GetCommercialKeywords(c *fiber.Ctx) error {
-	type reqBody struct {
-		Keyword string `json:"keyword"`
-	}
-
-	var body reqBody
-	err := c.BodyParser(&body)
+	body := &types.Keyword{}
+	results := &actions.GoogleKeywordResults{}
+	err := c.BodyParser(body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse request body.",
 		})
 	}
 
@@ -38,11 +34,11 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 		},
 	}
 
-	results, err := actions.QueryGoogle(q)
+	err = results.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to query Google.",
 		})
 	}
 
@@ -56,11 +52,9 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get seed keywords.",
 		})
 	}
-
-	fmt.Printf("Length of Seed Keywords: %v", seedKeywords)
 
 	if len(seedKeywords) == 0 {
 		return c.Status(404).JSON(fiber.Map{
@@ -72,11 +66,9 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get commercial keywords.",
 		})
 	}
-
-	fmt.Printf("Length of Commercial Keywords: %v", keywords)
 
 	if len(keywords) == 0 {
 		return c.Status(404).JSON(fiber.Map{
@@ -90,16 +82,13 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 }
 
 func GetSeedKeywords(c *fiber.Ctx) error {
-	type reqBody struct {
-		Keyword string `json:"keyword"`
-	}
-
-	var body reqBody
-	err := c.BodyParser(&body)
+	body := &types.Keyword{}
+	results := &actions.GoogleKeywordResults{}
+	err := c.BodyParser(body)
 
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse request body.",
 		})
 	}
 
@@ -118,11 +107,11 @@ func GetSeedKeywords(c *fiber.Ctx) error {
 		},
 	}
 
-	results, err := actions.QueryGoogle(q)
+	err = results.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to query Google.",
 		})
 	}
 
@@ -136,7 +125,7 @@ func GetSeedKeywords(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get seed keywords.",
 		})
 	}
 
@@ -148,20 +137,5 @@ func GetSeedKeywords(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": seedKeywords,
-	})
-}
-
-func GetPeopleAlsoAsk(c *fiber.Ctx) error {
-
-	keywords, err := actions.CrawlGoogleSERP("bbcor bat reviews")
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": keywords,
 	})
 }

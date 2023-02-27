@@ -2,14 +2,12 @@ package actions
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -17,6 +15,10 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/davidalvarez305/review_poster/crawler/server/utils"
 )
+
+type GoogleKeywordResults struct {
+	Results []types.GoogleResult `json:"results"`
+}
 
 func RequestGoogleAuthToken() error {
 	config, err := utils.GetGoogleCredentials()
@@ -154,7 +156,7 @@ func RefreshAuthToken() (string, error) {
 	return data.Access_Token, nil
 }
 
-func GetSeedKeywords(results types.GoogleKeywordResults) ([]string, error) {
+func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
 	var data []string
 
 	for i := 0; i < len(results.Results); i++ {
@@ -184,15 +186,14 @@ func GetSeedKeywords(results types.GoogleKeywordResults) ([]string, error) {
 	return data, nil
 }
 
-func QueryGoogle(query types.GoogleQuery) (types.GoogleKeywordResults, error) {
+func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error {
 	time.Sleep(1 * time.Second)
-	var results types.GoogleKeywordResults
 
 	authToken, err := RefreshAuthToken()
 
 	if err != nil {
 		fmt.Printf("Error refreshing token.")
-		return results, err
+		return err
 	}
 
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
@@ -205,13 +206,13 @@ func QueryGoogle(query types.GoogleQuery) (types.GoogleKeywordResults, error) {
 	out, err := json.Marshal(query)
 
 	if err != nil {
-		return results, err
+		return err
 	}
 
 	req, err := http.NewRequest("POST", googleUrl, bytes.NewBuffer(out))
 	if err != nil {
 		fmt.Println("Request failed: ", err)
-		return results, err
+		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("developer-token", developerToken)
@@ -220,17 +221,18 @@ func QueryGoogle(query types.GoogleQuery) (types.GoogleKeywordResults, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while querying Google", err)
-		return results, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	json.NewDecoder(resp.Body).Decode(&results)
 
-	return results, nil
+	return nil
 }
 
 func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 	var keywords []string
+	results := &GoogleKeywordResults{}
 	for i := 0; i < len(seedKeywords); i++ {
 
 		q := types.GoogleQuery{
@@ -240,13 +242,13 @@ func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 			},
 		}
 
-		results, err := QueryGoogle(q)
+		err := results.QueryGoogle(q)
 
 		if err != nil {
 			return keywords, err
 		}
 
-		k := utils.FilterCommercialKeywords(results, seedKeywords[i])
+		k := filterCommercialKeywords(results, seedKeywords[i])
 		keywords = append(keywords, k...)
 	}
 
@@ -255,56 +257,32 @@ func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 	return keywords, nil
 }
 
-func CrawlGoogleSERP(keywords string) ([]string, error) {
-	var results []string
+func filterCommercialKeywords(results *GoogleKeywordResults, seedKeyword string) []string {
+	var data []string
+	r := regexp.MustCompile("(used|cheap|deals|deal|sale|buy|online|on sale|discount|for sale|near me|best|for|[0-9]+)")
 
-	str := strings.Join(strings.Split(keywords, " "), "+")
+	for i := 0; i < len(results.Results); i++ {
+		cleanKeyword := strings.TrimSpace(r.ReplaceAllString(results.Results[i].Text, ""))
+		fmt.Println(cleanKeyword)
 
-	serp := fmt.Sprintf("https://www.google.com/search?q=%s", str)
+		compIndex, errOne := strconv.Atoi(results.Results[i].KeywordIdeaMetrics.CompetitionIndex)
+		if errOne != nil {
+			return data
+		}
 
-	host := os.Getenv("P_HOST")
-	username := os.Getenv("P_USERNAME")
-	sessionId := fmt.Sprint(rand.Intn(1000000))
-	path := username + sessionId + ":" + host
+		searchVol, errTwo := strconv.Atoi(results.Results[i].KeywordIdeaMetrics.AvgMonthlySearches)
+		if errTwo != nil {
+			return data
+		}
 
-	u, err := url.Parse(path)
-	if err != nil {
-		return results, err
+		conditionOne := compIndex == 100
+		conditionTwo := searchVol > 100
+		conditionThree := len(strings.Split(strings.TrimSpace(cleanKeyword), seedKeyword)[0]) >= 2
+
+		if conditionOne && conditionTwo && conditionThree {
+			data = append(data, cleanKeyword)
+		}
 	}
 
-	tr := &http.Transport{
-		Proxy: http.ProxyURL(u),
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-
-	client := &http.Client{
-		Transport: tr,
-	}
-
-	req, err := http.NewRequest("GET", serp, nil)
-
-	if err != nil {
-		fmt.Println("Request failed: ", err)
-		return results, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("Error while fetching Google SERP", err)
-		return results, err
-	}
-	defer resp.Body.Close()
-
-	kws, err := utils.ParseGoogleSERP(resp.Body)
-	results = kws
-
-	if err != nil {
-		fmt.Println("Error while parsing HTML.")
-		return kws, err
-	}
-
-	return results, nil
+	return data
 }

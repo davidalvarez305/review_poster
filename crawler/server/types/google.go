@@ -41,7 +41,3 @@ type GoogleResult struct {
 	KeywordIdeaMetrics keywordIdeaMetrics `json:"keywordIdeaMetrics"`
 	Text               string             `json:"text"`
 }
-
-type GoogleKeywordResults struct {
-	Results []GoogleResult `json:"results"`
-}
