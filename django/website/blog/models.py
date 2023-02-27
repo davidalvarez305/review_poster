@@ -27,6 +27,19 @@ class SubCategory(Categorization):
     class Meta:
         db_table = "sub_category"
 
+class Product(models.Model):
+    affiliate_url = models.CharField(max_length=250, db_index=True, unique=True)
+    product_price = models.CharField(max_length=250)
+    product_reviews = models.CharField(max_length=250)
+    product_ratings = models.CharField(max_length=250)
+    product_image = models.CharField(max_length=250)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = "product"
+
 class ReviewPost(models.Model):
     title = models.CharField(max_length=250)
     slug = models.SlugField(db_index=True)
@@ -38,7 +51,7 @@ class ReviewPost(models.Model):
     product_label = models.CharField(max_length=250)
     product_name = models.CharField(max_length=250)
     product_description = models.TextField()
-    product_affiliate_url = models.CharField(max_length=250)
+    product_affiliate_url = models.ForeignKey(Product, to_field='affiliate_url', on_delete=models.CASCADE)
     faq_answer_1 = models.TextField()
     faq_answer_2 = models.TextField()
     faq_answer_3 = models.TextField()
@@ -53,17 +66,3 @@ class ReviewPost(models.Model):
 
     class Meta:
         db_table = "review_post"
-
-class Product(models.Model):
-    affiliate_url = models.CharField(max_length=250, db_index=True, unique=True)
-    product_price = models.CharField(max_length=250)
-    product_reviews = models.CharField(max_length=250)
-    product_ratings = models.CharField(max_length=250)
-    product_image = models.CharField(max_length=250)
-    review_post = models.ForeignKey(ReviewPost, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        db_table = "product"

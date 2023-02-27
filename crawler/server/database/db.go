@@ -34,6 +34,7 @@ func Connect() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		FullSaveAssociations: true,
 	})
 
 	if err != nil {

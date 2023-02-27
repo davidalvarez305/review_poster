@@ -1,10 +1,10 @@
 package models
 
 type Product struct {
-	ID             uint
-	AffiliateUrl   string `gorm:"unique;column:affiliateUrl"`
-	ProductPrice   string `gorm:"column:productPrice"`
-	ProductReviews string `gorm:"column:productReviews"`
-	ProductRatings string `gorm:"column:productRatings"`
-	ProductImage   string `gorm:"column:productImage"`
+	ID             int    `json:"id" form:"id"`
+	AffiliateUrl   string `gorm:"unique;column:affiliate_url" json:"affiliate_url" form:"affiliate_url"`
+	ProductPrice   string `gorm:"column:product_price" json:"product_price" form:"product_price"`
+	ProductReviews string `gorm:"column:product_reviews" json:"product_reviews" form:"product_reviews"`
+	ProductRatings string `gorm:"column:product_ratings" json:"product_ratings" form:"product_ratings"`
+	ProductImage   string `gorm:"column:product_image" json:"product_image" form:"product_image"`
 }
