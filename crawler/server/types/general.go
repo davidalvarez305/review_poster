@@ -9,3 +9,7 @@ type CreatePostInput struct {
 	ProductPrice   string `json:"productPrice"`
 	ProductRating  string `json:"productRating"`
 }
+
+type Keyword struct {
+	Keyword string `json:"keyword" form:"keyword"`
+}

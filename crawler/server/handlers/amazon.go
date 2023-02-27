@@ -2,47 +2,41 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CrawlAmazon(c *fiber.Ctx) error {
-	type reqBody struct {
-		Keyword string `json:"keyword"`
-	}
-
-	var body reqBody
-	err := c.BodyParser(&body)
+	body := &types.Keyword{}
+	products := &actions.AmazonSearchResultsPages{}
+	err := c.BodyParser(body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse request body.",
 		})
 	}
 
-	data, err := actions.ScrapeSearchResultsPage(body.Keyword)
+	err = products.ScrapeSearchResultsPage(body.Keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to scrape Amazon SERP.",
 		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": data,
+		"data": products,
 	})
 }
 
 func SearchPAAPI5(c *fiber.Ctx) error {
-	type reqBody struct {
-		Keyword string `json:"keyword"`
-	}
-
-	var body reqBody
-	err := c.BodyParser(&body)
+	body := &types.Keyword{}
+	err := c.BodyParser(body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse request body.",
 		})
 	}
 
@@ -50,7 +44,7 @@ func SearchPAAPI5(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to search PAAPI5.",
 		})
 	}
 

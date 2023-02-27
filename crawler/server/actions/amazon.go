@@ -7,29 +7,43 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/davidalvarez305/review_poster/crawler/server/utils"
 )
 
-func crawlPage(keyword, page string) ([]types.AmazonSearchResultsPage, error) {
-	var results []types.AmazonSearchResultsPage
+type AmazonSearchResultsPage struct {
+	Image    string `json:"image"`
+	Name     string `json:"name"`
+	Link     string `json:"link"`
+	Reviews  string `json:"reviews"`
+	Price    string `json:"price"`
+	Rating   string `json:"rating"`
+	Category string `json:"category"`
+}
 
+type AmazonSearchResultsPages []*AmazonSearchResultsPage
+
+func (products *AmazonSearchResultsPages) CrawlPage(keyword, page string) error {
 	host := os.Getenv("P_HOST")
 	username := os.Getenv("P_USERNAME")
 	sessionId := fmt.Sprint(rand.Intn(1000000))
 	path := username + sessionId + ":" + host
 
 	u, err := url.Parse(path)
+
 	if err != nil {
-		return results, err
+		return err
 	}
 
 	tr := &http.Transport{
@@ -46,31 +60,30 @@ func crawlPage(keyword, page string) ([]types.AmazonSearchResultsPage, error) {
 	req, err := http.NewRequest("GET", page, nil)
 
 	if err != nil {
-		return results, err
+		return err
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while fetching Amazon SERP", err)
-		return results, err
+		return err
 	}
 	defer resp.Body.Close()
 
-	products, err := utils.ParseHtml(resp.Body, keyword)
-	results = products
+	err = products.ParseHtml(resp.Body, keyword)
 
 	if err != nil {
-		fmt.Println("Error while parsing HTML.")
-		return products, err
+		fmt.Println("Error while parsing HTML.", err)
+		return err
 	}
 
-	return results, nil
+	return nil
 }
 
-func ScrapeSearchResultsPage(keyword string) ([]types.AmazonSearchResultsPage, error) {
-	var results []types.AmazonSearchResultsPage
-
+func (products *AmazonSearchResultsPages) ScrapeSearchResultsPage(keyword string) error {
+	var results AmazonSearchResultsPages
 	str := strings.Join(strings.Split(keyword, " "), "+")
 
 	wg := sync.WaitGroup{}
@@ -79,7 +92,9 @@ func ScrapeSearchResultsPage(keyword string) ([]types.AmazonSearchResultsPage, e
 		wg.Add(1)
 		go func(page int) {
 			serp := fmt.Sprintf("https://www.amazon.com/s?k=%s&s=review-rank&page=%v", str, page)
-			products, err := crawlPage(keyword, serp)
+			var products AmazonSearchResultsPages
+
+			err := products.CrawlPage(keyword, serp)
 
 			if err != nil {
 				fmt.Printf("Error while crawling: %+v", err.Error())
@@ -92,7 +107,7 @@ func ScrapeSearchResultsPage(keyword string) ([]types.AmazonSearchResultsPage, e
 
 	wg.Wait()
 	fmt.Printf("Length of products: %+v", len(results))
-	return results, nil
+	return nil
 }
 
 func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
@@ -178,4 +193,53 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 
 	json.NewDecoder(resp.Body).Decode(&products)
 	return products, nil
+}
+
+func (products *AmazonSearchResultsPages) ParseHtml(r io.Reader, keyword string) error {
+	var results AmazonSearchResultsPages
+	doc, err := goquery.NewDocumentFromReader(r)
+	if err != nil {
+		fmt.Println("Error trying to parse document.")
+		return err
+	}
+
+	doc.Find(".sg-col-inner").Each(func(i int, s *goquery.Selection) {
+		product := &AmazonSearchResultsPage{}
+
+		reviewsRegex := regexp.MustCompile("[0-9,]+")
+		moneyRegex := regexp.MustCompile(`[\$]+?(\d+([,\.\d]+)?)`)
+		amazonASIN := regexp.MustCompile(`(\/[A-Z0-9]{10,}\/)`)
+
+		el, _ := s.Find("a").Attr("href")
+		cond := amazonASIN.MatchString(el)
+
+		if cond {
+			name := strings.Join(strings.Split(strings.Split(el, "/")[1], "-"), " ")
+			product.Name = name
+
+			rating := strings.Split(s.Find(".a-icon-alt").Text(), " ")[0]
+			product.Rating = rating
+
+			link := strings.Split(el, "/")[3]
+			product.Link = "https://amazon.com/dp/" + link + os.Getenv("AMAZON_TAG")
+
+			image, _ := s.Find("img").Attr("src")
+			product.Image = image
+
+			product.Category = keyword
+
+			if len(moneyRegex.FindAllString(s.Find(".a-size-base").Text(), 3)) > 0 {
+				price := moneyRegex.FindAllString(s.Find(".a-size-base").Text(), 3)[0]
+				product.Price = price
+			}
+			if len(reviewsRegex.FindAllString(s.Find(".a-size-base").Text(), 2)) > 0 {
+				reviews := reviewsRegex.FindAllString(s.Find(".a-size-base").Text(), 3)[0]
+				product.Reviews = reviews
+
+			}
+			results = append(results, product)
+			products = &results
+		}
+	})
+	return nil
 }
