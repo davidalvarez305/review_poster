@@ -10,21 +10,22 @@ func CreatePosts(c *fiber.Ctx) error {
 		Keyword     string `json:"keyword"`
 		ParentGroup string `json:"parent_group"`
 	}
+	products := &actions.AmazonSearchResultsPages{}
 
 	var body reqBody
 	err := c.BodyParser(&body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse request body.",
 		})
 	}
 
-	products, err := actions.CreateReviewPosts(body.Keyword, body.ParentGroup)
+	err = products.CreateReviewPosts(body.Keyword, body.ParentGroup)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to create review posts.",
 		})
 	}
 
