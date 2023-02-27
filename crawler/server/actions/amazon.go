@@ -34,6 +34,20 @@ type AmazonSearchResultsPage struct {
 
 type AmazonSearchResultsPages []*AmazonSearchResultsPage
 
+type PAAAPI5Response struct {
+	SearchResult types.SearchResult `json:"SearchResult"`
+}
+
+type AmazonPaapi5RequestBody struct {
+	Marketplace string   `json:"Marketplace"`
+	PartnerType string   `json:"PartnerType"`
+	PartnerTag  string   `json:"PartnerTag"`
+	Keywords    string   `json:"Keywords"`
+	SearchIndex string   `json:"SearchIndex"`
+	ItemCount   int      `json:"ItemCount"`
+	Resources   []string `json:"Resources"`
+}
+
 func (products *AmazonSearchResultsPages) CrawlPage(keyword, page string) error {
 	host := os.Getenv("P_HOST")
 	username := os.Getenv("P_USERNAME")
@@ -110,8 +124,7 @@ func (products *AmazonSearchResultsPages) ScrapeSearchResultsPage(keyword string
 	return nil
 }
 
-func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
-	var products types.PAAAPI5Response
+func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 
 	resources := []string{
 		"Images.Primary.Medium",
@@ -121,7 +134,7 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 		"ItemInfo.Features",
 		"ItemInfo.ProductInfo"}
 
-	d := types.AmazonPaapi5RequestBody{
+	d := AmazonPaapi5RequestBody{
 		Marketplace: "www.amazon.com",
 		PartnerType: "Associates",
 		PartnerTag:  os.Getenv("AMAZON_PARTNER_TAG"),
@@ -134,7 +147,7 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 	body, err := json.Marshal(d)
 
 	if err != nil {
-		return products, err
+		return err
 	}
 
 	method := "POST"
@@ -165,7 +178,7 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 	signature, err := utils.BuildSignature(stringToSign, signingKey)
 	if err != nil {
 		fmt.Println("Error while building signature.")
-		return products, err
+		return err
 	}
 
 	authorizationHeader := "AWS4-HMAC-SHA256" + " Credential=" + os.Getenv("AWS_ACCESS_KEY_ID") + "/" + credentialScope + " SignedHeaders=" + signedHeaders + " Signature=" + signature
@@ -174,7 +187,7 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 
 	if err != nil {
 		fmt.Println("Request failed: ", err)
-		return products, err
+		return err
 	}
 
 	req.Header.Set("content-encoding", contentEncoding)
@@ -187,12 +200,12 @@ func SearchPaapi5Items(keyword string) (types.PAAAPI5Response, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while fetching Amazon SERP", err)
-		return products, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	json.NewDecoder(resp.Body).Decode(&products)
-	return products, nil
+	return nil
 }
 
 func (products *AmazonSearchResultsPages) ParseHtml(r io.Reader, keyword string) error {
