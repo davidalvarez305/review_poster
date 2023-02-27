@@ -49,22 +49,28 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 	return post
 }
 
-func InsertReviewPosts(parent_group, keyword string, products AmazonSearchResultsPages, dictionary []types.Dictionary, sentences []types.DynamicContent) error {
+func InsertReviewPosts(groupName, keyword string, products AmazonSearchResultsPages, dictionary []types.Dictionary, sentences []types.DynamicContent) error {
 	var posts []models.ReviewPost
+	group := &Group{}
+
+	err := group.GetGroup(groupName)
+
+	if err != nil {
+		group.Group = &models.Group{
+			Name: groupName,
+			Slug: groupName,
+		}
+	}
 
 	subCategory := &models.SubCategory{
 		ID:   subCategoryId,
 		Name: subCategoryName,
 		Slug: subCategorySlug,
 		Category: &models.Category{
-			ID:   categoryId,
-			Name: categoryName,
-			Slug: categorySlug,
-			Group: &models.Group{
-				ID:   groupId,
-				Name: groupName,
-				Slug: groupSlug,
-			},
+			ID:    categoryId,
+			Name:  categoryName,
+			Slug:  categorySlug,
+			Group: group.Group,
 		},
 	}
 

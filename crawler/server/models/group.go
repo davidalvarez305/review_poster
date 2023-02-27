@@ -1,6 +1,6 @@
 package models
 
 type Group struct {
-	*Base
+	Base
 	Categories []*Category `json:"categories" form:"categories"`
 }
