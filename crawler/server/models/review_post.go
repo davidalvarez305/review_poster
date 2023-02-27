@@ -1,25 +1,25 @@
 package models
 
 type ReviewPost struct {
-	ID                            uint
-	Title                         string `json:"title" form:"title"`
-	Slug                          string `gorm:"unique" json:"slug" form:"slug"`
-	Content                       string `json:"content" form:"content"`
-	CategoryID                    int    `gorm:"column:category_id" json:"category_id" form:"category_id"`
-	Category                      *Category
-	Headline                      string `json:"headline" form:"headline"`
-	Intro                         string
-	Description                   string
-	ProductLabel                  string `gorm:"column:productlabel"`
-	ProductName                   string `gorm:"column:productname"`
-	ProductDescription            string `gorm:"column:productdescription"`
-	ProductAffiliateUrl           string `gorm:"column:productaffiliateurl"`
-	Faq_Answer_1                  string
-	Faq_Answer_2                  string
-	Faq_Answer_3                  string
-	Faq_Question_1                string
-	Faq_Question_2                string
-	Faq_Question_3                string
-	HorizontalCardProductImageUrl string `gorm:"column:horizontalcardproductimageurl"`
-	HorizontalCardProductImageAlt string `gorm:"column:horizontalcardproductimagealt"`
+	ID                  int          `json:"id" form:"id"`
+	Title               string       `json:"title" form:"title"`
+	Slug                string       `gorm:"unique" json:"slug" form:"slug"`
+	Content             string       `json:"content" form:"content"`
+	SubCategoryID       int          `json:"sub_category_id" form:"sub_category_id"`
+	SubCategory         *SubCategory `gorm:"not null;column:sub_category_id;foreignKey:CityID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE" json:"sub_category" form:"sub_category"`
+	Headline            string       `json:"headline" form:"headline"`
+	Intro               string       `json:"intro" form:"intro"`
+	Description         string       `json:"description" form:"description"`
+	ProductLabel        string       `gorm:"column:product_label" json:"product_label" form:"product_label"`
+	ProductName         string       `gorm:"column:product_name" json:"product_name" form:"product_name"`
+	ProductDescription  string       `gorm:"column:product_description" json:"product_description" form:"product_description"`
+	ProductAffiliateUrl string       `gorm:"column:product_affiliate_url" json:"product_affiliate_url" form:"product_affiliate_url"`
+	Faq_Answer_1        string       `gorm:"column:faq_answer_1" json:"faq_answer_1" form:"faq_answer_1"`
+	Faq_Answer_2        string       `gorm:"column:faq_answer_2" json:"faq_answer_2" form:"faq_answer_2"`
+	Faq_Answer_3        string       `gorm:"column:faq_answer_3" json:"faq_answer_3" form:"faq_answer_3"`
+	Faq_Question_1      string       `gorm:"column:faq_question_1" json:"faq_question_1" form:"faq_question_1"`
+	Faq_Question_2      string       `gorm:"column:faq_question_2" json:"faq_question_2" form:"faq_question_2"`
+	Faq_Question_3      string       `gorm:"column:faq_question_3" json:"faq_question_3" form:"faq_question_3"`
+	ProductImageUrl     string       `gorm:"column:product_image_url" json:"product_image_url" form:"product_image_url"`
+	ProductImageAlt     string       `gorm:"column:product_image_alt" json:"product_image_alt" form:"product_image_alt"`
 }

@@ -7,8 +7,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-
-	"github.com/davidalvarez305/review_poster/crawler/server/models"
 )
 
 type DBInstance = *gorm.DB
@@ -44,8 +42,6 @@ func Connect() {
 	} else {
 		fmt.Printf("Connected to Database.")
 	}
-
-	db.AutoMigrate(&models.Product{}, &models.Category{}, &models.ReviewPost{}, &models.CategoryGroup{}, &models.ParentGroup{})
 
 	DB = db
 }
