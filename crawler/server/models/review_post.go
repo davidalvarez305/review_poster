@@ -2,11 +2,12 @@ package models
 
 type ReviewPost struct {
 	ID                            uint
-	Title                         string
-	Slug                          string `gorm:"unique"`
-	Content                       string
-	CategoryID                    int `gorm:"column:categoryId"`
-	Headline                      string
+	Title                         string `json:"title" form:"title"`
+	Slug                          string `gorm:"unique" json:"slug" form:"slug"`
+	Content                       string `json:"content" form:"content"`
+	CategoryID                    int    `gorm:"column:category_id" json:"category_id" form:"category_id"`
+	Category                      *Category
+	Headline                      string `json:"headline" form:"headline"`
 	Intro                         string
 	Description                   string
 	ProductLabel                  string `gorm:"column:productlabel"`

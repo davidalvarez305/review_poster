@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/davidalvarez305/soflo_go/server/actions"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 

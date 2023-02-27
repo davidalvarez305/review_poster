@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
 func PullDynamicContent() ([]types.DynamicContent, error) {

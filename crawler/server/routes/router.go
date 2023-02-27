@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/davidalvarez305/soflo_go/server/controllers"
+	"github.com/davidalvarez305/review_poster/crawler/server/controllers"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
 func FilterCommercialKeywords(results types.GoogleKeywordResults, seedKeyword string) []string {

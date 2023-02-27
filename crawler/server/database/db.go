@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
-	"github.com/davidalvarez305/soflo_go/server/models"
+	"github.com/davidalvarez305/review_poster/crawler/server/models"
 )
 
 type DBInstance = *gorm.DB

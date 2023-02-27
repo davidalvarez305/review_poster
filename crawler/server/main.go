@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/davidalvarez305/soflo_go/server/database"
-	"github.com/davidalvarez305/soflo_go/server/routes"
-	"github.com/davidalvarez305/soflo_go/server/sessions"
+	"github.com/davidalvarez305/review_poster/crawler/server/database"
+	"github.com/davidalvarez305/review_poster/crawler/server/routes"
+	"github.com/davidalvarez305/review_poster/crawler/server/sessions"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"

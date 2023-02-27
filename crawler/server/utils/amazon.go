@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
 func ParseHtml(r io.Reader, keyword string) ([]types.AmazonSearchResultsPage, error) {

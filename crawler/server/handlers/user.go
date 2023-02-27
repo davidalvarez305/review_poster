@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/davidalvarez305/soflo_go/server/actions"
-	"github.com/davidalvarez305/soflo_go/server/database"
-	"github.com/davidalvarez305/soflo_go/server/models"
-	"github.com/davidalvarez305/soflo_go/server/sessions"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/crawler/server/database"
+	"github.com/davidalvarez305/review_poster/crawler/server/models"
+	"github.com/davidalvarez305/review_poster/crawler/server/sessions"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )

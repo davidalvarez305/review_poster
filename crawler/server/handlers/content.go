@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/soflo_go/server/actions"
-	"github.com/davidalvarez305/soflo_go/server/utils"
+	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/crawler/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 

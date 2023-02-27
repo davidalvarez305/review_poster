@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/davidalvarez305/soflo_go/server/database"
-	"github.com/davidalvarez305/soflo_go/server/models"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/database"
+	"github.com/davidalvarez305/review_poster/crawler/server/models"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm/clause"

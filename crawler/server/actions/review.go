@@ -3,8 +3,8 @@ package actions
 import (
 	"fmt"
 
-	"github.com/davidalvarez305/soflo_go/server/types"
-	"github.com/davidalvarez305/soflo_go/server/utils"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/utils"
 )
 
 func CreateReviewPosts(keyword, parent_group string) ([]types.AmazonSearchResultsPage, error) {

@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"github.com/davidalvarez305/soflo_go/server/database"
-	"github.com/davidalvarez305/soflo_go/server/types"
+	"github.com/davidalvarez305/review_poster/crawler/server/database"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
 func CreateUser(user types.User) (types.User, error) {
