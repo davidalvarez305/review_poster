@@ -2,17 +2,14 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CreatePosts(c *fiber.Ctx) error {
-	type reqBody struct {
-		Keyword     string `json:"keyword"`
-		ParentGroup string `json:"parent_group"`
-	}
+	var body types.CreateReviewPostsInput
 	products := &actions.AmazonSearchResultsPages{}
 
-	var body reqBody
 	err := c.BodyParser(&body)
 
 	if err != nil {
@@ -21,7 +18,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	err = products.CreateReviewPosts(body.Keyword, body.ParentGroup)
+	err = products.CreateReviewPosts(body.Keyword, body.GroupName, body.CatergoryName)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
