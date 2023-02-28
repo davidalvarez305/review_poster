@@ -54,14 +54,14 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 
 	subCategory := &SubCategory{}
 
-	err = subCategory.GetSubCategoryOrCreate(categoryName, subCategoryName, groupName)
+	err := subCategory.GetOrCreateSubCategory(categoryName, subCategoryName, groupName)
 
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < len(products); i++ {
-		p := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory)
+		p := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
 		posts = append(posts, p)
 	}
 

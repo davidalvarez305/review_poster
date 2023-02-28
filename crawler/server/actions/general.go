@@ -1,6 +1,10 @@
 package actions
 
 import (
+	"fmt"
+
+	"github.com/gosimple/slug"
+
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
 )
@@ -13,23 +17,27 @@ type SubCategory struct {
 	*models.SubCategory
 }
 
-func (g *Group) GetOrCreateGroup(name string) error {
-	err := database.DB.Where("name = ?", name).First(&g).Error
+type Category struct {
+	*models.Category
+}
+
+func (g *Group) GetOrCreateGroup(groupName string) error {
+	err := database.DB.Where("name = ?", groupName).First(&g).Error
 
 	if err != nil {
 		fmt.Printf("Creating new group...")
 	}
 
-	g = &models.Group{
+	g.Group = &models.Group{
 		Name: groupName,
-		Slug: groupName,
+		Slug: slug.Make(groupName),
 	}
 
 	return nil
 }
 
 func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) error {
-	
+
 	err := database.DB.Where("name = ?", subCategoryName).Preload("SubCategory.Category.Group").Error
 
 	// If there is no error, it means that the subcategory was found, so we can return early.
@@ -46,23 +54,44 @@ func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, grou
 		return err
 	}
 
-	err = category.GetOrCreateCategory(categoryName)
+	err = category.GetOrCreateCategory(categoryName, &group)
 
 	if err != nil {
 		return err
 	}
 
-	// create GetOrCreateCategory function
 	// create slugify and toTitle functions
 
-	s = &models.SubCategory{
+	s.SubCategory = &models.SubCategory{
 		Name: subCategoryName,
-		Slug: subCategorySlug,
+		Slug: slug.Make(subCategoryName),
 		Category: &models.Category{
-			ID:    category.ID,
-			Name:  category.Name,
-			Slug:  category.Slug,
-			Group: group.Group,
+			ID:   category.ID,
+			Name: category.Name,
+			Slug: category.Slug,
+			Group: &models.Group{
+				Name: group.Name,
+				Slug: group.Slug,
+			},
+		},
+	}
+
+	return nil
+}
+
+func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error {
+	err := database.DB.Where("name = ?", categoryName).Preload("Category.Group").First(&c).Error
+
+	if err != nil {
+		fmt.Printf("Creating new group...")
+	}
+
+	c.Category = &models.Category{
+		Name: categoryName,
+		Slug: slug.Make(categoryName),
+		Group: &models.Group{
+			Name: group.Name,
+			Slug: group.Slug,
 		},
 	}
 
