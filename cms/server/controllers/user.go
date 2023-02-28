@@ -17,4 +17,11 @@ func User(router fiber.Router) {
 	user.Post("/logout", handlers.Logout)
 	user.Get("/change-password", handlers.RequestChangePasswordCode)
 	user.Put("/change-password/:code", handlers.ChangePassword)
+
+	// Words related endpoints
+	user.Get("/word/:userId", handlers.GetWords)
+	user.Get("/word/:userId/:word", handlers.GetWord)
+	user.Post("/word/:userId", handlers.CreateWord)
+	user.Put("/word/:userId/:id", handlers.UpdateWord)
+	user.Delete("/word/:userId/:id", handlers.DeleteWord)
 }

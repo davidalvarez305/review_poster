@@ -9,7 +9,7 @@ import (
 )
 
 func CreateUser(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 	err := c.BodyParser(&user)
 
 	if err != nil {
@@ -32,7 +32,7 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 
 	err := user.GetUserFromSession(c)
 
@@ -54,7 +54,7 @@ func GetUser(c *fiber.Ctx) error {
 }
 
 func Logout(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 
 	err := user.Logout(c)
 
@@ -70,7 +70,7 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 	err := c.BodyParser(&user)
 
 	if err != nil {
@@ -93,8 +93,8 @@ func Login(c *fiber.Ctx) error {
 }
 
 func UpdateUser(c *fiber.Ctx) error {
-	var body actions.Users
-	user := &actions.Users{}
+	var body actions.User
+	user := &actions.User{}
 
 	err := c.BodyParser(&body)
 
@@ -124,7 +124,7 @@ func UpdateUser(c *fiber.Ctx) error {
 }
 
 func DeleteUser(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 
 	err := user.GetUserFromSession(c)
 
@@ -171,7 +171,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	// Initialize Structs
 	var body ChangePasswordInput
-	user := &actions.Users{}
+	user := &actions.User{}
 	token := &actions.Token{}
 
 	err := c.BodyParser(&body)
@@ -233,7 +233,7 @@ func ChangePassword(c *fiber.Ctx) error {
 }
 
 func RequestChangePasswordCode(c *fiber.Ctx) error {
-	user := &actions.Users{}
+	user := &actions.User{}
 
 	err := user.GetUserFromSession(c)
 

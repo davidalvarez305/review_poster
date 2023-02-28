@@ -18,17 +18,17 @@ import (
 	"google.golang.org/api/option"
 )
 
-type Users struct {
-	*models.Users
+type User struct {
+	*models.User
 }
 
-func (user *Users) Save() error {
+func (user *User) Save() error {
 	result := database.DB.Save(&user).First(&user)
 
 	return result.Error
 }
 
-func (user *Users) Logout(c *fiber.Ctx) error {
+func (user *User) Logout(c *fiber.Ctx) error {
 	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
@@ -40,13 +40,13 @@ func (user *Users) Logout(c *fiber.Ctx) error {
 	return err
 }
 
-func (user *Users) Delete() error {
+func (user *User) Delete() error {
 	result := database.DB.Delete(&user)
 
 	return result.Error
 }
 
-func (user *Users) CreateUser() error {
+func (user *User) CreateUser() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -60,7 +60,7 @@ func (user *Users) CreateUser() error {
 	return err
 }
 
-func (user *Users) UpdateUser(body Users) error {
+func (user *User) UpdateUser(body User) error {
 
 	user.Username = body.Username
 	user.Email = body.Email
@@ -71,7 +71,7 @@ func (user *Users) UpdateUser(body Users) error {
 	return err
 }
 
-func (user *Users) GetUserById(userId string) error {
+func (user *User) GetUserById(userId string) error {
 	result := database.DB.Where("id = ?", userId).First(&user)
 
 	return result.Error
@@ -96,7 +96,7 @@ func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 	return userId, nil
 }
 
-func (user *Users) GetUserFromSession(c *fiber.Ctx) error {
+func (user *User) GetUserFromSession(c *fiber.Ctx) error {
 	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
@@ -116,7 +116,7 @@ func (user *Users) GetUserFromSession(c *fiber.Ctx) error {
 	return err
 }
 
-func (user *Users) Login(c *fiber.Ctx) error {
+func (user *User) Login(c *fiber.Ctx) error {
 	userPassword := user.Password
 	result := database.DB.Where("username = ?", user.Username).First(&user)
 
@@ -143,7 +143,7 @@ func (user *Users) Login(c *fiber.Ctx) error {
 	return err
 }
 
-func (user *Users) RequestChangePasswordCode() error {
+func (user *User) RequestChangePasswordCode() error {
 	var token Token
 
 	err := token.GenerateToken(user)
@@ -161,7 +161,7 @@ func (user *Users) RequestChangePasswordCode() error {
 	return nil
 }
 
-func (user *Users) ChangePassword(password string) error {
+func (user *User) ChangePassword(password string) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
@@ -176,7 +176,7 @@ func (user *Users) ChangePassword(password string) error {
 	return err
 }
 
-func (user *Users) SendGmail(uuidCode string) error {
+func (user *User) SendGmail(uuidCode string) error {
 
 	// Load & Read Credentials From Credentials JSON File
 	ctx := context.Background()
