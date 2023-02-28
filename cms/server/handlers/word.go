@@ -11,19 +11,27 @@ import (
 func GetWords(c *fiber.Ctx) error {
 	words := &actions.Words{}
 
-	userId, err := actions.GetUserIdFromSession(c)
+	sessionUserId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "User ID not found in session storage.",
 		})
 	}
 
-	err = words.GetWords(userId)
+	userId := c.Params("userId")
+
+	if sessionUserId != userId {
+		return c.Status(429).JSON(fiber.Map{
+			"data": "Not allowed to access these resources.",
+		})
+	}
+
+	err = words.GetWords(sessionUserId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Faield to query words.",
 		})
 	}
 

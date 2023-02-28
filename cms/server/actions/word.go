@@ -20,27 +20,19 @@ type CreateWordInput struct {
 }
 
 func (word *Word) GetWordByID(id int) error {
-	result := database.DB.Find(&word, "id = ?", id)
-
-	return result.Error
+	return database.DB.Where("id = ?", id).Find(&word).Error
 }
 
 func (word *Word) GetWordByName(name, userId string) error {
-	result := database.DB.Find(&word, "name = ? AND user_id = ?", name, userId)
-
-	return result.Error
+	return database.DB.Where("name = ? AND user_id = ?", name, userId).Find(&word).Error
 }
 
 func (words *Words) GetWords(userId string) error {
-	result := database.DB.Find(&words, "user_id = ?", userId)
-
-	return result.Error
+	return database.DB.Where("user_id = ?", userId).Find(&words).Error
 }
 
 func (word *Word) CreateWord() error {
-	query := database.DB.Where("user_id = ?", word.UserID).Save(&word)
-
-	return query.Error
+	return database.DB.Where("user_id = ?", word.UserID).Save(&word).Error
 }
 
 func (word *Word) UpdateWord(userId string) error {

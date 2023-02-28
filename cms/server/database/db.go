@@ -49,8 +49,6 @@ func Connect() {
 
 	fmt.Printf("Connected to Database.\n")
 
-	// db.AutoMigrate(&models.Word{}, &models.Synonym{}, &models.Paragraph{}, &models.Template{}, &models.Users{}, &models.Sentence{}, &models.Token{})
-
 	DB = db
 }
 

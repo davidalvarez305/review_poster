@@ -8,10 +8,10 @@ import (
 func Word(router fiber.Router) {
 	word := router.Group("word")
 
-	word.Get("/", handlers.GetWords)
-	word.Get("/:word", handlers.GetWord)
-	word.Post("/", handlers.CreateWord)
-	word.Put("/", handlers.UpdateWord)
-	word.Delete("/", handlers.DeleteWord)
+	word.Get("/:userId", handlers.GetWords)
+	word.Get("/:userId/:word", handlers.GetWord)
+	word.Post("/:userId", handlers.CreateWord)
+	word.Put("/:userId/:id", handlers.UpdateWord)
+	word.Delete("/:userId/:id", handlers.DeleteWord)
 
 }
