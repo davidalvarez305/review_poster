@@ -117,7 +117,7 @@ func UpdateWord(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to update word.",
 		})
 	}
 
@@ -127,28 +127,21 @@ func UpdateWord(c *fiber.Ctx) error {
 }
 
 func DeleteWord(c *fiber.Ctx) error {
-	word_id := c.Query("word")
+	wordId := c.Params("id")
+	userId := c.Params("userId")
 	word := &actions.Word{}
 
-	if word_id == "" {
+	if wordId == "" {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No word in query.",
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = word.DeleteWord(userId, word_id)
+	err := word.DeleteWord(userId, wordId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete word.",
 		})
 	}
 
