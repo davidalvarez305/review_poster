@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	gob.Register(models.Users{})
+	gob.Register(models.User{})
 
 	err := godotenv.Load()
 

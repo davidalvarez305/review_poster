@@ -15,12 +15,8 @@ type CreateWordInput struct {
 	ID       int      `json:"id"`
 	Word     string   `json:"word"`
 	Tag      string   `json:"tag"`
-	UserID   uint     `json:"user_id"`
+	UserID   int      `json:"user_id"`
 	Synonyms []string `json:"synonyms"`
-}
-
-func (word *Word) GetWordByID(id int) error {
-	return database.DB.Where("id = ?", id).Find(&word).Error
 }
 
 func (word *Word) GetWordByName(name, userId string) error {
@@ -36,25 +32,7 @@ func (word *Word) CreateWord() error {
 }
 
 func (word *Word) UpdateWord(userId string) error {
-
-	// Set updateable values aside
-	wordName := word.Name
-	wordTag := word.Tag
-
-	// Query to find record
-	query := database.DB.Where("user_id = ? AND id = ?", userId, word.ID).First(&word)
-
-	if query.Error != nil {
-		return query.Error
-	}
-
-	// If record is found, update. If not, DB will throw error.
-	word.Name = wordName
-	word.Tag = wordTag
-
-	query = database.DB.Save(&word).First(&word)
-
-	return query.Error
+	return database.DB.Where("user_id = ? AND id = ?", userId, word.ID).Save(&word).First(&word).Error
 }
 
 func (word *Word) DeleteWord(userId, word_id string) error {

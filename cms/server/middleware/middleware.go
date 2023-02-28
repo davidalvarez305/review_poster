@@ -24,3 +24,23 @@ func AuthMiddleware(c *fiber.Ctx) error {
 
 	return c.Next()
 }
+
+func ResourceAccessRestriction(c *fiber.Ctx) error {
+	sessionUserId, err := actions.GetUserIdFromSession(c)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "User ID not found in session storage.",
+		})
+	}
+
+	userId := c.Params("userId")
+
+	if sessionUserId != userId {
+		return c.Status(429).JSON(fiber.Map{
+			"data": "Not allowed to access these resources.",
+		})
+	}
+
+	return c.Next()
+}
