@@ -19,9 +19,15 @@ func User(router fiber.Router) {
 	user.Put("/change-password/:code", handlers.ChangePassword)
 
 	// Words related endpoints
-	user.Get("/word/:userId", handlers.GetWords)
-	user.Get("/word/:userId/:word", handlers.GetWord)
-	user.Post("/word/:userId", handlers.CreateWord)
-	user.Put("/word/:userId/:id", handlers.UpdateWord)
-	user.Delete("/word/:userId/:id", handlers.DeleteWord)
+	user.Get("/:userId/word", handlers.GetWords)
+	user.Get("/:userId/word/:word", handlers.GetWord)
+	user.Post("/:userId/word", handlers.CreateWord)
+	user.Put("/:userId/word/:id", handlers.UpdateWord)
+	user.Delete("/:userId/word/:id", handlers.DeleteWord)
+
+	// Template related endpoints
+	user.Get("/:userId/template", handlers.GetTemplates)
+	user.Post("/:userId/template", handlers.CreateTemplate)
+	user.Put("/:userId/template/:templateId", handlers.UpdateTemplate)
+	user.Delete("/:userId/template/:templateId", handlers.DeleteTemplate)
 }

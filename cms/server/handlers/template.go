@@ -7,16 +7,9 @@ import (
 
 func GetTemplates(c *fiber.Ctx) error {
 	templates := &actions.Templates{}
+	userId := c.Params("userId")
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Unable to Get Selected Synonyms.",
-		})
-	}
-
-	err = templates.GetTemplates(userId)
+	err := templates.GetTemplates(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -32,6 +25,7 @@ func GetTemplates(c *fiber.Ctx) error {
 func CreateTemplate(c *fiber.Ctx) error {
 	template := &actions.Template{}
 	templates := &actions.Templates{}
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&template)
 
@@ -41,18 +35,10 @@ func CreateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = template.CreateTemplate()
+	err = template.CreateTemplate(userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
 			"data": err.Error(),
 		})
 	}
@@ -72,20 +58,13 @@ func CreateTemplate(c *fiber.Ctx) error {
 
 func UpdateTemplate(c *fiber.Ctx) error {
 	template := &actions.Template{}
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&template)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "Unable to Parse Request Body.",
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
 		})
 	}
 
@@ -103,24 +82,17 @@ func UpdateTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteTemplate(c *fiber.Ctx) error {
-	template_id := c.Query("template")
+	templateId := c.Params("templateId")
+	userId := c.Params("userId")
 	template := &actions.Template{}
 
-	if template_id == "" {
+	if templateId == "" {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No template in query.",
+			"data": "No template in params.",
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = template.DeleteTemplate(userId, template_id)
+	err := template.DeleteTemplate(userId, templateId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

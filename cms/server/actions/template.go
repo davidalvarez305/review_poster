@@ -12,21 +12,15 @@ type Template struct {
 type Templates []*Template
 
 func (templates *Templates) GetTemplates(userId string) error {
-	result := database.DB.Where("user_id = ?", userId).Find(&templates)
-
-	return result.Error
+	return database.DB.Where("user_id = ?", userId).Find(&templates).Error
 }
 
 func (template *Template) GetTemplateByID(id string) error {
-	result := database.DB.Where("id = ?", id).First(&template)
-
-	return result.Error
+	return database.DB.Where("id = ?", id).First(&template).Error
 }
 
-func (template *Template) CreateTemplate() error {
-	result := database.DB.Save(&template)
-
-	return result.Error
+func (template *Template) CreateTemplate(userId string) error {
+	return database.DB.Where("user_id = ?").Save(&template).Error
 }
 
 func (template *Template) UpdateTemplate(userId string) error {
@@ -44,13 +38,9 @@ func (template *Template) UpdateTemplate(userId string) error {
 	// If record is found, update. If not, DB will throw error.
 	template.Name = templateName
 
-	query = database.DB.Save(&template).First(&template)
-
-	return query.Error
+	return database.DB.Save(&template).First(&template).Error
 }
 
 func (template *Template) DeleteTemplate(userId, template_id string) error {
-	result := database.DB.Where("user_id = ? AND id = ?", userId, template_id).Delete(&template)
-
-	return result.Error
+	return database.DB.Where("user_id = ? AND id = ?", userId, template_id).Delete(&template).Error
 }
