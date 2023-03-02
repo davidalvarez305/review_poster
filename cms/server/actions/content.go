@@ -11,10 +11,10 @@ type Sentences []*models.Sentence
 
 type Words []*models.Word
 
-func (s *Sentences) GetSentences(template string) error {
-	return database.DB.Where("template_id = ?", template).Preload("Sentence.Template").Preload("Sentence.Paragraph").Find(&s).Error
+func (s *Sentences) GetSentences(template, userId string) error {
+	return database.DB.Where("template_id = ? AND user_id = ?", template, userId).Preload("Sentence.Template").Preload("Sentence.Paragraph").Find(&s).Error
 }
 
-func (w *Words) GetWords() error {
-	return database.DB.Preload("Word.Synonym").Find(&w).Error
+func (w *Words) GetWords(userId string) error {
+	return database.DB.Where("user_id = ?", userId).Preload("Word.Synonym").Find(&w).Error
 }

@@ -8,7 +8,7 @@ import (
 func Content(router fiber.Router) {
 	content := router.Group("content")
 
-	content.Get("/", handlers.GetContent)
-	content.Get("/dictionary", handlers.GetDictionary)
+	content.Get("/:userId", handlers.GetContent)
+	content.Get("/:userId/dictionary", handlers.GetDictionary)
 
 }
