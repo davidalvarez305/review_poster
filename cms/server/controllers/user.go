@@ -30,4 +30,8 @@ func User(router fiber.Router) {
 	user.Post("/:userId/template", handlers.CreateTemplate)
 	user.Put("/:userId/template/:templateId", handlers.UpdateTemplate)
 	user.Delete("/:userId/template/:templateId", handlers.DeleteTemplate)
+
+	// Content related endpoits
+	user.Get("/:userId/content", handlers.GetContent)
+	user.Get("/:userId/content/dictionary", handlers.GetDictionary)
 }
