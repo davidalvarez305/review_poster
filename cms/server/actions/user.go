@@ -132,13 +132,13 @@ func (user *User) GetUserFromSession(c *fiber.Ctx) error {
 
 func (user *User) Login(c *fiber.Ctx) error {
 	userPassword := user.Password
-	result := database.DB.Where("username = ?", user.Username).First(&user)
+	err := database.DB.Where("username = ?", user.Username).First(&user).Error
 
-	if result.Error != nil {
+	if err != nil {
 		return errors.New("incorrect username")
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userPassword))
 
 	if err != nil {
 		return errors.New("incorrect password")
