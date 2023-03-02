@@ -60,8 +60,6 @@ func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, grou
 		return err
 	}
 
-	// create slugify and toTitle functions
-
 	s.SubCategory = &models.SubCategory{
 		Name: subCategoryName,
 		Slug: slug.Make(subCategoryName),
