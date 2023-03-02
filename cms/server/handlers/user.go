@@ -42,7 +42,7 @@ func GetUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if user.Users == nil {
+	if user.User == nil {
 		return c.Status(404).JSON(fiber.Map{
 			"data": errors.New("no user found"),
 		})

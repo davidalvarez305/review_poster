@@ -12,27 +12,18 @@ type Token struct {
 	*models.Token
 }
 
-func (token *Token) GenerateToken(user *Users) error {
-
-	// Create UUID for Token
-	uuid := uuid.New().String()
+func (token *Token) GenerateToken() error {
 
 	// Initialize & Generate Token
-	t := models.Token{
-		UUID:      uuid,
-		UserID:    user.ID,
+	token.Token = &models.Token{
+		UUID:      uuid.New().String(),
 		CreatedAt: time.Now().Unix(),
 	}
 
-	// Assign token to struct
-	token.Token = &t
-
-	result := database.DB.Save(&token).First(&token)
-
-	return result.Error
+	return database.DB.Save(&token).First(&token).Error
 }
 
-func (token *Token) GetToken(uuid string, userId uint) error {
+func (token *Token) GetToken(uuid string, userId int) error {
 	result := database.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token)
 	return result.Error
 }

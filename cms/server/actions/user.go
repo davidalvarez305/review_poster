@@ -53,22 +53,36 @@ func (user *User) CreateUser() error {
 		return err
 	}
 
-	user.Password = string(hashedPassword)
-	user.Token = utils.GenerateAPIToken(user.Email + user.Password)
+	token := &Token{}
 
-	err = user.Save()
-	return err
+	err = token.GenerateToken()
+
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(hashedPassword)
+	user.Token = token.Token
+
+	return user.Save()
 }
 
 func (user *User) UpdateUser(body User) error {
 
 	user.Username = body.Username
 	user.Email = body.Email
-	user.Token = utils.GenerateAPIToken(user.Email + user.Password)
 
-	err := user.Save()
+	token := &Token{}
 
-	return err
+	err := token.GenerateToken()
+
+	if err != nil {
+		return err
+	}
+
+	user.Token = token.Token
+
+	return user.Save()
 }
 
 func (user *User) GetUserById(userId string) error {
@@ -144,21 +158,15 @@ func (user *User) Login(c *fiber.Ctx) error {
 }
 
 func (user *User) RequestChangePasswordCode() error {
-	var token Token
+	token := &Token{}
 
-	err := token.GenerateToken(user)
-
-	if err != nil {
-		return err
-	}
-
-	err = user.SendGmail(token.UUID)
+	err := token.GenerateToken()
 
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return user.SendGmail(token.UUID)
 }
 
 func (user *User) ChangePassword(password string) error {
@@ -168,12 +176,20 @@ func (user *User) ChangePassword(password string) error {
 	if err != nil {
 		return err
 	}
+
 	user.Password = string(hashedPassword)
-	user.Token = utils.GenerateAPIToken(user.Email + user.Password)
 
-	err = user.Save()
+	token := &Token{}
 
-	return err
+	err = token.GenerateToken()
+
+	if err != nil {
+		return err
+	}
+
+	user.Token = token.Token
+
+	return user.Save()
 }
 
 func (user *User) SendGmail(uuidCode string) error {
