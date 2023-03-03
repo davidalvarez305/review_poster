@@ -8,11 +8,6 @@ import (
 
 func Router(app *fiber.App) {
 	api := app.Group("api", middleware.AuthMiddleware, middleware.ResourceAccessRestriction)
-	controllers.Paragraph(api)
-	controllers.Sentence(api)
 	controllers.Synonym(api)
-	controllers.Template(api)
-	controllers.Word(api)
 	controllers.User(api)
-	controllers.Content(api)
 }

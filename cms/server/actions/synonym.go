@@ -62,31 +62,18 @@ func (synonyms *Synonyms) UpdateSynonyms(word, userId string) error {
 
 // Select records from DB by a word string.
 func (synonyms *Synonyms) GetSynonymsByWord(word, userId string) error {
-
-	sql := fmt.Sprintf(`SELECT * FROM synonym WHERE word_id = (
-		SELECT id FROM word WHERE name = '%s' AND user_id = '%s'
-	)`, word, userId)
-
-	result := database.DB.Raw(sql).Scan(&synonyms)
-
-	return result.Error
+	return database.DB.Where("user_id = ?", userId).Preload("Word", "name = ?", word).Find(*synonyms).Error
 }
 
 // Delete a slice of records without returning any values.
 func (synonyms *Synonyms) DeleteSynonyms(s []int, word, userId string) error {
-	res := database.DB.Delete(&models.Synonym{}, s)
+	err := database.DB.Delete(&models.Synonym{}, s).Error
 
-	if res.Error != nil {
-		return res.Error
+	if err != nil {
+		return err
 	}
 
-	sql := fmt.Sprintf(`SELECT * FROM synonym WHERE word_id = (
-		SELECT id FROM word WHERE name = '%s' AND user_id = '%s'
-	)`, word, userId)
-
-	result := database.DB.Raw(sql).Scan(&synonyms)
-
-	return result.Error
+	return synonyms.GetSynonymsByWord(word, userId)
 }
 
 // Delete without returning anything.

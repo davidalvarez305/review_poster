@@ -72,6 +72,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 func GetSelectedSynonyms(c *fiber.Ctx) error {
 	synonyms := &actions.Synonyms{}
 	word := c.Query("word")
+	userId := c.Params("userId")
 
 	if word == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -79,15 +80,7 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = synonyms.GetSynonymsByWord(word, userId)
+	err := synonyms.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -104,20 +97,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 	synonyms := &actions.Synonyms{}
 	s := c.Query("synonyms")
 	word := c.Query("word")
-
-	if word == "" || s == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No word or synonym in query.",
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
+	userId := c.Params("userId")
 
 	ids, err := utils.GetIds(s)
 
@@ -143,6 +123,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 func BulkSynonymsPost(c *fiber.Ctx) error {
 	synonyms := &actions.Synonyms{}
 	word := c.Query("word")
+	userId := c.Params("userId")
 
 	if word == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -151,14 +132,6 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 	}
 
 	err := c.BodyParser(&synonyms)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
