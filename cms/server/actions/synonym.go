@@ -3,8 +3,8 @@ package actions
 import (
 	"fmt"
 
-	"github.com/davidalvarez305/content_go/server/database"
-	"github.com/davidalvarez305/content_go/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/database"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
 type Synonym struct {

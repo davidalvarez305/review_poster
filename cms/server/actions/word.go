@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"github.com/davidalvarez305/content_go/server/database"
-	"github.com/davidalvarez305/content_go/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/database"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
 type Word struct {

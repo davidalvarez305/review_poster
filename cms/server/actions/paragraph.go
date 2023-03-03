@@ -1,10 +1,8 @@
 package actions
 
 import (
-	"fmt"
-
-	"github.com/davidalvarez305/content_go/server/database"
-	"github.com/davidalvarez305/content_go/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/database"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
 type Paragraph struct {
@@ -25,55 +23,41 @@ func (paragraph *Paragraph) CreateParagraph() error {
 }
 
 // Create Multiple Paragraphs
-func (paragraphs *Paragraphs) CreateParagraphs() error {
-	result := database.DB.Save(&paragraphs)
-	return result.Error
+func (paragraphs *Paragraphs) CreateParagraphs(userId string) error {
+	return database.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
 }
 
-func (paragraph *Paragraph) UpdateParagraph() error {
-	result := database.DB.Where("user_id = ?", paragraph.UserID).Save(&paragraph).First(&paragraph)
-	return result.Error
+func (paragraph *Paragraph) UpdateParagraph(userId string) error {
+	return database.DB.Where("user_id = ?", userId).Save(&paragraph).First(&paragraph).Error
 }
 
 // Updates multiple records and returns DB values.
-func (paragraphs *Paragraphs) UpdateParagraphs(template, userId string) error {
-	query := database.DB.Save(&paragraphs)
+func (paragraphs *Paragraphs) UpdateParagraphs(paragraphId, userId, templateId string) error {
+	err := database.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
 
-	if query.Error != nil {
-		return query.Error
+	if err != nil {
+		return err
 	}
 
-	err := paragraphs.GetParagraphsByTemplate(template, userId)
-	return err
+	return paragraphs.GetParagraphsByTemplate(templateId, userId)
 }
 
-func (paragraphs *Paragraphs) DeleteParagraphs(ids []int, template string) error {
-	res := database.DB.Delete(&models.Paragraph{}, ids)
+func (paragraphs *Paragraphs) DeleteParagraphs(ids []int, templateId string) error {
+	err := database.DB.Delete(&models.Paragraph{}, ids).Error
 
-	if res.Error != nil {
-		return res.Error
+	if err != nil {
+		return err
 	}
 
-	sql := fmt.Sprintf(`SELECT * FROM paragraph WHERE template_id = (
-		SELECT id FROM template WHERE name = '%s'
-	)`, template)
-	result := database.DB.Raw(sql).Scan(&paragraphs)
-
-	return result.Error
+	return database.DB.Where("template_id = ?", templateId).Find(&paragraphs).Error
 }
 
-func (paragraphs *Paragraphs) GetParagraphsByTemplate(template, userId string) error {
-	sql := fmt.Sprintf(`SELECT * FROM paragraph WHERE template_id = (
-		SELECT id FROM template WHERE name = '%s' AND user_id = '%s'
-	)`, template, userId)
-	result := database.DB.Raw(sql).Scan(&paragraphs)
-
-	return result.Error
+func (paragraphs *Paragraphs) GetParagraphsByTemplate(templateId, userId string) error {
+	return database.DB.Where("template_id = ? AND user_id = ?", templateId, userId).Find(&paragraphs).Error
 }
 
 func (paragraphs *Paragraphs) SimpleDelete() error {
-	res := database.DB.Delete(&paragraphs)
-	return res.Error
+	return database.DB.Delete(&paragraphs).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
@@ -102,7 +86,7 @@ func (paragraphs Paragraphs) DeleteBulkParagraphs(clientParagraphs, existingPara
 }
 
 // Take structs from client and creates them. Does not return any records.
-func (paragraphs Paragraphs) AddBulkParagraphs(clientParagraphs, existingParagraphs *Paragraphs) error {
+func (paragraphs Paragraphs) AddBulkParagraphs(clientParagraphs, existingParagraphs *Paragraphs, userId string) error {
 	for _, clientParagraph := range *clientParagraphs {
 		found := false
 		for _, existingParagraph := range *existingParagraphs {
@@ -116,7 +100,7 @@ func (paragraphs Paragraphs) AddBulkParagraphs(clientParagraphs, existingParagra
 	}
 
 	if len(paragraphs) > 0 {
-		err := paragraphs.CreateParagraphs()
+		err := paragraphs.CreateParagraphs(userId)
 
 		if err != nil {
 			return err

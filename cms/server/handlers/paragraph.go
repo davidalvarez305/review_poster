@@ -8,16 +8,9 @@ import (
 
 func GetParagraphs(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
+	userId := c.Params("userId")
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = paragraphs.GetParagraphs(userId)
+	err := paragraphs.GetParagraphs(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -31,8 +24,8 @@ func GetParagraphs(c *fiber.Ctx) error {
 }
 
 func CreateParagraphs(c *fiber.Ctx) error {
-	user := &actions.Users{}
 	paragraphs := &actions.Paragraphs{}
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&paragraphs)
 
@@ -42,14 +35,7 @@ func CreateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err = user.GetUserFromSession(c)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-	err = paragraphs.CreateParagraphs()
+	err = paragraphs.CreateParagraphs(userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -64,13 +50,9 @@ func CreateParagraphs(c *fiber.Ctx) error {
 
 func UpdateParagraphs(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
-	template := c.Query("template")
-
-	if template == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No template in query.",
-		})
-	}
+	userId := c.Params("userId")
+	paragraphId := c.Params("paragraphId")
+	templateId := c.Query("template")
 
 	err := c.BodyParser(&paragraphs)
 
@@ -80,15 +62,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = paragraphs.UpdateParagraphs(template, userId)
+	err = paragraphs.UpdateParagraphs(paragraphId, userId, templateId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -129,6 +103,7 @@ func DeleteParagraph(c *fiber.Ctx) error {
 func GetSelectedParagraphs(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
 	template := c.Query("template")
+	userId := c.Params("userId")
 
 	if template == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -136,15 +111,7 @@ func GetSelectedParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = paragraphs.GetParagraphsByTemplate(template, userId)
+	err := paragraphs.GetParagraphsByTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -160,6 +127,7 @@ func GetSelectedParagraphs(c *fiber.Ctx) error {
 func BulkParagraphsUpdate(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
 	template := c.Query("template")
+	userId := c.Params("userId")
 
 	if template == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -168,14 +136,6 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 	}
 
 	err := c.BodyParser(&paragraphs)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -199,7 +159,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 	var paragraphsToAdd actions.Paragraphs
 
 	paragraphsToDelete.DeleteBulkParagraphs(paragraphs, existingParagraphs)
-	paragraphsToAdd.AddBulkParagraphs(paragraphs, existingParagraphs)
+	paragraphsToAdd.AddBulkParagraphs(paragraphs, existingParagraphs, userId)
 
 	// Re-assign paragraphs to what's now on the database.
 	err = paragraphs.GetParagraphsByTemplate(template, userId)

@@ -6,7 +6,7 @@ import (
 )
 
 func GetContent(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
+	content := &actions.Content{}
 	template := c.Query("template")
 	userId := c.Params("userId")
 
@@ -16,7 +16,7 @@ func GetContent(c *fiber.Ctx) error {
 		})
 	}
 
-	err := sentences.GetSentences(template, userId)
+	err := content.GetSentences(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -30,9 +30,9 @@ func GetContent(c *fiber.Ctx) error {
 }
 
 func GetDictionary(c *fiber.Ctx) error {
-	words := &actions.Words{}
+	dict := &actions.Dictionary{}
 	userId := c.Params("userId")
-	err := words.GetWords(userId)
+	err := dict.GetDictionary(userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -41,6 +41,6 @@ func GetDictionary(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": dictionary,
+		"data": dict,
 	})
 }

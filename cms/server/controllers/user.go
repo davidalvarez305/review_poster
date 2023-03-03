@@ -31,7 +31,15 @@ func User(router fiber.Router) {
 	user.Put("/:userId/template/:templateId", handlers.UpdateTemplate)
 	user.Delete("/:userId/template/:templateId", handlers.DeleteTemplate)
 
-	// Content related endpoits
+	// Content related endpoints
 	user.Get("/:userId/content", handlers.GetContent)
-	user.Get("/:userId/content/dictionary", handlers.GetDictionary)
+	user.Get("/:userId/dictionary", handlers.GetDictionary)
+
+	// Paragraph related endpoints
+	user.Get("/:userId/paragraph", handlers.GetParagraphs)
+	user.Post("/:userId/paragraph", handlers.CreateParagraphs)
+	user.Put("/:userId/paragraph", handlers.UpdateParagraphs)
+	user.Delete("/:userId/paragraph/:paragraphId", handlers.DeleteParagraph)
+	user.Get("/:userId/paragraph/selected", handlers.GetSelectedParagraphs)
+	user.Post("/:userId/paragraph/bulk", handlers.BulkParagraphsUpdate)
 }
