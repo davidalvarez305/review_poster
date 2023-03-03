@@ -8,13 +8,7 @@ import (
 
 func GetSentencesByParagraph(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
-	paragraph := c.Params("paragraph")
-
-	if paragraph == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No paragraph in params.",
-		})
-	}
+	paragraphId := c.Params("paragraphId")
 
 	userId, err := actions.GetUserIdFromSession(c)
 
@@ -24,7 +18,7 @@ func GetSentencesByParagraph(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentences.GetSentencesByParagraph(paragraph, userId)
+	err = sentences.GetSentencesByParagraph(paragraphId, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -39,15 +33,9 @@ func GetSentencesByParagraph(c *fiber.Ctx) error {
 
 func GetSentences(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
-	userId, err := actions.GetUserIdFromSession(c)
+	userId := c.Params("userId")
 
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = sentences.GetAllSentences(userId)
+	err := sentences.GetAllSentences(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -62,7 +50,8 @@ func GetSentences(c *fiber.Ctx) error {
 
 func CreateSentences(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
-	jp := &actions.JoinedParagraphs{}
+	paragraphs := &actions.Paragraphs{}
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&sentences)
 
@@ -72,7 +61,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentences.CreateSentences()
+	err = sentences.CreateSentences(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -80,15 +69,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = jp.GetTemplatesAndParagraphs(userId)
+	err = paragraphs.GetTemplatesAndParagraphs(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -97,29 +78,16 @@ func CreateSentences(c *fiber.Ctx) error {
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": jp,
+		"data": paragraphs,
 	})
 }
 
 func UpdateSentences(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
 	paragraph := c.Query("paragraph")
-
-	if paragraph == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No paragraph in query.",
-		})
-	}
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&sentences)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -144,25 +112,12 @@ func DeleteSentence(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
 	s := c.Query("sentences")
 	paragraph := c.Query("paragraph")
-
-	if paragraph == "" || s == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No paragraph or sentences in query.",
-		})
-	}
+	userId := c.Params("userId")
 
 	ids, err := utils.GetIds(s)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
 			"data": err.Error(),
 		})
 	}
@@ -180,33 +135,10 @@ func DeleteSentence(c *fiber.Ctx) error {
 	})
 }
 
-func GetTemplatesAndParagraphs(c *fiber.Ctx) error {
-	jp := &actions.JoinedParagraphs{}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = jp.GetTemplatesAndParagraphs(userId)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": jp,
-	})
-}
-
 func BulkSentencesUpdate(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
 	paragraph := c.Query("paragraph")
+	userId := c.Params("userId")
 
 	if paragraph == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -215,14 +147,6 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	}
 
 	err := c.BodyParser(&sentences)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -253,7 +177,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentencesToAdd.AddBulkSentences(sentences, existingSentences)
+	err = sentencesToAdd.AddBulkSentences(sentences, existingSentences, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

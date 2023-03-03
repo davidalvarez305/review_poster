@@ -12,8 +12,7 @@ type Paragraph struct {
 type Paragraphs []*models.Paragraph
 
 func (paragraphs *Paragraphs) GetParagraphs(userId string) error {
-	result := database.DB.Where("user_id = ?", userId).Find(&paragraphs)
-	return result.Error
+	return database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 }
 
 // Create Single Paragraph

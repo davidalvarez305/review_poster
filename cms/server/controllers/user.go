@@ -38,8 +38,16 @@ func User(router fiber.Router) {
 	// Paragraph related endpoints
 	user.Get("/:userId/paragraph", handlers.GetParagraphs)
 	user.Post("/:userId/paragraph", handlers.CreateParagraphs)
-	user.Put("/:userId/paragraph", handlers.UpdateParagraphs)
+	user.Put("/:userId/paragraph/:paragraphId", handlers.UpdateParagraphs)
 	user.Delete("/:userId/paragraph/:paragraphId", handlers.DeleteParagraph)
 	user.Get("/:userId/paragraph/selected", handlers.GetSelectedParagraphs)
 	user.Post("/:userId/paragraph/bulk", handlers.BulkParagraphsUpdate)
+
+	// Sentence related endpoints
+	user.Get("/:userId/sentence", handlers.GetSentences)
+	user.Get("/:userId/sentence/:paragraph", handlers.GetSentencesByParagraph)
+	user.Post("/:userId/sentence", handlers.CreateSentences)
+	user.Put("/:userId/sentence", handlers.UpdateSentences)
+	user.Delete("/:userId/sentence", handlers.DeleteSentence)
+	user.Post("/:userId/sentence/bulk", handlers.BulkSentencesUpdate)
 }
