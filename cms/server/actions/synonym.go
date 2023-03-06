@@ -26,37 +26,28 @@ func (synonyms *Synonyms) CreateSynonyms() error {
 }
 
 // Update a single record that belongs a user.
-func (synonym *Synonym) UpdateSynonym(userId string) error {
+func (synonym *Synonym) UpdateSynonym(userId, wordId string) error {
 
-	// Store what came from the client separately to first make sure that the synonym being updated exists
-	syn := synonym
+	err := database.DB.Where("word_id = ? AND user_id = ?", wordId, userId).Find(&synonym).Error
 
-	sql := fmt.Sprintf(`SELECT * FROM synonym WHERE word_id = (
-		SELECT id FROM word WHERE name = '%v' AND user_id = '%s'
-	)`, synonym.WordID, userId)
-
-	query := database.DB.Raw(sql).Scan(&synonym)
-
-	if query.Error != nil {
-		return query.Error
+	if err != nil {
+		return err
 	}
 
-	// After checking that the record exists & belongs to the client user, re-assign and save.
-	synonym = syn
-	query = database.DB.Save(&synonym).First(&synonym)
+	err = database.DB.Save(&synonym).First(&synonym).Error
 
-	return query.Error
+	return err
 }
 
 // Updates multiple records and returns DB values.
 func (synonyms *Synonyms) UpdateSynonyms(word, userId string) error {
-	query := database.DB.Save(&synonyms)
+	err := database.DB.Save(&synonyms).Error
 
-	if query.Error != nil {
-		return query.Error
+	if err != nil {
+		return err
 	}
 
-	err := synonyms.GetSynonymsByWord(word, userId)
+	err = synonyms.GetSynonymsByWord(word, userId)
 	return err
 }
 
