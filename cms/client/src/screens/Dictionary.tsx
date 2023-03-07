@@ -5,7 +5,6 @@ import useLoginRequired from "../hooks/useLoginRequired";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
 import useFetch from "../hooks/useFetch";
-import { WORDS_ROUTE } from "../constants";
 import FormSelectComponent from "../components/FormSelectComponent";
 import { createTag } from "../utils/createTag";
 import Layout from "../layout/Layout";
@@ -14,6 +13,7 @@ import { UserContext } from "../context/UserContext";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { getId } from "../utils/getId";
 import { Word } from "../types/general";
+import { USER_ROUTE } from "../constants";
 
 interface Props {}
 
@@ -38,7 +38,7 @@ export const Dictionary: React.FC<Props> = () => {
     };
     makeRequest(
       {
-        url: WORDS_ROUTE,
+        url: USER_ROUTE + `${user.id}/word`,
         method: "POST",
         data: wordStruct,
       },
@@ -59,7 +59,7 @@ export const Dictionary: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: WORDS_ROUTE,
+        url: USER_ROUTE + `${user.id}/word`,
       },
       (res) => {
         setWords(res.data.data);

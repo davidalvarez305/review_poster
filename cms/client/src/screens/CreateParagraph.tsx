@@ -4,7 +4,6 @@ import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
 import useFetch from "../hooks/useFetch";
-import { PARAGRAPH_ROUTE, TEMPLATE_ROUTE } from "../constants";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
 import { getId } from "../utils/getId";
@@ -14,6 +13,7 @@ import useLoginRequired from "../hooks/useLoginRequired";
 import { UserContext } from "../context/UserContext";
 import { SaveButton } from "../components/SaveButton";
 import RequestErrorMessage from "../components/RequestErrorMessage";
+import { USER_ROUTE } from "../constants";
 
 interface Props {}
 
@@ -45,7 +45,7 @@ export const CreateParagraph: React.FC<Props> = () => {
   
     makeRequest(
       {
-        url: PARAGRAPH_ROUTE,
+        url: USER_ROUTE + `${user.id}/paragraph`,
         method: "POST",
         data: paragraphBody,
       },
@@ -71,7 +71,7 @@ export const CreateParagraph: React.FC<Props> = () => {
     }
     makeRequest(
       {
-        url: TEMPLATE_ROUTE,
+        url: USER_ROUTE + `${user.id}/template`,
         method: "POST",
         data: {
           name: values.template,
@@ -95,7 +95,7 @@ export const CreateParagraph: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: TEMPLATE_ROUTE,
+        url: USER_ROUTE + `${user.id}/template`,
       },
       (res) => {
         setTemplates(res.data.data);

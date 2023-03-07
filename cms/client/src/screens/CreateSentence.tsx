@@ -4,7 +4,6 @@ import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
 import useFetch from "../hooks/useFetch";
-import { SENTENCE_ROUTE } from "../constants";
 import FormSelectComponent from "../components/FormSelectComponent";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
@@ -13,6 +12,7 @@ import { getId } from "../utils/getId";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { UserContext } from "../context/UserContext";
 import RequestErrorMessage from "../components/RequestErrorMessage";
+import { USER_ROUTE } from "../constants";
 
 interface Props {}
 
@@ -53,7 +53,7 @@ export const CreateSentence: React.FC<Props> = () => {
     }
     makeRequest(
       {
-        url: SENTENCE_ROUTE,
+        url: USER_ROUTE + `${user.id}/sentence`,
         method: "POST",
         data: sentenceBody,
       },
@@ -73,7 +73,7 @@ export const CreateSentence: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: SENTENCE_ROUTE + "/create-sentence",
+        url: USER_ROUTE + `${user.id}/sentence`,
       },
       (res) => {
         const response: JoinedParagraph[] = res.data.data;

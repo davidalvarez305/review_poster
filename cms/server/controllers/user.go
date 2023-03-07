@@ -52,9 +52,9 @@ func User(router fiber.Router) {
 	user.Post("/:userId/sentence/bulk", handlers.BulkSentencesUpdate)
 
 	// Synonym related endpoints
-	user.Get("/:userId/synonym/", handlers.GetSelectedSynonyms)
-	user.Post("/:userId/synonym/", handlers.CreateSynonym)
-	user.Put("/:userId/synonym/", handlers.UpdateSynonyms)
-	user.Delete("/:userId/synonym/", handlers.DeleteSynonym)
+	user.Get("/:userId/synonym", handlers.GetSelectedSynonyms)
+	user.Post("/:userId/synonym", handlers.CreateSynonym)
+	user.Put("/:userId/synonym", handlers.UpdateSynonyms)
+	user.Delete("/:userId/synonym", handlers.DeleteSynonym)
 	user.Post("/:userId/synonym/bulk", handlers.BulkSynonymsPost)
 }
