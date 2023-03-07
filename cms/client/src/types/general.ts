@@ -1,15 +1,23 @@
+export type Token = {
+  id: number;
+  uuid: string;
+  created_at: number;
+};
+
 export type User = {
   id: number;
   username: string;
   password: string;
   email: string;
-  token: string;
+  token: Token;
+  words?: Word[];
 };
 
 export type Template = {
   id: number;
   name: string;
   user_id: number;
+  user?: User;
 };
 
 export type Word = {
@@ -17,12 +25,15 @@ export type Word = {
   name: string;
   tag: string;
   user_id: number;
+  user?: User;
+  synonyms?: Synonym[];
 };
 
 export type Synonym = {
   id: number | null;
   synonym: string;
   word_id: number;
+  word?: Word;
 };
 
 export type Sentence = {
@@ -31,6 +42,8 @@ export type Sentence = {
   paragraph_id: number;
   template_id: number;
   user_id: number;
+  paragraph?: Paragraph;
+  template?: Template;
 };
 
 export type Paragraph = {
@@ -39,6 +52,8 @@ export type Paragraph = {
   order?: number;
   template_id: number;
   user_id: number;
+  template?: Template;
+  user?: User;
 };
 
 export type UpdateParagraph = {
