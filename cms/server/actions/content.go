@@ -10,9 +10,9 @@ type Content []*models.Sentence
 type Dictionary []*models.Word
 
 func (c *Content) GetSentences(template, userId string) error {
-	return database.DB.Where("template_id = ? AND user_id = ?", template, userId).Preload("Template").Preload("Paragraph").Find(&c).Error
+	return database.DB.Where("user_id = ?", template, userId).Preload("Template", "name = ?", template).Preload("Paragraph").Find(&c).Error
 }
 
 func (d *Dictionary) GetDictionary(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("Synonym").Find(&d).Error
+	return database.DB.Where("user_id = ?", userId).Preload("Word.Synonyms").Find(&d).Error
 }

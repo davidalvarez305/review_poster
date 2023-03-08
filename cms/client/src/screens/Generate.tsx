@@ -1,16 +1,11 @@
 import { Box, Button, FormLabel, useToast } from "@chakra-ui/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import EditModal from "../components/EditModal";
 import SentenceBox from "../components/SentenceBox";
-import {
-  CONTENT_ROUTE,
-  SENTENCE_ROUTE,
-  SYNONYM_ROUTE,
-  TEMPLATE_ROUTE,
-  WORDS_ROUTE,
-} from "../constants";
+import { USER_ROUTE } from "../constants";
+import { UserContext } from "../context/UserContext";
 import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
@@ -33,6 +28,7 @@ import { transformDictionary } from "../utils/transformDictionary";
 
 const Generate: React.FC = () => {
   const { makeRequest, isLoading, cancelToken } = useFetch();
+  const { user } = useContext(UserContext);
   const toast = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedWord, setSelectedWord] = useState<number>();
@@ -59,7 +55,7 @@ const Generate: React.FC = () => {
     if (selectedWord) {
       makeRequest(
         {
-          url: SYNONYM_ROUTE + `/?word=${selectedWord}`,
+          url: USER_ROUTE + `/${user.id}/synonym` + `?word=${selectedWord}`,
         },
         (res) => {
           setExistingSynonyms(res.data.data);
@@ -73,7 +69,7 @@ const Generate: React.FC = () => {
     if (selectedTemplate.length === 0) {
       makeRequest(
         {
-          url: TEMPLATE_ROUTE,
+          url: USER_ROUTE + `/${user.id}/template`,
         },
         (res) => {
           setTemplates(res.data.data);
@@ -83,7 +79,7 @@ const Generate: React.FC = () => {
       // Otherwise, pull the content associated with that template.
       makeRequest(
         {
-          url: CONTENT_ROUTE + `/content/?template=${selectedTemplate}`,
+          url: USER_ROUTE + `/${user.id}/content?template=${selectedTemplate}`,
         },
         (res) => {
           const initialContent: Content[] = res.data.data;
@@ -94,7 +90,7 @@ const Generate: React.FC = () => {
       // Pull dictionary
       makeRequest(
         {
-          url: CONTENT_ROUTE + "/dictionary",
+          url: USER_ROUTE + `/${user.id}/dictionary`,
         },
         (res) => {
           const initialDictionary: DictionaryResponse[] = res.data.data;
@@ -123,7 +119,7 @@ const Generate: React.FC = () => {
       });
       makeRequest(
         {
-          url: SENTENCE_ROUTE + "/bulk/?paragraph=" + editingSentencesParagraph,
+          url: USER_ROUTE + `/${user.id}/bulk?paragraph=${editingSentencesParagraph}`,
           method: "POST",
           data: body,
         },
@@ -147,7 +143,7 @@ const Generate: React.FC = () => {
       let body = synonyms.map((synonym) => {
         return { synonym, word_id };
       });
-      let route = SYNONYM_ROUTE + `/bulk/?word=` + wordString;
+      let route = USER_ROUTE + `/${user.id}/bulk/?word=${wordString}`
 
       // Change request format if user selected a word.
       if (selectedWord) {
@@ -155,7 +151,7 @@ const Generate: React.FC = () => {
         wordString = words[selectedWord].name;
         method = "PUT";
         body = createUpdateSynonyms(existingSynonyms, synonyms, word_id);
-        route = SYNONYM_ROUTE + `?word=` + wordString;
+        route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`
       }
 
       makeRequest(
@@ -193,7 +189,7 @@ const Generate: React.FC = () => {
   const editSentence = (content: Content) => {
     makeRequest(
       {
-        url: SENTENCE_ROUTE + `/${content.paragraph}`,
+        url: USER_ROUTE + `/${user.id}/synonym/${content.paragraph}`
       },
       (res) => {
         setEditingSentences(res.data.data);
@@ -212,7 +208,7 @@ const Generate: React.FC = () => {
     // Get the synonyms associated with the clicked word.
     makeRequest(
       {
-        url: SYNONYM_ROUTE + `/?word=${item.word}`,
+        url: USER_ROUTE + `/${user.id}/synonym?word=${item.word}`,
       },
       (res) => {
         setExistingSynonyms(res.data.data);
@@ -222,7 +218,7 @@ const Generate: React.FC = () => {
     // Get all of the user's words.
     makeRequest(
       {
-        url: WORDS_ROUTE,
+        url: USER_ROUTE + `/${user.id}/word`,
       },
       (res) => {
         setWords(res.data.data);

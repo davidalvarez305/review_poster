@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { SYNONYM_ROUTE, WORDS_ROUTE } from "../constants";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
 import { Synonym, Word } from "../types/general";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -22,9 +22,11 @@ import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { createUpdateSynonyms } from "../utils/createUpdateSynonyms";
+import { UserContext } from "../context/UserContext";
 
 export const SynonymsList: React.FC = () => {
   useLoginRequired();
+  const { user } = useContext(UserContext);
   const location = useLocation();
   const word = location.pathname.split("/word/")[1];
   const { makeRequest, isLoading, cancelToken, error } = useFetch();
@@ -43,7 +45,7 @@ export const SynonymsList: React.FC = () => {
     if (bulkModal) {
       makeRequest(
         {
-          url: WORDS_ROUTE,
+          url: USER_ROUTE + `/${user.id}/word`,
         },
         (res) => {
           setWords(res.data.data);
@@ -53,12 +55,12 @@ export const SynonymsList: React.FC = () => {
     if (!bulkModal) {
       setSelectedWord(null);
     }
-  }, [bulkModal, makeRequest]);
+  }, [bulkModal, makeRequest, user.id]);
 
   useEffect(() => {
     makeRequest(
       {
-        url: SYNONYM_ROUTE + `/?word=${word}`,
+        url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
       },
       (res) => {
         setOptions(res.data.data);
@@ -67,14 +69,14 @@ export const SynonymsList: React.FC = () => {
     return () => {
       cancelToken.cancel();
     };
-  }, [editModal, word, makeRequest, cancelToken]);
+  }, [editModal, word, makeRequest, cancelToken, user.id]);
 
   const columns = ["id", "synonym", "action"];
 
   function handleDelete(id: number) {
     makeRequest(
       {
-        url: SYNONYM_ROUTE + `/?word=${word}&synonyms=${[id]}`,
+        url: USER_ROUTE + `/${user.id}/synonym?word=${word}&synonyms=${[id]}`,
         method: "DELETE",
       },
       (res) => {
@@ -90,7 +92,7 @@ export const SynonymsList: React.FC = () => {
     });
     makeRequest(
       {
-        url: SYNONYM_ROUTE + "?word=" + word,
+        url: USER_ROUTE + `/${user.id}/synonym/${editOption?.id}?word=${word}`,
         method: "PUT",
         data: body,
       },
@@ -120,7 +122,7 @@ export const SynonymsList: React.FC = () => {
     let body = synonyms.map((synonym) => {
       return { synonym, word_id };
     });
-    let route = SYNONYM_ROUTE + `/bulk/?word=` + wordString;
+    let route = USER_ROUTE + `/${user.id}/synonym/bulk/?word=${wordString}`
 
     // Change request format if user selected a word.
     if (selectedWord) {
@@ -128,7 +130,7 @@ export const SynonymsList: React.FC = () => {
       wordString = words[selectedWord].name;
       method = "PUT";
       body = createUpdateSynonyms(options, synonyms, word_id);
-      route = SYNONYM_ROUTE + `?word=` + wordString;
+      route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`
     }
 
     makeRequest(

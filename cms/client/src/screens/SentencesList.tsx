@@ -15,7 +15,7 @@ import {
 import useLoginRequired from "../hooks/useLoginRequired";
 import EditModal from "../components/EditModal";
 import TableRow from "../components/TableRow";
-import { PARAGRAPH_ROUTE, SENTENCE_ROUTE } from "../constants";
+import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
 import { Paragraph, Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
@@ -47,7 +47,7 @@ export const SentencesList: React.FC = () => {
     if (bulkModal) {
       makeRequest(
         {
-          url: PARAGRAPH_ROUTE,
+          url: USER_ROUTE + `/${user.id}/paragraph`,
         },
         (res) => {
           setParagraphs(res.data.data);
@@ -57,25 +57,25 @@ export const SentencesList: React.FC = () => {
     if (!bulkModal) {
       setSelectedParagraph(null);
     }
-  }, [bulkModal, makeRequest]);
+  }, [bulkModal, makeRequest, user.id]);
 
   useEffect(() => {
     makeRequest(
       {
-        url: SENTENCE_ROUTE + `/${paragraph}`,
+        url: USER_ROUTE + `/${user.id}/sentence/${paragraph}`,
       },
       (res) => {
         setOptions(res.data.data);
       }
     );
-  }, [editModal, paragraph, makeRequest, cancelToken]);
+  }, [editModal, paragraph, makeRequest, cancelToken, user.id]);
 
   const headers = ["id", "sentence", "action"];
 
   function handleDelete(id: number) {
     makeRequest(
       {
-        url: SENTENCE_ROUTE + `/?sentences=${[id]}&paragraph=${paragraph}`,
+        url: USER_ROUTE + `/${user.id}/sentence?sentences=${[id]}&paragraph=${paragraph}`,
         method: "DELETE",
       },
       (res) => {
@@ -88,7 +88,7 @@ export const SentencesList: React.FC = () => {
     const sentence = values.input.split("\n")[0];
     makeRequest(
       {
-        url: SENTENCE_ROUTE,
+        url: USER_ROUTE + `/${user.id}/sentence/${editOption?.id}`,
         method: "PUT",
         data: {
           id: editOption?.id,
@@ -129,7 +129,7 @@ export const SentencesList: React.FC = () => {
         user_id: user.id,
       };
     });
-    let route = SENTENCE_ROUTE + "/bulk/?paragraph=" + paragraphString;
+    let route = USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${paragraphString}`
 
     // Change request format if user selected a paragraph.
     if (selectedParagraph) {
@@ -144,7 +144,7 @@ export const SentencesList: React.FC = () => {
         paragraph_id,
         user.id
       );
-      route = SENTENCE_ROUTE + "?paragraph=" + paragraphString;
+      route =  USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraphString}`
     }
 
     makeRequest(

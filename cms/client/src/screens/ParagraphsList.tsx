@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { PARAGRAPH_ROUTE, TEMPLATE_ROUTE } from "../constants";
+import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
 import { useLocation } from "react-router-dom";
 import Layout from "../layout/Layout";
@@ -46,7 +46,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     if (bulkModal) {
       makeRequest(
         {
-          url: TEMPLATE_ROUTE,
+          url: USER_ROUTE + `/${user.id}/template`,
         },
         (res) => {
           setTemplates(res.data.data);
@@ -56,12 +56,12 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     if (!bulkModal) {
       setSelectedTemplate(null);
     }
-  }, [bulkModal, makeRequest]);
+  }, [bulkModal, makeRequest, user.id]);
 
   useEffect(() => {
     makeRequest(
       {
-        url: PARAGRAPH_ROUTE + `/selected/?template=${template}`,
+        url: USER_ROUTE + `/${user.id}/paragraph/selected?template=${template}`,
       },
       (res) => {
         setOptions(res.data.data);
@@ -70,13 +70,13 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     return () => {
       cancelToken.cancel();
     };
-  }, [editModal, template, makeRequest, cancelToken]);
+  }, [editModal, template, makeRequest, cancelToken, user.id]);
   const columns = ["id", "name", "order", "action"];
 
   function handleDelete(id: number) {
     makeRequest(
       {
-        url: PARAGRAPH_ROUTE + `/?paragraphs=${[id]}&template=${template}`,
+        url: USER_ROUTE + `/${user.id}/paragraph/?paragraphs=${[id]}&template=${template}`,
         method: "DELETE",
       },
       (res) => {
@@ -89,7 +89,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     const paragraph = values.input.split("\n")[0];
     makeRequest(
       {
-        url: PARAGRAPH_ROUTE,
+        url: USER_ROUTE + `/${user.id}/paragraph/`,
         method: "PUT",
         data: {
           id: editOption?.id,
@@ -124,7 +124,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     let body = paragraphs.map((name) => {
       return { name, template_id: options[0].template_id, user_id: user.id };
     });
-    let route = PARAGRAPH_ROUTE + "/bulk/?template=" + templateString;
+    let route = USER_ROUTE + `/${user.id}/paragraph/bulk/?template=${templateString}`;
 
     // Change request format if user selected a template.
     if (selectedTemplate) {
@@ -132,7 +132,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
       templateString = templates[selectedTemplate].name;
       method = "PUT";
       body = createUpdateParagraphs(options, paragraphs, template_id, user.id);
-      route = PARAGRAPH_ROUTE + "?template=" + templateString;
+      route = USER_ROUTE + `/${user.id}/paragraph?template=${templateString}`;
     }
 
     makeRequest(
