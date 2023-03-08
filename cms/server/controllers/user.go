@@ -20,10 +20,10 @@ func User(router fiber.Router) {
 
 	// Words related endpoints
 	user.Get("/:userId/word", handlers.GetWords)
-	user.Get("/:userId/word/:word", handlers.GetWord)
+	user.Get("/:userId/word/:wordId", handlers.GetWord)
 	user.Post("/:userId/word", handlers.CreateWord)
-	user.Put("/:userId/word/:id", handlers.UpdateWord)
-	user.Delete("/:userId/word/:id", handlers.DeleteWord)
+	user.Put("/:userId/word/:wordId", handlers.UpdateWord)
+	user.Delete("/:userId/word/:wordId", handlers.DeleteWord)
 
 	// Template related endpoints
 	user.Get("/:userId/template", handlers.GetTemplates)
@@ -45,7 +45,7 @@ func User(router fiber.Router) {
 
 	// Sentence related endpoints
 	user.Get("/:userId/sentence", handlers.GetSentences)
-	user.Get("/:userId/sentence/:paragraph", handlers.GetSentencesByParagraph)
+	user.Get("/:userId/sentence/:paragraphId", handlers.GetSentencesByParagraph)
 	user.Post("/:userId/sentence", handlers.CreateSentences)
 	user.Put("/:userId/sentence", handlers.UpdateSentences)
 	user.Delete("/:userId/sentence", handlers.DeleteSentence)
