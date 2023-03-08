@@ -34,6 +34,21 @@ func GetSentencesByParagraph(c *fiber.Ctx) error {
 func GetSentences(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
 	userId := c.Params("userId")
+	paragraph := c.Query("paragraph")
+
+	if len(paragraph) > 0 {
+		err := sentences.GetSentencesByParagraph(paragraph, userId)
+
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"data": err.Error(),
+			})
+		}
+
+		return c.Status(200).JSON(fiber.Map{
+			"data": sentences,
+		})
+	}
 
 	err := sentences.GetAllSentences(userId)
 

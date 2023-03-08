@@ -8,7 +8,23 @@ import (
 
 func GetParagraphs(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
+	template := c.Query("template")
 	userId := c.Params("userId")
+
+	// Return paragraphs filtered by template if there's a query.
+	if len(template) > 0 {
+		err := paragraphs.GetParagraphsByTemplate(template, userId)
+
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"data": err.Error(),
+			})
+		}
+
+		return c.Status(200).JSON(fiber.Map{
+			"data": paragraphs,
+		})
+	}
 
 	err := paragraphs.GetParagraphs(userId)
 
@@ -96,30 +112,6 @@ func DeleteParagraph(c *fiber.Ctx) error {
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": paragraphs,
-	})
-}
-
-func GetSelectedParagraphs(c *fiber.Ctx) error {
-	paragraphs := &actions.Paragraphs{}
-	template := c.Query("template")
-	userId := c.Params("userId")
-
-	if template == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No template in query.",
-		})
-	}
-
-	err := paragraphs.GetParagraphsByTemplate(template, userId)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
 		"data": paragraphs,
 	})
 }

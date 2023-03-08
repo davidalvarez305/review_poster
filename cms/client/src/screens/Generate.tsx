@@ -55,14 +55,14 @@ const Generate: React.FC = () => {
     if (selectedWord) {
       makeRequest(
         {
-          url: USER_ROUTE + `/${user.id}/synonym` + `?word=${selectedWord}`,
+          url: USER_ROUTE + `/${user.id}/synonym?word=${selectedWord}`,
         },
         (res) => {
           setExistingSynonyms(res.data.data);
         }
       );
     }
-  }, [makeRequest, selectedWord]);
+  }, [makeRequest, selectedWord, user.id]);
 
   useEffect(() => {
     // If no template has been selected, fetch templates.
@@ -101,7 +101,7 @@ const Generate: React.FC = () => {
       // On Change Template => set the content back to an empty array.
       setGeneratedContent([]);
     }
-  }, [makeRequest, cancelToken, selectedTemplate]);
+  }, [makeRequest, cancelToken, selectedTemplate, user.id]);
 
   // This function will use the Set Sentences to send a "bulk request" to the server.
   // The server will take care of the rest.
@@ -130,7 +130,7 @@ const Generate: React.FC = () => {
         }
       );
     },
-    [makeRequest, editingSentences, editingSentencesParagraph]
+    [makeRequest, editingSentences, editingSentencesParagraph, user.id]
   );
 
   const handleSynonyms = useCallback(
@@ -183,13 +183,14 @@ const Generate: React.FC = () => {
       selectedWord,
       toast,
       words,
+      user.id
     ]
   );
 
   const editSentence = (content: Content) => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/sentence/${content.paragraph}`
+        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${content.paragraph}`
       },
       (res) => {
         setEditingSentences(res.data.data);

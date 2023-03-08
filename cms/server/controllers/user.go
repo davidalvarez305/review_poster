@@ -40,21 +40,19 @@ func User(router fiber.Router) {
 	user.Post("/:userId/paragraph", handlers.CreateParagraphs)
 	user.Put("/:userId/paragraph/:paragraphId", handlers.UpdateParagraphs)
 	user.Delete("/:userId/paragraph/:paragraphId", handlers.DeleteParagraph)
-	user.Get("/:userId/paragraph/selected", handlers.GetSelectedParagraphs)
 	user.Post("/:userId/paragraph/bulk", handlers.BulkParagraphsUpdate)
 
 	// Sentence related endpoints
 	user.Get("/:userId/sentence", handlers.GetSentences)
-	user.Get("/:userId/sentence/:paragraphId", handlers.GetSentencesByParagraph)
 	user.Post("/:userId/sentence", handlers.CreateSentences)
-	user.Put("/:userId/sentence", handlers.UpdateSentences)
-	user.Delete("/:userId/sentence", handlers.DeleteSentence)
+	user.Put("/:userId/sentence/:sentenceId", handlers.UpdateSentences)
+	user.Delete("/:userId/sentence/:sentenceId", handlers.DeleteSentence)
 	user.Post("/:userId/sentence/bulk", handlers.BulkSentencesUpdate)
 
 	// Synonym related endpoints
 	user.Get("/:userId/synonym", handlers.GetSelectedSynonyms)
 	user.Post("/:userId/synonym", handlers.CreateSynonym)
-	user.Put("/:userId/synonym", handlers.UpdateSynonyms)
-	user.Delete("/:userId/synonym", handlers.DeleteSynonym)
+	user.Put("/:userId/synonym/:synonymId", handlers.UpdateSynonyms)
+	user.Delete("/:userId/synonym/:synonymId", handlers.DeleteSynonym)
 	user.Post("/:userId/synonym/bulk", handlers.BulkSynonymsPost)
 }
