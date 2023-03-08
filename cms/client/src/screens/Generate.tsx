@@ -119,7 +119,7 @@ const Generate: React.FC = () => {
       });
       makeRequest(
         {
-          url: USER_ROUTE + `/${user.id}/bulk?paragraph=${editingSentencesParagraph}`,
+          url: USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${editingSentencesParagraph}`,
           method: "POST",
           data: body,
         },
@@ -143,7 +143,7 @@ const Generate: React.FC = () => {
       let body = synonyms.map((synonym) => {
         return { synonym, word_id };
       });
-      let route = USER_ROUTE + `/${user.id}/bulk/?word=${wordString}`
+      let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`
 
       // Change request format if user selected a word.
       if (selectedWord) {
@@ -189,7 +189,7 @@ const Generate: React.FC = () => {
   const editSentence = (content: Content) => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/synonym/${content.paragraph}`
+        url: USER_ROUTE + `/${user.id}/sentence/${content.paragraph}`
       },
       (res) => {
         setEditingSentences(res.data.data);
