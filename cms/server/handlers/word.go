@@ -8,7 +8,6 @@ import (
 
 func GetWords(c *fiber.Ctx) error {
 	words := &actions.Words{}
-
 	userId := c.Params("userId")
 
 	err := words.GetWords(userId)
