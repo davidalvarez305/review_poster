@@ -45,7 +45,7 @@ export const CreateParagraph: React.FC<Props> = () => {
   
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/paragraph`,
+        url: USER_ROUTE + `/${user.id}/paragraph`,
         method: "POST",
         data: paragraphBody,
       },
@@ -71,7 +71,7 @@ export const CreateParagraph: React.FC<Props> = () => {
     }
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/template`,
+        url: USER_ROUTE + `/${user.id}/template`,
         method: "POST",
         data: {
           name: values.template,
@@ -95,7 +95,7 @@ export const CreateParagraph: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/template`,
+        url: USER_ROUTE + `/${user.id}/template`,
       },
       (res) => {
         setTemplates(res.data.data);

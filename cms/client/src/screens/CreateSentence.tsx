@@ -53,7 +53,7 @@ export const CreateSentence: React.FC<Props> = () => {
     }
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/sentence`,
+        url: USER_ROUTE + `/${user.id}/sentence`,
         method: "POST",
         data: sentenceBody,
       },
@@ -73,7 +73,7 @@ export const CreateSentence: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/sentence`,
+        url: USER_ROUTE + `/${user.id}/sentence`,
       },
       (res) => {
         const response: JoinedParagraph[] = res.data.data;

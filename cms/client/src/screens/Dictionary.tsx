@@ -38,7 +38,7 @@ export const Dictionary: React.FC<Props> = () => {
     };
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/word`,
+        url: USER_ROUTE + `/${user.id}/word`,
         method: "POST",
         data: wordStruct,
       },
@@ -59,7 +59,7 @@ export const Dictionary: React.FC<Props> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: USER_ROUTE + `${user.id}/word`,
+        url: USER_ROUTE + `/${user.id}/word`,
       },
       (res) => {
         setWords(res.data.data);
