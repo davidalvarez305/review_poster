@@ -51,7 +51,7 @@ func (synonyms *Synonyms) UpdateSynonyms(word, userId string) error {
 
 // Select records from DB by a word string.
 func (synonyms *Synonyms) GetSynonymsByWord(word, userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("Word", "name = ?", word).Find(*synonyms).Error
+	return database.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
 }
 
 // Delete a slice of records without returning any values.

@@ -9,15 +9,14 @@ export type User = {
   username: string;
   password: string;
   email: string;
-  token: Token;
-  words?: Word[];
+  token: Token | null;
 };
 
 export type Template = {
   id: number;
   name: string;
   user_id: number;
-  user?: User;
+  user: User | null;
 };
 
 export type Word = {
@@ -25,15 +24,15 @@ export type Word = {
   name: string;
   tag: string;
   user_id: number;
-  user?: User;
-  synonyms?: Synonym[];
+  user: User | null;
+  synonyms: Synonym[] | null;
 };
 
 export type Synonym = {
   id: number | null;
   synonym: string;
   word_id: number;
-  word?: Word;
+  word: Word | null;
 };
 
 export type Sentence = {
@@ -42,8 +41,8 @@ export type Sentence = {
   paragraph_id: number;
   template_id: number;
   user_id: number;
-  paragraph?: Paragraph;
-  template?: Template;
+  paragraph: Paragraph | null;
+  template: Template | null;
 };
 
 export type Paragraph = {
@@ -52,8 +51,8 @@ export type Paragraph = {
   order?: number;
   template_id: number;
   user_id: number;
-  template?: Template;
-  user?: User;
+  template: Template | null;
+  user: User | null;
 };
 
 export type UpdateParagraph = {
@@ -74,14 +73,6 @@ export type UpdateSentence = {
   sentence: string;
   paragraph_id: number;
   template_id: number;
-};
-
-export type JoinedParagraph = {
-  paragraph_id: number;
-  paragraph_name: string;
-  paragraph_order: number;
-  template_id: number;
-  template_name: string;
 };
 
 export type Content = {

@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/davidalvarez305/content_go/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/actions"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,6 +22,8 @@ func AuthMiddleware(c *fiber.Ctx) error {
 			"data": "Unauthorized.",
 		})
 	}
+
+	fmt.Printf("%+v", c.Request())
 
 	return c.Next()
 }

@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/content_go/server/actions"
-	"github.com/davidalvarez305/content_go/server/utils"
+	"github.com/davidalvarez305/review_poster/cms/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidalvarez305/content_go/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"golang.org/x/crypto/bcrypt"
 )
 

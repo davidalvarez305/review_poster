@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/davidalvarez305/content_go/server/handlers"
+	"github.com/davidalvarez305/review_poster/cms/server/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 

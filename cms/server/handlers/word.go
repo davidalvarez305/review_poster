@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/content_go/server/actions"
-	"github.com/davidalvarez305/content_go/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,7 +15,7 @@ func GetWords(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Faield to query words.",
+			"data": "Failed to query words.",
 		})
 	}
 

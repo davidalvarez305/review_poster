@@ -24,7 +24,7 @@ func (word *Word) GetWordByName(name, userId string) error {
 }
 
 func (words *Words) GetWords(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Find(&words).Error
+	return database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
 }
 
 func (word *Word) CreateWord() error {
