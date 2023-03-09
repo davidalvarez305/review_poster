@@ -120,7 +120,6 @@ func RefreshAuthToken() (string, error) {
 		fmt.Println("Error getting Google credentials")
 		return "", err
 	}
-	fmt.Printf("%+v", config)
 
 	refreshToken := os.Getenv("REFRESH_TOKEN")
 	client := &http.Client{}
