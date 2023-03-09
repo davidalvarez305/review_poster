@@ -68,7 +68,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 	paragraphs := &actions.Paragraphs{}
 	userId := c.Params("userId")
 	paragraphId := c.Params("paragraphId")
-	templateId := c.Query("template")
+	template := c.Query("template")
 
 	err := c.BodyParser(&paragraphs)
 
@@ -78,7 +78,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err = paragraphs.UpdateParagraphs(paragraphId, userId, templateId)
+	err = paragraphs.UpdateParagraphs(paragraphId, userId, template)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

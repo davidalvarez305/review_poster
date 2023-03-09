@@ -31,14 +31,14 @@ func (paragraph *Paragraph) UpdateParagraph(userId string) error {
 }
 
 // Updates multiple records and returns DB values.
-func (paragraphs *Paragraphs) UpdateParagraphs(paragraphId, userId, templateId string) error {
+func (paragraphs *Paragraphs) UpdateParagraphs(paragraphId, userId, template string) error {
 	err := database.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
 
 	if err != nil {
 		return err
 	}
 
-	return paragraphs.GetParagraphsByTemplate(templateId, userId)
+	return paragraphs.GetParagraphsByTemplate(template, userId)
 }
 
 func (paragraphs *Paragraphs) DeleteParagraphs(ids []int, templateId string) error {
@@ -51,8 +51,8 @@ func (paragraphs *Paragraphs) DeleteParagraphs(ids []int, templateId string) err
 	return database.DB.Where("template_id = ?", templateId).Find(&paragraphs).Error
 }
 
-func (paragraphs *Paragraphs) GetParagraphsByTemplate(templateId, userId string) error {
-	return database.DB.Where("template_id = ? AND user_id = ?", templateId, userId).Find(&paragraphs).Error
+func (paragraphs *Paragraphs) GetParagraphsByTemplate(template, userId string) error {
+	return database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
 }
 
 func (paragraphs *Paragraphs) SimpleDelete() error {
