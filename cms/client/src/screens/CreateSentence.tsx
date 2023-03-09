@@ -7,7 +7,7 @@ import useFetch from "../hooks/useFetch";
 import FormSelectComponent from "../components/FormSelectComponent";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
-import { Paragraph, Template } from "../types/general";
+import { Paragraph, Sentence, Template } from "../types/general";
 import { getId } from "../utils/getId";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { UserContext } from "../context/UserContext";
@@ -76,23 +76,28 @@ export const CreateSentence: React.FC<Props> = () => {
         url: USER_ROUTE + `/${user.id}/sentence`,
       },
       (res) => {
-        const response: JoinedParagraph[] = res.data.data;
+        const response: Sentence[] = res.data.data;
         setParagraphs(() =>
           response.map((r) => {
             return {
               user_id: user.id,
               template_id: r.template_id,
-              name: r.paragraph_name,
+              name: r.paragraph!.name,
               id: r.paragraph_id,
+              template: r.template,
+              user: user,
             };
           })
         );
+
         setTemplates(() =>
           response.map((r) => {
             return {
-              name: r.template_name,
+              name: r.template!.name,
               id: r.template_id,
               user_id: user.id,
+              template: r.template,
+              user: user,
             };
           })
         );

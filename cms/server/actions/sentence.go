@@ -12,7 +12,7 @@ type Sentence struct {
 type Sentences []*models.Sentence
 
 func (sentences *Sentences) GetSentencesByParagraph(paragraph, userId string) error {
-	return database.DB.Where("user_id = ? AND name = ?", paragraph, userId).Joins("Paragraph").Find(&sentences).Error
+	return database.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
 }
 
 func (sentences *Sentences) GetAllSentences(userId string) error {
