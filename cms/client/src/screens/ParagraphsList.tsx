@@ -61,7 +61,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/paragraph/selected?template=${template}`,
+        url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
       },
       (res) => {
         setOptions(res.data.data);
@@ -76,7 +76,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
   function handleDelete(id: number) {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/paragraph/?paragraphs=${[id]}&template=${template}`,
+        url: USER_ROUTE + `/${user.id}/paragraph?paragraphs=${[id]}&template=${template}`,
         method: "DELETE",
       },
       (res) => {
@@ -124,7 +124,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     let body = paragraphs.map((name) => {
       return { name, template_id: options[0].template_id, user_id: user.id };
     });
-    let route = USER_ROUTE + `/${user.id}/paragraph/bulk/?template=${templateString}`;
+    let route = USER_ROUTE + `/${user.id}/paragraph/bulk?template=${templateString}`;
 
     // Change request format if user selected a template.
     if (selectedTemplate) {

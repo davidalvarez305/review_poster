@@ -20,7 +20,6 @@ func User(router fiber.Router) {
 
 	// Words related endpoints
 	user.Get("/:userId/word", handlers.GetWords)
-	user.Get("/:userId/word/:wordId", handlers.GetWord)
 	user.Post("/:userId/word", handlers.CreateWord)
 	user.Put("/:userId/word/:wordId", handlers.UpdateWord)
 	user.Delete("/:userId/word/:wordId", handlers.DeleteWord)

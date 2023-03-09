@@ -68,7 +68,7 @@ export const Dictionary: React.FC<Props> = () => {
     return () => {
       cancelToken.cancel();
     };
-  }, [cancelToken, makeRequest]);
+  }, [cancelToken, makeRequest, user.id]);
 
   return (
     <Layout>

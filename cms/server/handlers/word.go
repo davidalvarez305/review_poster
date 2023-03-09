@@ -8,7 +8,23 @@ import (
 
 func GetWords(c *fiber.Ctx) error {
 	words := &actions.Words{}
+	wordName := c.Query("word")
 	userId := c.Params("userId")
+
+	if len(wordName) > 0 {
+		word := &actions.Word{}
+		err := word.GetWordByName(wordName, userId)
+
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"data": "Failed to query word by name.",
+			})
+		}
+
+		return c.Status(200).JSON(fiber.Map{
+			"data": word,
+		})
+	}
 
 	err := words.GetWords(userId)
 
@@ -20,24 +36,6 @@ func GetWords(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": words,
-	})
-}
-
-func GetWord(c *fiber.Ctx) error {
-	word := &actions.Word{}
-	wordName := c.Params("word")
-	userId := c.Params("userId")
-
-	err := word.GetWordByName(wordName, userId)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to query word by name.",
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": word,
 	})
 }
 

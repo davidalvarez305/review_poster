@@ -122,7 +122,7 @@ export const SynonymsList: React.FC = () => {
     let body = synonyms.map((synonym) => {
       return { synonym, word_id };
     });
-    let route = USER_ROUTE + `/${user.id}/synonym/bulk/?word=${wordString}`
+    let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`
 
     // Change request format if user selected a word.
     if (selectedWord) {

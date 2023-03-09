@@ -6,31 +6,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetSentencesByParagraph(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
-	paragraphId := c.Params("paragraphId")
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	err = sentences.GetSentencesByParagraph(paragraphId, userId)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": sentences,
-	})
-}
-
 func GetSentences(c *fiber.Ctx) error {
 	sentences := &actions.Sentences{}
 	userId := c.Params("userId")

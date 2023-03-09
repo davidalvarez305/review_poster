@@ -104,7 +104,7 @@ export const CreateParagraph: React.FC<Props> = () => {
     return () => {
       cancelToken.cancel();
     };
-  }, [makeRequest, cancelToken]);
+  }, [makeRequest, cancelToken, user.id]);
 
   return (
     <Layout>

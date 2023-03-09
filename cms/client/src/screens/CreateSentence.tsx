@@ -7,7 +7,7 @@ import useFetch from "../hooks/useFetch";
 import FormSelectComponent from "../components/FormSelectComponent";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
-import { JoinedParagraph, Paragraph, Template } from "../types/general";
+import { Paragraph, Template } from "../types/general";
 import { getId } from "../utils/getId";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { UserContext } from "../context/UserContext";

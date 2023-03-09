@@ -62,7 +62,7 @@ export const SentencesList: React.FC = () => {
   useEffect(() => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/sentence/${paragraph}`,
+        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
       },
       (res) => {
         setOptions(res.data.data);
