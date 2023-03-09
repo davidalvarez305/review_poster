@@ -38,11 +38,11 @@ func (g *Group) GetOrCreateGroup(groupName string) error {
 
 func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) error {
 
-	err := database.DB.Where("name = ?", subCategoryName).Preload("SubCategory.Category.Group").Error
+	err := database.DB.Where("name = ?", subCategoryName).Preload("SubCategory.Category.Group").First(&s).Error
 
 	// If there is no error, it means that the subcategory was found, so we can return early.
 	if err == nil {
-		return err
+		return nil
 	}
 
 	group := Group{}
