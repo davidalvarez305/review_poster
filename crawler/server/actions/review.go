@@ -8,13 +8,14 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/davidalvarez305/review_poster/crawler/server/utils"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 )
 
 func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dictionary, sentences []types.DynamicContent, subCategory models.SubCategory) (models.ReviewPost, error) {
 	var post models.ReviewPost
 	name := strings.Join(strings.Split(strings.ToLower(input.Name), " "), "-")
-	slug := utils.CreateCategorySlug(name)
+	slug := slug.Make(name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
 
 	additionalContent, err := GetAdditionalContent(input.Name)
