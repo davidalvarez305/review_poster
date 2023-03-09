@@ -11,18 +11,25 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dictionary, sentences []types.DynamicContent, subCategory models.SubCategory) models.ReviewPost {
+func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dictionary, sentences []types.DynamicContent, subCategory models.SubCategory) (models.ReviewPost, error) {
+	var post models.ReviewPost
 	name := strings.Join(strings.Split(strings.ToLower(input.Name), " "), "-")
 	slug := utils.CreateCategorySlug(name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
 
+	additionalContent, err := GetAdditionalContent(input.Name)
+
+	if err != nil {
+		return post, err
+	}
+
 	data := utils.GenerateContentUtil(input.Name, dictionary, sentences)
 
-	post := models.ReviewPost{
+	post = models.ReviewPost{
 		Title:              data.ReviewPostTitle,
 		SubCategory:        &subCategory,
 		Slug:               slug,
-		Content:            data.ReviewPostContent,
+		Content:            data.ReviewPostContent + additionalContent.Choices[0].Text,
 		Headline:           data.ReviewPostHeadline,
 		Intro:              data.ReviewPostIntro,
 		Description:        data.ReviewPostDescription,
@@ -46,7 +53,7 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		ProductImageAlt: strings.ToLower(input.Name),
 	}
 
-	return post
+	return post, nil
 }
 
 func InsertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Dictionary, sentences []types.DynamicContent) error {
@@ -61,7 +68,13 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 	}
 
 	for i := 0; i < len(products); i++ {
-		p := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
+		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
+
+		if err != nil {
+			fmt.Printf("Error with creating a post...")
+			continue
+		}
+
 		posts = append(posts, p)
 	}
 

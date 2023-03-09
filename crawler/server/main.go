@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/routes"
@@ -26,5 +27,5 @@ func main() {
 	sessions.Init()
 	routes.Router(app)
 
-	app.Listen(":4007")
+	app.Listen(":" + os.Getenv("PORT"))
 }
