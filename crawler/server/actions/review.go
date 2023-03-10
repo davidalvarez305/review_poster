@@ -88,7 +88,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 	return nil
 }
 
-func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName, categoryName string) error {
+func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName string) error {
 	dictionary, err := PullContentDictionary()
 	googleKeywords := &GoogleKeywordResults{}
 	var results AmazonSearchResultsPages
@@ -134,7 +134,7 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName, 
 			fmt.Println("Keyword: " + seedKeywords[i] + "0" + "\n")
 		}
 		if len(data) > 0 {
-			err := InsertReviewPosts(groupName, categoryName, seedKeywords[i], data, dictionary, sentences)
+			err := InsertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary, sentences)
 
 			if err != nil {
 				fmt.Printf("Error while trying to insert %s: %+v", seedKeywords[i], err)

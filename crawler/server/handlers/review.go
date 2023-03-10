@@ -18,7 +18,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	err = products.CreateReviewPosts(body.Keyword, body.GroupName, body.CatergoryName)
+	err = products.CreateReviewPosts(body.Keyword, body.GroupName)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
