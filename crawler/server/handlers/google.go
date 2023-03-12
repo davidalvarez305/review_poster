@@ -1,40 +1,29 @@
 package handlers
 
 import (
-	"strings"
-
 	"github.com/davidalvarez305/review_poster/crawler/server/actions"
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetCommercialKeywords(c *fiber.Ctx) error {
-	body := &types.Keyword{}
+	keyword := c.Query("keyword")
 	results := &actions.GoogleKeywordResults{}
-	err := c.BodyParser(body)
 
-	if err != nil {
+	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse request body.",
-		})
-	}
-
-	s := strings.Split(body.Keyword, "\n")
-
-	if len(s) > 1 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Only one seed keyword allowed per query.",
+			"data": "No keyword found in querystring.",
 		})
 	}
 
 	q := types.GoogleQuery{
 		Pagesize: 1000,
 		KeywordSeed: types.KeywordSeed{
-			Keywords: [1]string{body.Keyword},
+			Keywords: [1]string{keyword},
 		},
 	}
 
-	err = results.QueryGoogle(q)
+	err := results.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -82,32 +71,23 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 }
 
 func GetSeedKeywords(c *fiber.Ctx) error {
-	body := &types.Keyword{}
 	results := &actions.GoogleKeywordResults{}
-	err := c.BodyParser(body)
+	keyword := c.Query("keyword")
 
-	if err != nil {
+	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "Failed to parse request body.",
-		})
-	}
-
-	s := strings.Split(body.Keyword, "\n")
-
-	if len(s) > 1 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Only one seed keyword allowed per query.",
 		})
 	}
 
 	q := types.GoogleQuery{
 		Pagesize: 1000,
 		KeywordSeed: types.KeywordSeed{
-			Keywords: [1]string{body.Keyword},
+			Keywords: [1]string{keyword},
 		},
 	}
 
-	err = results.QueryGoogle(q)
+	err := results.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

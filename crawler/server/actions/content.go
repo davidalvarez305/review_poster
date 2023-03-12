@@ -11,7 +11,7 @@ import (
 
 func PullDynamicContent() ([]types.DynamicContent, error) {
 	var content []types.DynamicContent
-	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "/api/content/content/?template=ReviewPost"
+	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "content/?template=ReviewPost"
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", contentApi, nil)
@@ -35,7 +35,7 @@ func PullDynamicContent() ([]types.DynamicContent, error) {
 
 func PullContentDictionary() ([]types.Dictionary, error) {
 	var content []types.Dictionary
-	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "/api/content/dictionary"
+	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "dictionary"
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", contentApi, nil)
