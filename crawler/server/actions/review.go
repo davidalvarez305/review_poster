@@ -14,8 +14,7 @@ import (
 
 func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dictionary, sentences []types.DynamicContent, subCategory models.SubCategory) (models.ReviewPost, error) {
 	var post models.ReviewPost
-	name := strings.Join(strings.Split(strings.ToLower(input.Name), " "), "-")
-	slug := slug.Make(name)
+	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
 
 	additionalContent, err := GetAdditionalContent(input.Name)
@@ -72,7 +71,6 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
 
 		if err != nil {
-			fmt.Printf("Error with creating a post...")
 			continue
 		}
 
@@ -132,17 +130,17 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 
 		if len(data) == 0 {
 			fmt.Println("Keyword: " + seedKeywords[i] + "0" + "\n")
+			continue
 		}
-		if len(data) > 0 {
-			err := InsertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary, sentences)
 
-			if err != nil {
-				fmt.Printf("Error while trying to insert %s: %+v", seedKeywords[i], err)
-				return err
-			}
+		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary, sentences)
 
-			results = append(results, data...)
+		if err != nil {
+			return err
 		}
+
+		results = append(results, data...)
+
 		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
 		fmt.Println(total)
 	}
