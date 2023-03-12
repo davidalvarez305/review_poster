@@ -17,13 +17,31 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
 
-	additionalContent, err := GetAdditionalContent(input.Name)
+	additionalContent, err := GetAdditionalContent("What are people saying about the " + input.Name)
 
 	if err != nil {
 		return post, err
 	}
 
 	data := utils.GenerateContentUtil(input.Name, dictionary, sentences)
+
+	FAQ_ONE, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_1)
+
+	if err != nil {
+		return post, err
+	}
+
+	FAQ_TWO, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_2)
+
+	if err != nil {
+		return post, err
+	}
+
+	FAQ_THREE, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_3)
+
+	if err != nil {
+		return post, err
+	}
 
 	post = models.ReviewPost{
 		Title:              data.ReviewPostTitle,
@@ -43,9 +61,9 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 			ProductRatings: input.Rating,
 			ProductImage:   input.Image,
 		},
-		Faq_Answer_1:    data.ReviewPostFaq_Answer_1,
-		Faq_Answer_2:    data.ReviewPostFaq_Answer_2,
-		Faq_Answer_3:    data.ReviewPostFaq_Answer_3,
+		Faq_Answer_1:    FAQ_ONE.Choices[0].Text,
+		Faq_Answer_2:    FAQ_TWO.Choices[0].Text,
+		Faq_Answer_3:    FAQ_THREE.Choices[0].Text,
 		Faq_Question_1:  data.ReviewPostFaq_Question_1,
 		Faq_Question_2:  data.ReviewPostFaq_Question_2,
 		Faq_Question_3:  data.ReviewPostFaq_Question_3,

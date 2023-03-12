@@ -31,13 +31,13 @@ type Prompt struct {
 	MaxTokens   int     `json:"max_tokens"`
 }
 
-func GetAdditionalContent(productName string) (OpenAIResponse, error) {
+func GetAdditionalContent(promptMsg string) (OpenAIResponse, error) {
 	var response OpenAIResponse
 	url := "https://api.openai.com/v1/completions"
 
 	prompt := Prompt{
 		Model:       "text-davinci-003",
-		Prompt:      "What are people saying about the " + productName,
+		Prompt:      promptMsg,
 		Temperature: 0.6,
 		MaxTokens:   2000,
 	}
