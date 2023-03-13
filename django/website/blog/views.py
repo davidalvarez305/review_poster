@@ -204,3 +204,9 @@ class AffiliateDisclaimer(MyBaseView):
 
 class PrivacyPolicy(MyBaseView):
     template = 'blog/privacy_policy.html'
+
+class CreatePost(View):
+    template = 'blog/create_post.html'
+
+    def get():
+        return '<html></html>'
