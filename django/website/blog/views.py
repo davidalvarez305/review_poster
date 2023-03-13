@@ -205,10 +205,12 @@ class AffiliateDisclaimer(MyBaseView):
 class PrivacyPolicy(MyBaseView):
     template_name = 'blog/privacy_policy.html'
 
-class CreatePost(View):
-    template_name = 'blog/create_post.html'
+class CreatePost(MyBaseView):
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
-        return context
+            context = super(self).get_context_data(**kwargs)
+            context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
+            return context
+
+    def get(self, request):
+        return render(request, 'blog/create_post.html', self.context)
