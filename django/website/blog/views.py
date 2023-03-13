@@ -200,13 +200,15 @@ def sitemap_index(request, *args, **kwargs):
     return render(request, 'blog/sitemap_index.xml', context, content_type="application/xhtml+xml")
 
 class AffiliateDisclaimer(MyBaseView):
-    template = 'blog/affiliate_disclaimer.html'
+    template_name = 'blog/affiliate_disclaimer.html'
 
 class PrivacyPolicy(MyBaseView):
-    template = 'blog/privacy_policy.html'
+    template_name = 'blog/privacy_policy.html'
 
 class CreatePost(View):
-    template = 'blog/create_post.html'
+    template_name = 'blog/create_post.html'
 
-    def get():
-        return '<html></html>'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
+        return context
