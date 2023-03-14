@@ -28,10 +28,8 @@ class MyBaseView(View):
     template_name = 'home.html'
 
     def get(self, request, *args, **kwargs):
-
         ctx = self.context
         ctx['path'] = request.path
-
         return render(request, self.template_name, context=ctx)
 
 
@@ -71,11 +69,10 @@ class HomeView(MyBaseView):
 
 
 class CategoryView(MyBaseView):
-
     template_name = 'blog/category.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        
+    def get(self, request, *args, **kwargs):
+        context = self.context
         category_slug = kwargs['category']
         category = get_object_or_404(Category, slug=category_slug)
         sub_categories = SubCategory.objects.filter(category__slug=category_slug)
@@ -84,32 +81,30 @@ class CategoryView(MyBaseView):
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
-        return context
+        return render(request, self.template_name, context)
 
 
 class SubCategoryView(MyBaseView):
-
     template_name = 'blog/sub_category.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        context = self.context
         sub_category_slug = kwargs['sub_category']
         sub_category = get_object_or_404(SubCategory, sub_category_slug=sub_category_slug)
         posts = ReviewPost.objects.filter(sub_category__slug=sub_category.slug)
         context['posts'] = posts
         context['sub_category'] = sub_category
         context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
-        return context
+        return render(request, self.template_name, context)
 
 class ReviewPostView(MyBaseView):
-
     template_name = 'blog/review_post.html'
-    
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        context = self.context
         slug = kwargs['slug']
         sub_category_slug = kwargs['sub_category']
+
         review_post = get_object_or_404(ReviewPost, slug=slug)
         product = get_object_or_404(Product, affiliate_url=review_post.product_affiliate_url)
 
@@ -130,7 +125,8 @@ class ReviewPostView(MyBaseView):
         context['page_title'] = review_post.title
         context['product'] = product
         context['product_rating_stars'] = product_rating_stars
-        return context
+        
+        return render(request, self.template_name, context)
 
 def sitemap(request, *args, **kwargs):
 
