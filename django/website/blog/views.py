@@ -21,7 +21,7 @@ class MyBaseView(View):
         'google_analytics_id': google_analytics_id,
         'google_analytics_src': "https://www.googletagmanager.com/gtag/js?id=" + google_analytics_id,
         'meta_description': 'Get reviews for all things sports, fitness, outdoors, and everything in between!',
-        'page_title': str(os.environ.get('PAGE_TITLE')),
+        'page_title': str(os.environ.get('SITE_NAME')),
         'site_name': str(os.environ.get('SITE_NAME'))
     }
 
@@ -80,7 +80,7 @@ class CategoryView(MyBaseView):
         context['example_posts'] = example_posts
         context['sub_categories'] = sub_categories
         context['category'] = category
-        context['page_title'] = category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
+        context['page_title'] = category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
         return render(request, self.template_name, context)
 
 
@@ -94,7 +94,7 @@ class SubCategoryView(MyBaseView):
         posts = ReviewPost.objects.filter(sub_category__slug=sub_category.slug)
         context['posts'] = posts
         context['sub_category'] = sub_category
-        context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('PAGE_TITLE'))
+        context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
         return render(request, self.template_name, context)
 
 class ReviewPostView(MyBaseView):
@@ -108,7 +108,6 @@ class ReviewPostView(MyBaseView):
         review_post = get_object_or_404(ReviewPost, slug=slug)
         product = get_object_or_404(Product, affiliate_url=review_post.product_affiliate_url)
 
-        # Output Stars
         i = 0
         product_rating_stars = ""
         if product.product_ratings == "":
@@ -202,11 +201,17 @@ class PrivacyPolicy(MyBaseView):
     template_name = 'blog/privacy_policy.html'
 
 class CreatePost(MyBaseView):
+    template_name = 'blog/create_post.html'
 
-    def get_context_data(self, **kwargs):
-            context = super(self).get_context_data(**kwargs)
-            context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
-            return context
+    def get(self, request, *args, **kwargs):
+        context = self.context
 
-    def get(self, request):
-        return render(request, 'blog/create_post.html', self.context)
+        options = self.context['groups']
+        select_options = ""
+        for option in options:
+            select_options += f'<option value={option}>{option}</option>'
+
+        context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
+        context['select_options'] = select_options
+        context['page_title'] = "Create Review Posts - " + context['site_name']
+        return render(request, self.template_name, context)

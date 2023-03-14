@@ -8,13 +8,11 @@
 					<form method="post" action="{{ crawler_api }}" id="create-review-post" class="default-form">
 						<div class="row">
 							<div class="short-box clearfix">
-								<p>Short by</p>
 								<div class="select-box">
-									<select id="keyword" name="keyword" class="wide" required>
-									   <option value="Popularity">Popularity</option>
-									   <option value="1">New Collection</option>
-									   <option value="2">Top Sell</option>
-									   <option value="4">Top Ratted</option>
+									<select id="group_name" name="group_name" class="wide form-group" required>
+									   {% for group in groups %}
+									   		<option value={{ group }}>{{ group }}</option>
+									   {% endfor %}
 									</select>
 								</div>
 							</div>
@@ -38,10 +36,7 @@
 			event.preventDefault();
 			
 			var form = event.target;
-			var data = {
-				group_name: form.group_name.value,
-				keyword: form.keyword.value
-			};
+			var data = Object.fromEntries(new FormData(form).entries());
 			
 			fetch(form.action, {
 				method: form.method,
