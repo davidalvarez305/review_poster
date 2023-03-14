@@ -124,7 +124,6 @@ class ReviewPostView(MyBaseView):
         context['page_title'] = review_post.title
         context['product'] = product
         context['product_rating_stars'] = product_rating_stars
-        
         return render(request, self.template_name, context)
 
 def sitemap(request, *args, **kwargs):
@@ -211,7 +210,7 @@ class CreatePost(MyBaseView):
         for option in options:
             select_options += f'<option value={option}>{option}</option>'
 
-        context['crawler_api'] = str(os.environ.get('REVIEW_POST_API')) + "/api/review-post"
+        context['crawler_api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
         context['select_options'] = select_options
         context['page_title'] = "Create Review Posts - " + context['site_name']
         return render(request, self.template_name, context)
