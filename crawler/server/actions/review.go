@@ -16,6 +16,7 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
+	fmt.Printf("category: %+v", subCategory)
 
 	additionalContent, err := GetAdditionalContent("What are people saying about the " + input.Name)
 

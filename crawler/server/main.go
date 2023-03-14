@@ -21,7 +21,7 @@ func main() {
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:4007",
+		AllowOrigins: "*",
 	}))
 	database.Connect()
 	sessions.Init()

@@ -16,5 +16,5 @@ type Keyword struct {
 
 type CreateReviewPostsInput struct {
 	Keyword   string `json:"keyword" form:"keyword"`
-	GroupName string `json:"groupName" form:"groupName"`
+	GroupName string `json:"group_name" form:"group_name"`
 }

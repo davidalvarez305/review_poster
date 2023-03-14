@@ -192,7 +192,6 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 	authToken, err := RefreshAuthToken()
 
 	if err != nil {
-		fmt.Printf("Error refreshing token.")
 		return err
 	}
 
@@ -211,7 +210,6 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 
 	req, err := http.NewRequest("POST", googleUrl, bytes.NewBuffer(out))
 	if err != nil {
-		fmt.Println("Request failed: ", err)
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -220,7 +218,6 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error while querying Google", err)
 		return err
 	}
 	defer resp.Body.Close()
