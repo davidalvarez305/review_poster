@@ -221,7 +221,6 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 		return err
 	}
 	defer resp.Body.Close()
-
 	json.NewDecoder(resp.Body).Decode(&results)
 
 	return nil
