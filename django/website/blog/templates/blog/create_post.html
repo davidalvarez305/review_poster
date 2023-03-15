@@ -8,7 +8,7 @@
 					<form method="post" action="{{ crawler_api }}" id="create-review-post" class="default-form">
 						<select id="group_name" name="group_name" class="nice-select wide open form-group" required>
 							{% for group in groups %}
-									<option value={{ group }}>{{ group }}</option>
+									<option value="{{ group }}">{{ group }}</option>
 							{% endfor %}
 							</select>
 						<div class="col-lg-12 col-md-12 col-sm-12 form-group">
