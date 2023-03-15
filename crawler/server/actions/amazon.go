@@ -48,16 +48,18 @@ type AmazonPaapi5RequestBody struct {
 	Resources   []string `json:"Resources"`
 }
 
-func (products *AmazonSearchResultsPages) CrawlPage(keyword, page string) error {
+func CrawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
 	host := os.Getenv("P_HOST")
 	username := os.Getenv("P_USERNAME")
 	sessionId := fmt.Sprint(rand.Intn(1000000))
 	path := username + sessionId + ":" + host
+	crawledProducts := &AmazonSearchResultsPages{}
 
 	u, err := url.Parse(path)
 
 	if err != nil {
-		return err
+		fmt.Println("Error With URL Parse: ", err)
+		return crawledProducts, err
 	}
 
 	tr := &http.Transport{
@@ -74,29 +76,30 @@ func (products *AmazonSearchResultsPages) CrawlPage(keyword, page string) error 
 	req, err := http.NewRequest("GET", page, nil)
 
 	if err != nil {
-		return err
+		fmt.Println("Error With Proxy Request: ", err)
+		return crawledProducts, err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "text/html")
 
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while fetching Amazon SERP", err)
-		return err
+		return crawledProducts, err
 	}
 	defer resp.Body.Close()
 
-	err = products.ParseHtml(resp.Body, keyword)
+	crawledProducts, err = ParseHtml(resp.Body, keyword)
 
 	if err != nil {
 		fmt.Println("Error while parsing HTML.", err)
-		return err
+		return crawledProducts, err
 	}
 
-	return nil
+	return crawledProducts, nil
 }
 
-func (products *AmazonSearchResultsPages) ScrapeSearchResultsPage(keyword string) error {
+func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) {
 	var results AmazonSearchResultsPages
 	str := strings.Join(strings.Split(keyword, " "), "+")
 
@@ -106,22 +109,20 @@ func (products *AmazonSearchResultsPages) ScrapeSearchResultsPage(keyword string
 		wg.Add(1)
 		go func(page int) {
 			serp := fmt.Sprintf("https://www.amazon.com/s?k=%s&s=review-rank&page=%v", str, page)
-			var products AmazonSearchResultsPages
 
-			err := products.CrawlPage(keyword, serp)
+			products, err := CrawlPage(keyword, serp)
 
 			if err != nil {
 				fmt.Printf("Error while crawling: %+v", err.Error())
 			}
 
-			results = append(results, products...)
+			results = append(results, *products...)
 			wg.Done()
 		}(i)
 	}
 
 	wg.Wait()
-	fmt.Printf("Length of products: %+v", len(results))
-	return nil
+	return &results, nil
 }
 
 func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
@@ -208,12 +209,12 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	return nil
 }
 
-func (products *AmazonSearchResultsPages) ParseHtml(r io.Reader, keyword string) error {
+func ParseHtml(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
 	var results AmazonSearchResultsPages
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
 		fmt.Println("Error trying to parse document.")
-		return err
+		return &results, err
 	}
 
 	doc.Find(".sg-col-inner").Each(func(i int, s *goquery.Selection) {
@@ -251,8 +252,8 @@ func (products *AmazonSearchResultsPages) ParseHtml(r io.Reader, keyword string)
 
 			}
 			results = append(results, product)
-			products = &results
 		}
 	})
-	return nil
+
+	return &results, nil
 }

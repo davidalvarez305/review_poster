@@ -81,7 +81,7 @@ func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error 
 	err := database.DB.Where("name = ?", categoryName).Preload("Category.Group").First(&c).Error
 
 	if err != nil {
-		fmt.Printf("Creating new group...")
+		fmt.Printf("Creating new category...\n")
 	}
 
 	c.Category = &models.Category{

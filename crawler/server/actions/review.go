@@ -140,31 +140,30 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 	}
 
 	for i := 0; i < len(seedKeywords); i++ {
-		var data AmazonSearchResultsPages
-		err := data.ScrapeSearchResultsPage(seedKeywords[i])
+		data, err := ScrapeSearchResultsPage(seedKeywords[i])
 
 		if err != nil {
 			return err
 		}
 
-		if len(data) == 0 {
-			fmt.Println("Keyword: " + seedKeywords[i] + "0" + "\n")
+		if len(*data) == 0 {
+			fmt.Println("Keyword: " + seedKeywords[i] + " - 0" + "\n")
 			continue
 		}
 
-		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary, sentences)
+		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary, sentences)
 
 		if err != nil {
 			return err
 		}
 
-		results = append(results, data...)
+		results = append(results, *data...)
 
-		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
+		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(*data))
 		fmt.Println(total)
 	}
 
-	productsTotal := fmt.Sprintf("Total Products = %v", len(results))
+	productsTotal := fmt.Sprintf("Total Products = %v\n", len(results))
 	fmt.Println(productsTotal)
 
 	products = &results

@@ -8,7 +8,6 @@ import (
 
 func CrawlAmazon(c *fiber.Ctx) error {
 	body := &types.Keyword{}
-	products := &actions.AmazonSearchResultsPages{}
 	err := c.BodyParser(body)
 
 	if err != nil {
@@ -17,7 +16,7 @@ func CrawlAmazon(c *fiber.Ctx) error {
 		})
 	}
 
-	err = products.ScrapeSearchResultsPage(body.Keyword)
+	products, err := actions.ScrapeSearchResultsPage(body.Keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
