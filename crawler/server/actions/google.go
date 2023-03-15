@@ -196,7 +196,7 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 	}
 
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
-	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v10/customers/%s:generateKeywordIdeas", googleCustomerID)
+	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v11/customers/%s:generateKeywordIdeas", googleCustomerID)
 	developerToken := os.Getenv("GOOGLE_DEVELOPER_TOKEN")
 	authorizationHeader := fmt.Sprintf("Bearer %s", authToken)
 
