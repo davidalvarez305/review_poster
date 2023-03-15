@@ -16,7 +16,6 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
-	fmt.Printf("category: %+v", subCategory)
 
 	additionalContent, err := GetAdditionalContent("What are people saying about the " + input.Name)
 
@@ -44,6 +43,21 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		return post, err
 	}
 
+	product := models.Product{
+		AffiliateUrl:   input.Link,
+		ProductPrice:   input.Price,
+		ProductReviews: input.Reviews,
+		ProductRatings: input.Rating,
+		ProductImage:   input.Image,
+	}
+
+	err = database.DB.FirstOrCreate(&product).Error
+
+	if err != nil {
+		fmt.Printf("Failed to create post: %+v", err)
+		return post, err
+	}
+
 	post = models.ReviewPost{
 		Title:              data.ReviewPostTitle,
 		SubCategory:        &subCategory,
@@ -55,21 +69,14 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		ProductLabel:       data.ReviewPostProductLabel,
 		ProductName:        input.Name,
 		ProductDescription: data.ReviewPostProductDescription,
-		Product: &models.Product{
-			AffiliateUrl:   input.Link,
-			ProductPrice:   input.Price,
-			ProductReviews: input.Reviews,
-			ProductRatings: input.Rating,
-			ProductImage:   input.Image,
-		},
-		Faq_Answer_1:    FAQ_ONE.Choices[0].Text,
-		Faq_Answer_2:    FAQ_TWO.Choices[0].Text,
-		Faq_Answer_3:    FAQ_THREE.Choices[0].Text,
-		Faq_Question_1:  data.ReviewPostFaq_Question_1,
-		Faq_Question_2:  data.ReviewPostFaq_Question_2,
-		Faq_Question_3:  data.ReviewPostFaq_Question_3,
-		ProductImageUrl: replacedImage,
-		ProductImageAlt: strings.ToLower(input.Name),
+		Faq_Answer_1:       FAQ_ONE.Choices[0].Text,
+		Faq_Answer_2:       FAQ_TWO.Choices[0].Text,
+		Faq_Answer_3:       FAQ_THREE.Choices[0].Text,
+		Faq_Question_1:     data.ReviewPostFaq_Question_1,
+		Faq_Question_2:     data.ReviewPostFaq_Question_2,
+		Faq_Question_3:     data.ReviewPostFaq_Question_3,
+		ProductImageUrl:    replacedImage,
+		ProductImageAlt:    strings.ToLower(input.Name),
 	}
 
 	return post, nil
@@ -86,7 +93,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 		return err
 	}
 
-	for i := 0; i < len(products); i++ {
+	for i := 0; i < 2; i++ {
 		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
 
 		if err != nil {
@@ -96,10 +103,10 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 		posts = append(posts, p)
 	}
 
-	db := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(posts)
+	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&posts).Error
 
-	if db.Error != nil {
-		return db.Error
+	if err != nil {
+		return err
 	}
 
 	return nil
