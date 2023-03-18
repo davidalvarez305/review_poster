@@ -2,6 +2,7 @@ package actions
 
 import (
 	"github.com/gosimple/slug"
+	"gorm.io/gorm/clause"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
@@ -61,10 +62,14 @@ func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error 
 	c.Category = &models.Category{
 		Name:    categoryName,
 		Slug:    slug.Make(categoryName),
-		GroupID: group.Group.ID,
+		GroupID: group.ID,
 	}
 
-	err := database.DB.Where("name = ?", categoryName).Preload("Group").FirstOrCreate(&c).Error
+	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&c).Error
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return database.DB.Preload("Group").First(&c).Error
 }
