@@ -43,6 +43,8 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		return post, err
 	}
 
+	// I'm creating this separately because there's a chance that the product already exists, in which case, it will be updated
+
 	product := models.Product{
 		AffiliateUrl:   input.Link,
 		ProductPrice:   input.Price,
@@ -51,10 +53,9 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		ProductImage:   input.Image,
 	}
 
-	err = database.DB.FirstOrCreate(&product).Error
+	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&product).Error
 
 	if err != nil {
-		fmt.Printf("Failed to create post: %+v", err)
 		return post, err
 	}
 

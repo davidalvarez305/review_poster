@@ -1,8 +1,6 @@
 package actions
 
 import (
-	"fmt"
-
 	"github.com/gosimple/slug"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
@@ -22,23 +20,12 @@ type Category struct {
 }
 
 func (g *Group) GetOrCreateGroup(groupName string) error {
-	err := database.DB.Where("name = ?", groupName).First(&g).Error
-
-	if err != nil {
-		fmt.Printf("Creating new group...")
-	}
-
-	g.Group = &models.Group{
-		Name: groupName,
-		Slug: slug.Make(groupName),
-	}
-
-	return nil
+	return database.DB.Where("name = ?", groupName).First(&g).Error
 }
 
 func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) error {
 
-	err := database.DB.Where("name = ?", subCategoryName).Preload("SubCategory.Category.Group").First(&s).Error
+	err := database.DB.Where("name = ?", subCategoryName).Preload("Category.Group").First(&s).Error
 
 	// If there is no error, it means that the subcategory was found, so we can return early.
 	if err == nil {
@@ -61,39 +48,23 @@ func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, grou
 	}
 
 	s.SubCategory = &models.SubCategory{
-		Name: subCategoryName,
-		Slug: slug.Make(subCategoryName),
-		Category: &models.Category{
-			ID:   category.ID,
-			Name: category.Name,
-			Slug: category.Slug,
-			Group: &models.Group{
-				ID:   group.ID,
-				Name: group.Name,
-				Slug: group.Slug,
-			},
-		},
+		Name:     subCategoryName,
+		Slug:     slug.Make(subCategoryName),
+		Category: category.Category,
 	}
 
 	return nil
 }
 
 func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error {
-	err := database.DB.Where("name = ?", categoryName).Preload("Category.Group").First(&c).Error
-
-	if err != nil {
-		fmt.Printf("Creating new category...\n")
-	}
 
 	c.Category = &models.Category{
-		Name: categoryName,
-		Slug: slug.Make(categoryName),
-		Group: &models.Group{
-			ID:   group.ID,
-			Name: group.Name,
-			Slug: group.Slug,
-		},
+		Name:    categoryName,
+		Slug:    slug.Make(categoryName),
+		GroupID: group.Group.ID,
 	}
 
-	return nil
+	err := database.DB.Where("name = ?", categoryName).Preload("Group").FirstOrCreate(&c).Error
+
+	return err
 }
