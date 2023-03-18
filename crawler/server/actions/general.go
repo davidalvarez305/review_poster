@@ -68,6 +68,7 @@ func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, grou
 			Name: category.Name,
 			Slug: category.Slug,
 			Group: &models.Group{
+				ID:   group.ID,
 				Name: group.Name,
 				Slug: group.Slug,
 			},
@@ -88,6 +89,7 @@ func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error 
 		Name: categoryName,
 		Slug: slug.Make(categoryName),
 		Group: &models.Group{
+			ID:   group.ID,
 			Name: group.Name,
 			Slug: group.Slug,
 		},
