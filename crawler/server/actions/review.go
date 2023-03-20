@@ -81,6 +81,8 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		ProductImageAlt:     strings.ToLower(input.Name),
 	}
 
+	fmt.Printf("%+v\n", post)
+
 	return post, nil
 }
 
