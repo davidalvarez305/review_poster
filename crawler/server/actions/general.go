@@ -12,64 +12,60 @@ type Group struct {
 	*models.Group
 }
 
-type SubCategory struct {
-	*models.SubCategory
-}
-
-type Category struct {
-	*models.Category
-}
-
 func (g *Group) GetOrCreateGroup(groupName string) error {
 	return database.DB.Where("name = ?", groupName).First(&g).Error
 }
 
-func (s *SubCategory) GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) error {
+func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*models.SubCategory, error) {
+	var s models.SubCategory
 
 	err := database.DB.Where("name = ?", subCategoryName).Preload("Category.Group").First(&s).Error
 
 	// If there is no error, it means that the subcategory was found, so we can return early.
 	if err == nil {
-		return nil
+		return &s, nil
 	}
 
 	group := Group{}
-	category := Category{}
-
 	err = group.GetOrCreateGroup(groupName)
 
 	if err != nil {
-		return err
+		return &s, err
 	}
 
-	err = category.GetOrCreateCategory(categoryName, &group)
+	category, err := GetOrCreateCategory(categoryName, &group)
 
 	if err != nil {
-		return err
+		return &s, err
 	}
 
-	s.SubCategory = &models.SubCategory{
-		Name:     subCategoryName,
-		Slug:     slug.Make(subCategoryName),
-		Category: category.Category,
+	s.Name = subCategoryName
+	s.Slug = slug.Make(subCategoryName)
+	s.Category = category
+
+	err = database.DB.Create(&s).Preload("Category.Group").First(&s).Error
+
+	if err != nil {
+		return &s, err
 	}
 
-	return nil
+	return &s, nil
 }
 
-func (c *Category) GetOrCreateCategory(categoryName string, group *Group) error {
+func GetOrCreateCategory(categoryName string, group *Group) (*models.Category, error) {
+	var c models.Category
 
-	c.Category = &models.Category{
-		Name:    categoryName,
-		Slug:    slug.Make(categoryName),
-		GroupID: group.ID,
-	}
+	c.Name = categoryName
+	c.Slug = slug.Make(categoryName)
+	c.GroupID = group.ID
 
-	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&c).Error
+	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&c).Error
 
 	if err != nil {
-		return err
+		return &c, err
 	}
 
-	return database.DB.Preload("Group").First(&c).Error
+	c.Group = group.Group
+
+	return &c, nil
 }

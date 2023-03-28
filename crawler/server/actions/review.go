@@ -81,24 +81,20 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 		ProductImageAlt:     strings.ToLower(input.Name),
 	}
 
-	fmt.Printf("%+v\n", post)
-
 	return post, nil
 }
 
 func InsertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Dictionary, sentences []types.DynamicContent) error {
 	var posts []models.ReviewPost
 
-	subCategory := &SubCategory{}
-
-	err := subCategory.GetOrCreateSubCategory(categoryName, subCategoryName, groupName)
+	subCategory, err := GetOrCreateSubCategory(categoryName, subCategoryName, groupName)
 
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < 2; i++ {
-		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory.SubCategory)
+		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory)
 
 		if err != nil {
 			continue
