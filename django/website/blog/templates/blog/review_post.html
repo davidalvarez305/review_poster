@@ -15,18 +15,18 @@
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12 content-column">
                     <div class="product-info">
-                        <h3>{{ review_post.productname }}</h3>
+                        <h3>{{ review_post.product_name }}</h3>
                         <div class="customer-review clearfix">
                             <ul class="rating-box clearfix">
                                 {{ product_rating_stars|safe }}
                             </ul>
-                            <div class="reviews"><a href="{{ product_info.affiliateUrl }}">{{ product_info.productReviews }} Reviews</a></div>
+                            <div class="reviews"><a href="{{ product.affiliate_url }}">{{ product.product_reviews }} Reviews</a></div>
                         </div>
-                        <span class="item-price" id="product-pricing">{{ product_info.productPrice }}</span>
+                        <span class="item-price" id="product-pricing">{{ product.product_price }}</span>
                         <div class="text">
-                            <p>{{ review_post.productdescription }}</p>
+                            <p>{{ review_post.product_description }}</p>
                             <ul class="list clearfix">
-                                <li><b><i>Ratings: </i></b>{{ product_info.productRatings }}</li>
+                                <li><b><i>Ratings: </i></b>{{ product.product_ratings }}</li>
                                 <li>Category: <a href="/category/{{ category.slug }}">{{ category.name }}</a></li>
                             </ul>
                         </div>
@@ -34,7 +34,7 @@
                             <div class="item-quantity">
                                 <input class="quantity-spinner" type="text" value="1" name="quantity">
                             </div>
-                            <a href="{{ product_info.affiliateUrl }}">
+                            <a href="{{ product.affiliate_url }}">
                                 <div class="btn-box">
                                     <button type="button" id="purchase-button" class="theme-btn-two">PURCHASE</button>
                                 </div>

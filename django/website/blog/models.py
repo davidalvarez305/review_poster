@@ -35,7 +35,7 @@ class Product(models.Model):
     product_image = models.CharField(max_length=250)
 
     def __str__(self):
-        return self.title
+        return self.affiliate_url
 
     class Meta:
         db_table = "product"
@@ -51,7 +51,7 @@ class ReviewPost(models.Model):
     product_label = models.CharField(max_length=250)
     product_name = models.CharField(max_length=250)
     product_description = models.TextField()
-    product_affiliate_url = models.ForeignKey(Product, to_field='affiliate_url', on_delete=models.CASCADE)
+    product_affiliate_url = models.ForeignKey(Product, db_column='product_affiliate_url', to_field='affiliate_url', on_delete=models.CASCADE)
     faq_answer_1 = models.TextField()
     faq_answer_2 = models.TextField()
     faq_answer_3 = models.TextField()
