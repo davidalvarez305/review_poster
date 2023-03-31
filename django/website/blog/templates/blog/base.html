@@ -81,16 +81,15 @@
                                         <li class="dropdown"><a href="#">{{ group.name }}</a>
                                             <div class="megamenu">
                                                 <div class="row clearfix">
-                                                    {% for category in group.categories %}
+                                                    {% for category in group.category_set.all %}
                                                     <div class="col-lg-6 column">
+                                                        <h4>Subcategories</h4>
                                                         <ul>
                                                             <li>
-                                                                <h4>Subcategories</h4>
+                                                                <a href="/{{ group.name }}/{{ category.name }}">
+                                                                    {{ category.name }}
+                                                                 </a>
                                                             </li>
-                                                            {% for item in category %}
-                                                            <li><a href="/category-group/{{ item.name }}">{{ item.name }}</a>
-                                                            </li>
-                                                            {% endfor %}
                                                         </ul>
                                                     </div>
                                                     {% endfor %}

@@ -9,7 +9,7 @@ from .models import *
 from django.db.models import Prefetch
 
 class MyBaseView(View):
-    groups = Group.objects.prefetch_related('category_set').all()
+    groups = Group.prefetch_category_set()
     domain = str(os.environ.get('DOMAIN'))
     current_year = date.today().year
     google_analytics_id = str(os.environ.get('GOOGLE_ANALYTICS_ID'))

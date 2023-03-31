@@ -15,14 +15,24 @@ class Group(Categorization):
     class Meta:
         db_table = "group"
 
+    def prefetch_category_set():
+        groups = Group.objects.all().prefetch_related('category_set').all()
+        return groups
+
 class Category(Categorization):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = "category"
 
 class SubCategory(Categorization):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = "sub_category"
