@@ -7,9 +7,9 @@
             <div class="row clearfix">
                 <div class="col-lg-6 col-md-12 col-sm-12 image-column">
                     <figure class="product-image">
-                        <img src="{{ review_post.horizontalcardproductimageurl }}"
-                            alt="{{ review_post.horizontalcardproductimagealt }}" />
-                        <a href="{{ review_post.horizontalcardproductimageurl }}" class="lightbox-image"><i
+                        <img src="{{ review_post.product_image_url }}"
+                            alt="{{ review_post.product_image_alt }}" />
+                        <a href="{{ review_post.product_image_url }}" class="lightbox-image"><i
                                 class="flaticon-search-2"></i></a>
                     </figure>
                 </div>
@@ -27,7 +27,7 @@
                             <p>{{ review_post.product_description }}</p>
                             <ul class="list clearfix">
                                 <li><b><i>Ratings: </i></b>{{ product.product_ratings }}</li>
-                                <li>Category: <a href="/category/{{ category.slug }}">{{ category.name }}</a></li>
+                                <li>Sub Category: <a href="/{{ category_slug }}/{{ sub_category_slug }}/">{{ review_post.sub_category.name }}</a></li>
                             </ul>
                         </div>
                         <div class="othre-options clearfix">
@@ -55,11 +55,11 @@
                     <div class="tab active-tab" id="tab-1">
                         <div class="text">
                             <p>{{ review_post.content|safe }}</p>
-                            <h2>{{ review_post.faq_question_1 }}</h2>
+                            <h2>{{ review_post.faq_question_1|safe }}</h2>
                             <p>{{ review_post.faq_answer_1|safe }}</p>
-                            <h2>{{ review_post.faq_question_2 }}</h2>
+                            <h2>{{ review_post.faq_question_2|safe }}</h2>
                             <p>{{ review_post.faq_answer_2|safe }}</p>
-                            <h2>{{ review_post.faq_question_3 }}</h2>
+                            <h2>{{ review_post.faq_question_3|safe }}</h2>
                             <p>{{ review_post.faq_answer_3|safe }}</p>
                         </div>
                     </div>
@@ -79,15 +79,15 @@
                     <div class="shop-block-one">
                         <div class="inner-box">
                             <figure class="image-box">
-                                <img src="{{ r.horizontalcardproductimageurl }}"
-                                    alt="{{ r.horizontalcardproductimagealt }}" />
+                                <img src="{{ r.product_image_url }}"
+                                    alt="{{ r.product_image_alt }}" />
                                 <ul class="info-list clearfix">
-                                    <li><a href="/{{ sub_category_slug }}/{{ r.slug }}"><i class="flaticon-heart"></i></a></li>
-                                    <li><a href="/{{ sub_category_slug }}/{{ r.slug }}">Check Product</a></li>
+                                    <li><a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}"><i class="flaticon-heart"></i></a></li>
+                                    <li><a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}">Check Product</a></li>
                                 </ul>
                             </figure>
                             <div class="lower-content">
-                                <a href="/{{ sub_category_slug }}/{{ r.slug }}">{{ r.title }}</a>
+                                <a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}">{{ r.title }}</a>
                             </div>
                         </div>
                     </div>

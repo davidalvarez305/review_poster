@@ -104,7 +104,7 @@ class ReviewPostView(MyBaseView):
         slug = kwargs['slug']
         sub_category_slug = kwargs['sub_category']
 
-        review_post = get_object_or_404(ReviewPost, slug=slug)
+        review_post = get_object_or_404(ReviewPost.objects.select_related('sub_category'), slug=slug)
         product = get_object_or_404(Product, affiliate_url=review_post.product_affiliate_url)
 
         i = 0
@@ -123,6 +123,8 @@ class ReviewPostView(MyBaseView):
         context['page_title'] = review_post.title
         context['product'] = product
         context['product_rating_stars'] = product_rating_stars
+        context['sub_category_slug'] = kwargs['sub_category']
+        context['category_slug'] = kwargs['category']
         return render(request, self.template_name, context)
 
 def sitemap(request, *args, **kwargs):
