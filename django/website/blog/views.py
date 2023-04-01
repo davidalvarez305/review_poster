@@ -89,7 +89,8 @@ class SubCategoryView(MyBaseView):
         context = self.context
         sub_category_slug = kwargs['sub_category']
         sub_category = get_object_or_404(SubCategory, slug=sub_category_slug)
-        posts = ReviewPost.objects.filter(slug=sub_category_slug)
+        posts = ReviewPost.objects.filter(sub_category__slug=sub_category_slug)
+        context['category_slug'] = kwargs['category']
         context['posts'] = posts
         context['sub_category'] = sub_category
         context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
