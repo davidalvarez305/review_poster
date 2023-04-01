@@ -85,11 +85,13 @@
                                                         {% for category in group.category_set.all %}
                                                         <h4>Subcategories</h4>
                                                             <ul>
-                                                                <li>
-                                                                    <a href="/{{ group.name }}/{{ category.name }}">
-                                                                        {{ category.name }}
-                                                                    </a>
-                                                                </li>
+                                                                {% for category in group.category_set.all %}
+                                                                    <li>
+                                                                        <a href="/{{ category.name }}/">
+                                                                            {{ category.name }}
+                                                                        </a>
+                                                                    </li>
+                                                                {% endfor %}
                                                             </ul>
                                                         {% endfor %}
                                                     </div>

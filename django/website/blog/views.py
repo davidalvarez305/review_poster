@@ -75,9 +75,7 @@ class CategoryView(MyBaseView):
         context = self.context
         category_slug = kwargs['category']
         category = get_object_or_404(Category, slug=category_slug)
-        sub_categories = SubCategory.objects.filter(category__slug=category_slug)
-        example_posts = sub_categories.prefetch_related(Prefetch('review_post', queryset=ReviewPost.objects.first()))
-        context['example_posts'] = example_posts
+        sub_categories = SubCategory.objects.filter(category__slug=category_slug).prefetch_related('reviewpost_set')
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
@@ -90,8 +88,8 @@ class SubCategoryView(MyBaseView):
     def get(self, request, *args, **kwargs):
         context = self.context
         sub_category_slug = kwargs['sub_category']
-        sub_category = get_object_or_404(SubCategory, sub_category_slug=sub_category_slug)
-        posts = ReviewPost.objects.filter(sub_category__slug=sub_category.slug)
+        sub_category = get_object_or_404(SubCategory, slug=sub_category_slug)
+        posts = ReviewPost.objects.filter(slug=sub_category_slug)
         context['posts'] = posts
         context['sub_category'] = sub_category
         context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
