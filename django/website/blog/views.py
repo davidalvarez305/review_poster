@@ -120,7 +120,7 @@ class ReviewPostView(MyBaseView):
         context['related_review_posts'] = related_review_posts
         context['review_post'] = review_post
         context['meta_description'] = review_post.description
-        context['page_title'] = review_post.title
+        context['page_title'] = review_post.title + " - " + str(os.environ.get('SITE_NAME'))
         context['product'] = product
         context['product_rating_stars'] = product_rating_stars
         context['sub_category_slug'] = kwargs['sub_category']
