@@ -1,5 +1,13 @@
 package types
 
+type DictionaryAPIResponse struct {
+	Data []Word `json:"data"`
+}
+
+type ContentAPIResponse struct {
+	Data []Sentence `json:"data"`
+}
+
 type Synonym struct {
 	ID      int    `json:"id" form:"id"`
 	Synonym string `json:"synonym" form:"synonym"`

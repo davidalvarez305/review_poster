@@ -9,8 +9,8 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
-func PullDynamicContent() ([]types.Sentence, error) {
-	var content []types.Sentence
+func PullDynamicContent() (types.ContentAPIResponse, error) {
+	var content types.ContentAPIResponse
 	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "content?template=ReviewPost"
 
 	client := &http.Client{}
@@ -33,8 +33,8 @@ func PullDynamicContent() ([]types.Sentence, error) {
 	return content, nil
 }
 
-func PullContentDictionary() ([]types.Word, error) {
-	var content []types.Word
+func PullContentDictionary() (types.DictionaryAPIResponse, error) {
+	var content types.DictionaryAPIResponse
 	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "dictionary"
 
 	client := &http.Client{}

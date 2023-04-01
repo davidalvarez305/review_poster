@@ -63,7 +63,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 		})
 	}
 
-	content := utils.GenerateContentUtil(body.ProductName, data, sentences)
+	content := utils.GenerateContentUtil(body.ProductName, data.Data, sentences.Data)
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": content,

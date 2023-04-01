@@ -160,7 +160,7 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 			continue
 		}
 
-		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary, sentences)
+		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary.Data, sentences.Data)
 
 		if err != nil {
 			return err
