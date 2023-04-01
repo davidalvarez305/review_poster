@@ -33,8 +33,8 @@ func PullDynamicContent() ([]types.DynamicContent, error) {
 	return content, nil
 }
 
-func PullContentDictionary() ([]types.Dictionary, error) {
-	var content []types.Dictionary
+func PullContentDictionary() ([]types.Word, error) {
+	var content []types.Word
 	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "dictionary"
 
 	client := &http.Client{}

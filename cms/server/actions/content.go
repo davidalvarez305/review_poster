@@ -14,5 +14,5 @@ func (c *Content) GetSentences(template, userId string) error {
 }
 
 func (d *Dictionary) GetDictionary(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("Word.Synonyms").Find(&d).Error
+	return database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&d).Error
 }

@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dictionary, sentences []types.DynamicContent, subCategory models.SubCategory) (models.ReviewPost, error) {
+func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word, sentences []types.DynamicContent, subCategory models.SubCategory) (models.ReviewPost, error) {
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
@@ -84,7 +84,7 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Dict
 	return post, nil
 }
 
-func InsertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Dictionary, sentences []types.DynamicContent) error {
+func InsertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Word, sentences []types.DynamicContent) error {
 	var posts []models.ReviewPost
 
 	subCategory, err := GetOrCreateSubCategory(categoryName, subCategoryName, groupName)

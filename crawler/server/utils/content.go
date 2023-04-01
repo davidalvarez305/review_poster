@@ -23,7 +23,7 @@ func filterSentences(sentence []types.DynamicContent, paragraph string) []string
 	return s
 }
 
-func processSentence(productName, sentence string, dictionary []types.ProcessedDictionary) string {
+func processSentence(productName, sentence string, dictionary []types.Word) string {
 	var s string
 
 	r := regexp.MustCompile(`(\([#@]\w+:[A-Z]+)\)|(\([#@]\w+)\)`)
@@ -40,17 +40,16 @@ func processSentence(productName, sentence string, dictionary []types.ProcessedD
 	return s
 }
 
-func switchWords(matchedWord string, dictionary []types.ProcessedDictionary) string {
+func switchWords(matchedWord string, dictionary []types.Word) string {
 	for i := 0; i < len(dictionary); i++ {
 		if dictionary[i].Tag == matchedWord {
-			matchedWord = dictionary[i].Synonyms[rand.Intn(len(dictionary[i].Synonyms))]
+			matchedWord = dictionary[i].Synonyms[rand.Intn(len(dictionary[i].Synonyms))].Synonym
 		}
 	}
 	return matchedWord
-
 }
 
-func spinnerFunction(productName, matchedWord string, dictionary []types.ProcessedDictionary) string {
+func spinnerFunction(productName, matchedWord string, dictionary []types.Word) string {
 	makeTitle := cases.Title(language.English)
 	if matchedWord == "(@ProductName)" {
 		matchedWord = productName
@@ -75,7 +74,7 @@ func spinnerFunction(productName, matchedWord string, dictionary []types.Process
 	return matchedWord
 }
 
-func selectRandomSentences(productName string, sentences []types.ProcessedContent, dictionary []types.ProcessedDictionary) types.FinalizedContent {
+func selectRandomSentences(productName string, sentences []types.ProcessedContent, dictionary []types.Word) types.FinalizedContent {
 	var content types.FinalizedContent
 	for i := 0; i < len(sentences); i++ {
 		content.ReviewPostTitle = processSentence(productName, sentences[i].ReviewPostTitle[rand.Intn(len(sentences[i].ReviewPostTitle))], dictionary)
@@ -95,19 +94,9 @@ func selectRandomSentences(productName string, sentences []types.ProcessedConten
 	return content
 }
 
-func GenerateContentUtil(productName string, dictionary []types.Dictionary, sentences []types.DynamicContent) types.FinalizedContent {
-	var dict []types.ProcessedDictionary
+func GenerateContentUtil(productName string, dictionary []types.Word, sentences []types.DynamicContent) types.FinalizedContent {
 	var content []types.ProcessedContent
 	var finalContent types.FinalizedContent
-
-	for i := 0; i < len(dictionary); i++ {
-		var d = types.ProcessedDictionary{
-			Word:     dictionary[i].Name,
-			Tag:      dictionary[i].Tag,
-			Synonyms: strings.Split(dictionary[i].Synonyms, "///"),
-		}
-		dict = append(dict, d)
-	}
 
 	for i := 0; i < len(sentences); i++ {
 		a := filterSentences(sentences, "ReviewPostTitle")
@@ -140,6 +129,6 @@ func GenerateContentUtil(productName string, dictionary []types.Dictionary, sent
 		}
 		content = append(content, final)
 	}
-	finalContent = selectRandomSentences(productName, content, dict)
+	finalContent = selectRandomSentences(productName, content, dictionary)
 	return finalContent
 }

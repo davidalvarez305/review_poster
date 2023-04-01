@@ -6,16 +6,19 @@ type DynamicContent struct {
 	Paragraph string `json:"paragraph"`
 }
 
-type Dictionary struct {
-	Name     string `json:"name"`
-	Tag      string `json:"tag"`
-	Synonyms string `json:"synonyms"`
+type Synonym struct {
+	ID      int    `json:"id" form:"id"`
+	Synonym string `json:"synonym" form:"synonym"`
+	WordID  int    `json:"word_id" form:"word_id"`
+	Word    *Word  `json:"word" form:"word"`
 }
 
-type ProcessedDictionary struct {
-	Word     string   `json:"word"`
-	Tag      string   `json:"tag"`
-	Synonyms []string `json:"synonyms"`
+type Word struct {
+	ID       int        `json:"id" form:"id"`
+	Name     string     `json:"name" form:"name"`
+	Tag      string     `json:"tag" form:"tag"`
+	UserID   int        `json:"user_id" form:"user_id"`
+	Synonyms []*Synonym `json:"synonyms" form:"synonyms"`
 }
 
 type ProcessedContent struct {
