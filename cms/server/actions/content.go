@@ -10,7 +10,7 @@ type Content []*models.Sentence
 type Dictionary []*models.Word
 
 func (c *Content) GetSentences(template, userId string) error {
-	return database.DB.Where("user_id = ? AND name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&c).Error
+	return database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&c).Error
 }
 
 func (d *Dictionary) GetDictionary(userId string) error {

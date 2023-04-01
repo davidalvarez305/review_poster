@@ -9,9 +9,9 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
-func PullDynamicContent() ([]types.DynamicContent, error) {
-	var content []types.DynamicContent
-	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "content/?template=ReviewPost"
+func PullDynamicContent() ([]types.Sentence, error) {
+	var content []types.Sentence
+	contentApi := os.Getenv("DYNAMIC_CONTENT_API") + "content?template=ReviewPost"
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", contentApi, nil)

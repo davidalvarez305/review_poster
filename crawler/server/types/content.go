@@ -1,11 +1,5 @@
 package types
 
-type DynamicContent struct {
-	Sentences string `json:"sentences"`
-	Template  string `json:"template"`
-	Paragraph string `json:"paragraph"`
-}
-
 type Synonym struct {
 	ID      int    `json:"id" form:"id"`
 	Synonym string `json:"synonym" form:"synonym"`
@@ -19,6 +13,30 @@ type Word struct {
 	Tag      string     `json:"tag" form:"tag"`
 	UserID   int        `json:"user_id" form:"user_id"`
 	Synonyms []*Synonym `json:"synonyms" form:"synonyms"`
+}
+
+type Sentence struct {
+	ID          int        `json:"id" form:"id"`
+	Sentence    string     `gorm:"unique;not null" json:"sentence" form:"sentence"`
+	ParagraphID int        `json:"paragraph_id" form:"paragraph_id"`
+	Paragraph   *Paragraph `json:"paragraph" form:"paragraph"`
+	TemplateID  int        `json:"template_id" form:"template_id"`
+	Template    *Template  `json:"template" form:"template"`
+}
+
+type Paragraph struct {
+	ID         int       `json:"id" form:"id"`
+	Name       string    `gorm:"unique;not null" json:"name" form:"name"`
+	Order      int       `gorm:"null:true;default:null" json:"order" form:"order"`
+	TemplateID int       `json:"template_id" form:"template_id"`
+	Template   *Template `json:"template" form:"template"`
+	UserID     int       `json:"user_id" form:"user_id"`
+}
+
+type Template struct {
+	ID     int    `json:"id" form:"id"`
+	Name   string `gorm:"unique;not null" json:"name" form:"name"`
+	UserID int    `json:"user_id" form:"user_id"`
 }
 
 type ProcessedContent struct {

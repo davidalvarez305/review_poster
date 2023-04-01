@@ -10,14 +10,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-func filterSentences(sentence []types.DynamicContent, paragraph string) []string {
+func filterSentences(sentence []types.Sentence, paragraph string) []string {
 	var s []string
 	for i := 0; i < len(sentence); i++ {
-		if sentence[i].Paragraph == paragraph {
+		if sentence[i].Paragraph.Name == paragraph {
 
-			splitSentences := strings.Split(sentence[i].Sentences, "///")
-
-			s = splitSentences
+			s = append(s, sentence[i].Sentence)
 		}
 	}
 	return s
@@ -94,7 +92,7 @@ func selectRandomSentences(productName string, sentences []types.ProcessedConten
 	return content
 }
 
-func GenerateContentUtil(productName string, dictionary []types.Word, sentences []types.DynamicContent) types.FinalizedContent {
+func GenerateContentUtil(productName string, dictionary []types.Word, sentences []types.Sentence) types.FinalizedContent {
 	var content []types.ProcessedContent
 	var finalContent types.FinalizedContent
 
