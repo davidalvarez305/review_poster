@@ -81,8 +81,6 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 		ProductImageAlt:     strings.ToLower(input.Name),
 	}
 
-	fmt.Printf("%+v\n", post)
-
 	return post, nil
 }
 
@@ -95,7 +93,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 		return err
 	}
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(products); i++ {
 		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory)
 
 		if err != nil {

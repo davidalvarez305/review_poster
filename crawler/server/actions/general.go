@@ -41,7 +41,7 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 
 	s.Name = subCategoryName
 	s.Slug = slug.Make(subCategoryName)
-	s.Category = category
+	s.CategoryID = category.ID
 
 	err = database.DB.Create(&s).Preload("Category.Group").First(&s).Error
 
@@ -59,13 +59,13 @@ func GetOrCreateCategory(categoryName string, group *Group) (*models.Category, e
 	c.Slug = slug.Make(categoryName)
 	c.GroupID = group.ID
 
-	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&c).Error
+	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&c).Error
 
 	if err != nil {
 		return &c, err
 	}
 
-	c.Group = group.Group
+	err = database.DB.Where("slug = ?", c.Slug).Preload("Group").First(&c).Error
 
-	return &c, nil
+	return &c, err
 }

@@ -82,16 +82,14 @@
                                             <div class="megamenu">
                                                 <div class="row clearfix">
                                                     <div class="col-lg-6 column">
-                                                        {% for category in group.category_set.all %}
                                                         <h4>Subcategories</h4>
+                                                        {% for category in group.category_set.all %}
                                                             <ul>
-                                                                {% for category in group.category_set.all %}
-                                                                    <li>
-                                                                        <a href="/{{ category.name }}/">
-                                                                            {{ category.name }}
-                                                                        </a>
-                                                                    </li>
-                                                                {% endfor %}
+                                                                <li>
+                                                                    <a href="/{{ category.name }}/">
+                                                                        {{ category.name }}
+                                                                    </a>
+                                                                </li>
                                                             </ul>
                                                         {% endfor %}
                                                     </div>
