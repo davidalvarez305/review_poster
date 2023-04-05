@@ -101,7 +101,7 @@ func CrawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
 
 func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) {
 	var results AmazonSearchResultsPages
-	str := strings.Join(strings.Split(keyword, " "), "+")
+	str := url.QueryEscape(keyword)
 
 	wg := sync.WaitGroup{}
 

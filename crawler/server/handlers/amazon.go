@@ -2,21 +2,19 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/crawler/server/actions"
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CrawlAmazon(c *fiber.Ctx) error {
-	body := &types.Keyword{}
-	err := c.BodyParser(body)
+	keyword := c.Query("keyword")
 
-	if err != nil {
+	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse request body.",
+			"data": "No keyword found in query string.",
 		})
 	}
 
-	products, err := actions.ScrapeSearchResultsPage(body.Keyword)
+	products, err := actions.ScrapeSearchResultsPage(keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -30,17 +28,16 @@ func CrawlAmazon(c *fiber.Ctx) error {
 }
 
 func SearchPAAPI5(c *fiber.Ctx) error {
-	body := &types.Keyword{}
-	err := c.BodyParser(body)
+	keyword := c.Query("keyword")
 	products := &actions.PAAAPI5Response{}
 
-	if err != nil {
+	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse request body.",
+			"data": "No keyword found in query string.",
 		})
 	}
 
-	err = products.SearchPaapi5Items(body.Keyword)
+	err := products.SearchPaapi5Items(keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

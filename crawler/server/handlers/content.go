@@ -35,15 +35,11 @@ func GetDictionary(c *fiber.Ctx) error {
 }
 
 func GetDynamicContent(c *fiber.Ctx) error {
-	type reqBody struct {
-		ProductName string `json:"productName"`
-	}
-	var body reqBody
-	err := c.BodyParser(&body)
+	productName := c.Query("productName")
 
-	if err != nil {
+	if len(productName) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "No product name in query string.",
 		})
 	}
 
@@ -63,7 +59,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 		})
 	}
 
-	content := utils.GenerateContentUtil(body.ProductName, data.Data, sentences.Data)
+	content := utils.GenerateContentUtil(productName, data.Data, sentences.Data)
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": content,
