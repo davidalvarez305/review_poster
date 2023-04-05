@@ -6,7 +6,6 @@ import (
 )
 
 func Router(app *fiber.App) {
-	// middleware.AuthMiddleware, middleware.ResourceAccessRestriction
-	api := app.Group("api")
+	api := app.Group("api", middleware.AuthMiddleware, middleware.ResourceAccessRestriction)
 	controllers.User(api)
 }
