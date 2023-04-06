@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	"os"
 	"strings"
 
 	"github.com/davidalvarez305/review_poster/cms/server/actions"
@@ -26,8 +26,8 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 	var found []string
 	path := c.OriginalURL()
 
-	for route, _ := range protectedRoutes {
-		if strings.Contains(url, route) {
+	for _, route := range protectedRoutes {
+		if strings.Contains(path, route) {
 			found = append(found, route)
 		}
 	}
