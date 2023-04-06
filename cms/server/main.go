@@ -17,10 +17,10 @@ import (
 func main() {
 	gob.Register(models.User{})
 
-	err := godotenv.Load()
+	err := godotenv.Load("../../.env")
 
 	if err != nil {
-		log.Fatal("Error loading env file.")
+		log.Fatalf("Error loading env file.: %+v\n", err)
 	}
 
 	CLIENT_URL := os.Getenv("CLIENT_URL")

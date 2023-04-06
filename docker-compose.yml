@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  cms_server:
+    build: ./cms/server
+    restart: always
+    env_file:
+      - .env
+    image: iamdavidmiguelalvarez/review_poster/cms
+    ports:
+    - "4008:4008"
+  crawler_server:
+    build: ./crawler/server
+    restart: always
+    env_file:
+      - .env
+    image: iamdavidmiguelalvarez/review_poster:crawler
+    ports:
+    - "4009:4009"
+  django:
+    build: ./django
+    restart: always
+    image: iamdavidmiguelalvarez/review_poster:django
+    env_file:
+      - .env
+    volumes:
+    - static_data:/vol/django
+    ports:
+      - "8000:8000"
+  postgres:
+    build: ./postgres
+    restart: always
+    env_file:
+      - .env
+    image: iamdavidmiguelalvarez/review_poster:postgres
+    volumes:
+    - static_data:/var/lib/postgresql/data/pgdata/
+    ports:
+      - "5432:5432"
+
+volumes:
+  static_data:
