@@ -27,5 +27,5 @@ func main() {
 	sessions.Init()
 	routes.Router(app)
 
-	app.Listen(":" + os.Getenv("PORT"))
+	app.Listen(":" + os.Getenv("CRAWLER_PORT"))
 }

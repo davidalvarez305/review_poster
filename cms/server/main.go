@@ -24,7 +24,7 @@ func main() {
 	}
 
 	CLIENT_URL := os.Getenv("CLIENT_URL")
-	PORT := os.Getenv("PORT")
+	PORT := os.Getenv("CMS_PORT")
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
