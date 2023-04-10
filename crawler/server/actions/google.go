@@ -160,13 +160,24 @@ func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
 	var data []string
 
 	for i := 0; i < len(results.Results); i++ {
+
+		if results.Results[i].KeywordIdeaMetrics.CompetitionIndex == "" {
+			continue
+		}
+
 		compIndex, err := strconv.Atoi(results.Results[i].KeywordIdeaMetrics.CompetitionIndex)
 		if err != nil {
+			fmt.Printf("Text: %+v\n", results.Results[i].Text)
+			fmt.Printf("Results: %+v\n", results.Results[i])
+			fmt.Printf("CompetitionIndex: %+v\n", results.Results[i].KeywordIdeaMetrics.CompetitionIndex)
 			return data, err
 		}
 
 		searchVol, err := strconv.Atoi(results.Results[i].KeywordIdeaMetrics.AvgMonthlySearches)
 		if err != nil {
+			fmt.Printf("Text: %+v\n", results.Results[i].Text)
+			fmt.Printf("Results: %+v\n", results.Results[i])
+			fmt.Printf("AvgMonthlySearches: %+v\n", results.Results[i].KeywordIdeaMetrics.AvgMonthlySearches)
 			return data, err
 		}
 
