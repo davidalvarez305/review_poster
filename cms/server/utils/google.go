@@ -145,7 +145,7 @@ func RefreshAuthToken() (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	refreshToken := os.Getenv("REFRESH_TOKEN")
+	refreshToken := os.Getenv("GOOGLE_API_REFRESH_TOKEN")
 	client := &http.Client{}
 
 	url := config.Web.TokenURI

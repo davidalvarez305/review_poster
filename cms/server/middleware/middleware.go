@@ -12,7 +12,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	headers := c.GetReqHeaders()
 	auth := headers["Authorization"]
 
-	if auth != "Bearer "+os.Getenv("HEADER_STRING") {
+	if auth != "Bearer "+os.Getenv("AUTH_HEADER_STRING") {
 		return c.Status(401).JSON(fiber.Map{
 			"data": "Unauthorized request.",
 		})

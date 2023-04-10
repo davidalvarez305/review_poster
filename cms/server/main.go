@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("Error loading env file.: %+v\n", err)
 	}
 
-	CLIENT_URL := os.Getenv("CLIENT_URL")
+	CLIENT_URL := os.Getenv("CONTENT_CLIENT_URL")
 	PORT := os.Getenv("CMS_PORT")
 
 	app := fiber.New()

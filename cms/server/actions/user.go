@@ -235,7 +235,7 @@ func (user *User) SendGmail(uuidCode string) error {
 	from := os.Getenv("GMAIL_EMAIL")
 	to := user.Email
 	title := "Change Password Request"
-	message := fmt.Sprintf("Click to change your password: %s", os.Getenv("CLIENT_URL")+"/token/"+uuidCode)
+	message := fmt.Sprintf("Click to change your password: %s", os.Getenv("CONTENT_CLIENT_URL")+"/token/"+uuidCode)
 
 	msgStr := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", from, to, title, message)
 
