@@ -151,7 +151,7 @@ def sitemap(request, *args, **kwargs):
 
     context = {
         'posts': posts,
-        'domain': str(os.environ.get('DOMAIN')),
+        'domain': str(os.environ.get('DJANGO_DOMAIN')),
         "current_year": date.today().year
     }
     return render(request, 'blog/sitemap.xml.gz', context, content_type="application/xhtml+xml")
@@ -189,7 +189,7 @@ def sitemap_index(request, *args, **kwargs):
 
     context = {
         'sitemaps': sitemaps,
-        'domain': str(os.environ.get('DOMAIN')),
+        'domain': str(os.environ.get('DJANGO_DOMAIN')),
         "current_year": date.today().year
     }
     return render(request, 'blog/sitemap_index.xml', context, content_type="application/xhtml+xml")

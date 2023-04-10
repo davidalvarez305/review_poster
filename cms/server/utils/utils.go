@@ -51,7 +51,7 @@ func GenerateAPIToken(str string) string {
 func ResolveServerPath() (string, error) {
 	var p string
 
-	if os.Getenv("APP_ENV") == "production" {
+	if os.Getenv("PRODUCTION") == "1" {
 		return ".", nil
 	}
 
