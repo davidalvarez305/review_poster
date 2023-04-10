@@ -38,6 +38,10 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
+	if os.Getenv("PRODUCTION") == "0" {
+		return c.Next()
+	}
+
 	sessionUserId, err := actions.GetUserIdFromSession(c)
 
 	if err != nil {

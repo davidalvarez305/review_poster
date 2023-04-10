@@ -173,7 +173,7 @@ func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
 		keywordLength := len(strings.Split(results.Results[i].Text, " "))
 
 		conditionOne := compIndex == 100
-		conditionTwo := searchVol > 10000
+		conditionTwo := searchVol > 4000
 		conditionThree := keywordLength >= 2 && keywordLength <= 4
 
 		if conditionOne && conditionTwo && conditionThree {
@@ -196,7 +196,7 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 	}
 
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
-	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v11/customers/%s:generateKeywordIdeas", googleCustomerID)
+	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v12/customers/%s:generateKeywordIdeas", googleCustomerID)
 	developerToken := os.Getenv("GOOGLE_DEVELOPER_TOKEN")
 	authorizationHeader := fmt.Sprintf("Bearer %s", authToken)
 

@@ -21,6 +21,7 @@ func PullDynamicContent() (types.ContentAPIResponse, error) {
 		return content, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("AUTH_HEADER_STRING"))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -45,6 +46,7 @@ func PullContentDictionary() (types.DictionaryAPIResponse, error) {
 		return content, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("AUTH_HEADER_STRING"))
 
 	resp, err := client.Do(req)
 	if err != nil {

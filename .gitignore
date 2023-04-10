@@ -1,1 +1,4 @@
-.env
+*.env
+*.json
+crawler_build
+cms_build

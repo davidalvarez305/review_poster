@@ -214,4 +214,5 @@ class CreatePost(MyBaseView):
         context['crawler_api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
         context['select_options'] = select_options
         context['page_title'] = "Create Review Posts - " + context['site_name']
+        context['auth_header_string'] = os.environ.get('AUTH_HEADER_STRING')
         return render(request, self.template_name, context)

@@ -22,9 +22,12 @@
 			</div>
 		</div>
 	</section>
+
+	{{ auth_header_string|json_script:"auth_header_string" }}
 	
 	<script>
         var createReviewPost = document.getElementById("create-review-post");
+        var AUTH_HEADER_STRING = JSON.parse(document.getElementById("auth_header_string").textContent);
 
 		createReviewPost.addEventListener("submit", function(event) {
 			event.preventDefault();
@@ -36,7 +39,8 @@
 				method: form.method,
 				body: JSON.stringify(data),
 				headers: {
-					"Content-Type": "application/json"
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + AUTH_HEADER_STRING
 				}
 			}).then(function(response) {
 				console.log(response);
