@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -17,7 +16,6 @@ func main() {
 	err := godotenv.Load("../../.env")
 
 	if err != nil {
-		fmt.Printf("ERROR: %+v\n", err)
 		log.Fatalf("Error loading env file.: %+v\n", err)
 	}
 

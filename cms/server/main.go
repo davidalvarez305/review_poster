@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/gob"
-	"fmt"
 	"log"
 	"os"
 
@@ -18,10 +17,9 @@ import (
 func main() {
 	gob.Register(models.User{})
 
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load()
 
 	if err != nil {
-		fmt.Printf("ERROR: %+v\n", err)
 		log.Fatalf("Error loading env file.: %+v\n", err)
 	}
 
