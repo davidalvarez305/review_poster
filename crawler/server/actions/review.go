@@ -50,7 +50,8 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 		data, err := ScrapeSearchResultsPage(seedKeywords[i])
 
 		if err != nil {
-			return err
+			fmt.Printf("ERROR SCRAPING: %+v\n", err)
+			continue
 		}
 
 		if len(*data) == 0 {
@@ -61,7 +62,8 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary.Data, sentences.Data)
 
 		if err != nil {
-			return err
+			fmt.Printf("ERROR INSERTING: %+v\n", err)
+			continue
 		}
 
 		results = append(results, *data...)
@@ -83,6 +85,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 	subCategory, err := GetOrCreateSubCategory(categoryName, subCategoryName, groupName)
 
 	if err != nil {
+		fmt.Printf("ERROR CREATING SUB_CATEGORY: %+v\n", err)
 		return err
 	}
 
@@ -90,6 +93,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory)
 
 		if err != nil {
+			fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
 			continue
 		}
 

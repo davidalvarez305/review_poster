@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"fmt"
+
 	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 
@@ -24,6 +26,8 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 	// If there is no error, it means that the subcategory was found, so we can return early.
 	if err == nil {
 		return &s, nil
+	} else {
+		fmt.Printf("CREATING NEW SUB_CATEGORY...%+v\n", err)
 	}
 
 	group := Group{}
@@ -43,13 +47,15 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 	s.Slug = slug.Make(subCategoryName)
 	s.CategoryID = category.ID
 
-	err = database.DB.Create(&s).Preload("Category.Group").First(&s).Error
+	err = database.DB.Save(&s).Error
 
 	if err != nil {
 		return &s, err
 	}
 
-	return &s, nil
+	err = database.DB.Preload("Category.Group").First(&s).Error
+
+	return &s, err
 }
 
 func GetOrCreateCategory(categoryName string, group *Group) (*models.Category, error) {
