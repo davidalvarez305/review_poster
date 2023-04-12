@@ -138,9 +138,15 @@ def sitemap(request, *args, **kwargs):
 
     cursor = connection.cursor()
     cursor.execute(
-        f"SELECT CONCAT('0.8'), slug FROM review_post LIMIT 5000 OFFSET {offset};")
+        f'''SELECT CONCAT('0.8'), review_post.slug AS slug, sc.slug AS sub_category_slug, c.slug AS category_slug
+            FROM review_post
+            LEFT JOIN sub_category AS sc
+            ON review_post.sub_category_id = sc.id
+            LEFT JOIN category AS c
+            ON sc.category_id = c.id
+            LIMIT 5000 OFFSET {offset};''')
     rows = cursor.fetchall()
-    columns = ["priority", "slug"]
+    columns = ["priority", "slug", "sub_category_slug", "category_slug"]
     posts = [
         dict(zip(columns, row))
         for row in rows
@@ -161,12 +167,10 @@ def sitemap_index(request, *args, **kwargs):
 
     cursor = connection.cursor()
     cursor.execute(
-        '''SELECT CONCAT('0.8'), review_post.slug AS slug, sc.slug AS sub_category_slug FROM review_post
-            LEFT JOIN sub_category AS sc
-            ON review_post.sub_category_id = sc.id;
+        '''SELECT CONCAT('0.8'), review_post.slug AS slug FROM review_post;
         ''')
     rows = cursor.fetchall()
-    columns = ["priority", "slug", "sub_category_slug"]
+    columns = ["priority", "slug"]
     posts = [
         dict(zip(columns, row))
         for row in rows
