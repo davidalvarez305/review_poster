@@ -2,6 +2,7 @@ package actions
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
@@ -43,7 +44,7 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 		return &s, err
 	}
 
-	s.Name = subCategoryName
+	s.Name = strings.ToLower(subCategoryName)
 	s.Slug = slug.Make(subCategoryName)
 	s.CategoryID = category.ID
 
@@ -61,7 +62,7 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 func GetOrCreateCategory(categoryName string, group *Group) (*models.Category, error) {
 	var c models.Category
 
-	c.Name = categoryName
+	c.Name = strings.ToLower(categoryName)
 	c.Slug = slug.Make(categoryName)
 	c.GroupID = group.ID
 
