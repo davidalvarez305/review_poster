@@ -3,6 +3,7 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -145,8 +146,9 @@ func RefreshAuthToken() (string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf(resp.Status)
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return "", errors.New("request failed")
 	}
 
 	var data TokenResponse
@@ -232,6 +234,12 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return errors.New("request failed")
+	}
+
 	json.NewDecoder(resp.Body).Decode(&results)
 
 	return nil

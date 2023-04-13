@@ -6,8 +6,10 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -126,6 +128,7 @@ func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) 
 }
 
 func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
+	var results PAAAPI5Response
 
 	resources := []string{
 		"Images.Primary.Medium",
@@ -205,7 +208,19 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	}
 	defer resp.Body.Close()
 
-	json.NewDecoder(resp.Body).Decode(&products)
+	json.NewDecoder(resp.Body).Decode(&results)
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return errors.New("request failed")
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(bodyBytes))
+
 	return nil
 }
 

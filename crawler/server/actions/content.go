@@ -2,6 +2,7 @@ package actions
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,6 +31,11 @@ func PullDynamicContent() (types.ContentAPIResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return content, errors.New("request failed")
+	}
+
 	json.NewDecoder(resp.Body).Decode(&content)
 	return content, nil
 }
@@ -54,6 +60,11 @@ func PullContentDictionary() (types.DictionaryAPIResponse, error) {
 		return content, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return content, errors.New("request failed")
+	}
 
 	json.NewDecoder(resp.Body).Decode(&content)
 	return content, nil
