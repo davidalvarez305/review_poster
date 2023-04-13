@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -128,8 +127,6 @@ func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) 
 }
 
 func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
-	var results PAAAPI5Response
-
 	resources := []string{
 		"Images.Primary.Medium",
 		"ItemInfo.Title",
@@ -171,7 +168,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	credentialScope := amazonDate + "/" + region + "/" + service + "/" + "aws4_request"
 	signedHeaders := "content-encoding;content-type;host;x-amz-date;x-amz-target"
 
-	kSecret := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	kSecret := os.Getenv("AWS_PAAPI_SECRET_KEY")
 	kDate := utils.HMACSHA256([]byte("AWS4"+kSecret), []byte(amazonDate))
 	kRegion := utils.HMACSHA256(kDate, []byte(region))
 	kService := utils.HMACSHA256(kRegion, []byte(service))
@@ -185,7 +182,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 		return err
 	}
 
-	authorizationHeader := "AWS4-HMAC-SHA256" + " Credential=" + os.Getenv("AWS_ACCESS_KEY_ID") + "/" + credentialScope + " SignedHeaders=" + signedHeaders + " Signature=" + signature
+	authorizationHeader := "AWS4-HMAC-SHA256" + " Credential=" + os.Getenv("AWS_PAAPI_ACCESS_KEY") + "/" + credentialScope + " SignedHeaders=" + signedHeaders + " Signature=" + signature
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 
@@ -208,18 +205,12 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	}
 	defer resp.Body.Close()
 
-	json.NewDecoder(resp.Body).Decode(&results)
+	json.NewDecoder(resp.Body).Decode(&products)
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
 		return errors.New("request failed")
 	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(bodyBytes))
 
 	return nil
 }
