@@ -34,7 +34,7 @@ services:
       - .env
     image: iamdavidmiguelalvarez/review_poster:postgres
     volumes:
-    - static_data:/var/lib/postgresql/data/pgdata/
+    - static_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
