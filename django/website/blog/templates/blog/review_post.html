@@ -99,11 +99,10 @@
 </section>
 
 <script>
-    // Targeted Variables for Conversion Tracking
     var productPrice = document.getElementById('product-pricing').textContent.split("$")[1];
     var purchaseButton = document.getElementById('purchase-button');
 
-    purchaseButton.addEventListener('click', () => {
+    purchaseButton.addEventListener('click', function() {
         gtag('event', 'purchase_click', {
             currency: 'USD',
             value: productPrice
