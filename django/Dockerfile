@@ -13,7 +13,7 @@ RUN apk update \
 
 # Copy Project
 COPY . .
-COPY ./django.ini /etc/django.ini
+COPY django.ini /etc/django.ini
 
 # Install Dependencies
 RUN pip install --upgrade pip
