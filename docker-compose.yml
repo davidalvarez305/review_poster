@@ -4,6 +4,8 @@ services:
   cms:
     build: ./cms/server
     restart: always
+    depends_on:
+      - postgres
     env_file:
       - .env
     image: iamdavidmiguelalvarez/review_poster/cms
@@ -12,6 +14,8 @@ services:
   crawler:
     build: ./crawler/server
     restart: always
+    depends_on:
+      - postgres
     env_file:
       - .env
     image: iamdavidmiguelalvarez/review_poster:crawler
@@ -20,6 +24,8 @@ services:
   django:
     build: ./django
     restart: always
+    depends_on:
+      - postgres
     image: iamdavidmiguelalvarez/review_poster:django
     env_file:
       - .env
