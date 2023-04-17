@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.17-alpine
+FROM golang:1.19-alpine
 
 WORKDIR /app
 
@@ -10,8 +10,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /soflo_go
+ENV APP_ENV=production
 
-EXPOSE 8080
+RUN go build -o /exec
 
-CMD [ "/soflo_go" ]
+CMD [ "/exec" ]
