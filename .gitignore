@@ -1,6 +1,7 @@
 *.env
 *.json
 *.conf
-*.sh
+deploy.sh
 crawler_build
 cms_build
+uwsgi_params
