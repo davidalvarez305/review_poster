@@ -5,7 +5,7 @@ ENV PATH="/scripts:${PATH}"
 ENV PRODUCTION=1
 
 # Set Work Dir
-WORKDIR /django/django_client/
+WORKDIR /django/website/
 
 # Install Psycopg2 Dependencies
 RUN apk update \
@@ -13,7 +13,7 @@ RUN apk update \
 
 # Copy Project
 COPY . .
-COPY ./django_client/django.ini /etc/django.ini
+COPY ./django.ini /etc/django.ini
 
 # Install Dependencies
 RUN pip install --upgrade pip
