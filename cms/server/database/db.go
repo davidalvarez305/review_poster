@@ -32,7 +32,7 @@ func Connect() {
 	conn := connection{
 		Host:     os.Getenv("POSTGRES_HOST"),
 		Port:     os.Getenv("POSTGRES_PORT"),
-		User:     os.Getenv("POSTGRES_USER"),
+		User:     os.Getenv("PGUSER"),
 		Password: os.Getenv("POSTGRES_PASSWORD"),
 		DB:       os.Getenv("POSTGRES_DB"),
 	}
