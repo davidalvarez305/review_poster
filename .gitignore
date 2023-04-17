@@ -1,5 +1,6 @@
 *.env
 *.json
 *.conf
+*.sh
 crawler_build
 cms_build
