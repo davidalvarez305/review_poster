@@ -36,20 +36,20 @@ class MyBaseView(View):
 class HomeView(MyBaseView):
     template_name = 'blog/home.html'
 
-    def get_context_data(self, **kwargs):
+    def get(self, request, *args, **kwargs):
         cursor = connection.cursor()
-        context = super().get_context_data(**kwargs)
+        context = self.context
 
         sql = '''
-            SELECT JSON_AGG(TO_JSON(r)) FROM (
-                SELECT rp.title, rp.slug, rp.horizontalcardproductimageurl, rp."categoryId", sub.slug AS sub_category_slug, sub.name AS sub_category, cg.name AS category, cg.id AS category_id,
+            SELECT JSON_AGG(TO_JSON(r)) AS example_posts FROM (
+                SELECT rp.title, rp.slug, rp.sub_category_id, sub.slug AS sub_category_slug, cg.slug AS category_slug, cg.id AS category_id,
                 ROW_NUMBER() OVER (PARTITION BY cg.id ORDER BY cg.id) row_number
                 FROM review_post AS rp
                 LEFT JOIN sub_category AS sub
-                ON rp."categoryId" = sub.id
+                ON rp.sub_category_id = sub.id
                 LEFT JOIN category AS cg
                 ON cg.id = sub.category_id
-                GROUP BY sub.id, rp.title, sub.name, sub.slug, cg.name, rp.slug, rp.horizontalcardproductimageurl, cg.id, rp."categoryId"
+                GROUP BY sub.id, rp.title, sub.slug, cg.slug, rp.slug, cg.id, rp.sub_category_id
                 ORDER BY cg.id
             ) AS r
             WHERE r.row_number < 10
@@ -63,9 +63,8 @@ class HomeView(MyBaseView):
             dict(zip(columns, row))
             for row in rows
         ]
-
-        context['example_posts'] = example_posts
-        return context
+        context['example_posts'] = example_posts[0]['example_posts']
+        return render(request, self.template_name, context=context)
 
 
 class CategoryView(MyBaseView):

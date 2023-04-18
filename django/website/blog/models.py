@@ -17,6 +17,7 @@ class Group(Categorization):
 
     def prefetch_category_set():
         groups = Group.objects.all().prefetch_related('category_set').all()
+
         return groups
 
 class Category(Categorization):
