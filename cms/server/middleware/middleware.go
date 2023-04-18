@@ -40,7 +40,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	if os.Getenv("PRODUCTION") == "0" || len(secretAgent) > 0 {
+	if os.Getenv("PRODUCTION") == "0" || secretAgent == os.Getenv("X_SECRET_AGENT") {
 		return c.Next()
 	}
 
