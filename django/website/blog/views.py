@@ -30,7 +30,6 @@ class MyBaseView(View):
     def get(self, request, *args, **kwargs):
         ctx = self.context
         ctx['path'] = request.path
-        print('ctx: ', ctx)
         return render(request, self.template_name, context=ctx)
 
 
