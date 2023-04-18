@@ -144,11 +144,15 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 	// I'm creating this separately because there's a chance that the product already exists, in which case, it will be updated
 
 	product := models.Product{
-		AffiliateUrl:   input.Link,
-		ProductPrice:   input.Price,
-		ProductReviews: input.Reviews,
-		ProductRatings: input.Rating,
-		ProductImage:   replacedImage,
+		AffiliateUrl:       input.Link,
+		ProductPrice:       input.Price,
+		ProductReviews:     input.Reviews,
+		ProductRatings:     input.Rating,
+		ProductImage:       replacedImage,
+		ProductLabel:       data.ReviewPostProductLabel,
+		ProductName:        input.Name,
+		ProductDescription: data.ReviewPostProductDescription,
+		ProductImageAlt:    strings.ToLower(input.Name),
 	}
 
 	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).FirstOrCreate(&product).Error
@@ -166,17 +170,12 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 		Headline:            data.ReviewPostHeadline,
 		Intro:               data.ReviewPostIntro,
 		Description:         data.ReviewPostDescription,
-		ProductLabel:        data.ReviewPostProductLabel,
-		ProductName:         input.Name,
-		ProductDescription:  data.ReviewPostProductDescription,
 		Faq_Answer_1:        FAQ_ONE.Choices[0].Text,
 		Faq_Answer_2:        FAQ_TWO.Choices[0].Text,
 		Faq_Answer_3:        FAQ_THREE.Choices[0].Text,
 		Faq_Question_1:      data.ReviewPostFaq_Question_1,
 		Faq_Question_2:      data.ReviewPostFaq_Question_2,
 		Faq_Question_3:      data.ReviewPostFaq_Question_3,
-		ProductImageUrl:     replacedImage,
-		ProductImageAlt:     strings.ToLower(input.Name),
 	}
 
 	return post, nil

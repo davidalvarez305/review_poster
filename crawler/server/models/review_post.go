@@ -10,9 +10,6 @@ type ReviewPost struct {
 	Headline            string       `json:"headline" form:"headline"`
 	Intro               string       `json:"intro" form:"intro"`
 	Description         string       `json:"description" form:"description"`
-	ProductLabel        string       `gorm:"column:product_label" json:"product_label" form:"product_label"`
-	ProductName         string       `gorm:"column:product_name" json:"product_name" form:"product_name"`
-	ProductDescription  string       `gorm:"column:product_description" json:"product_description" form:"product_description"`
 	ProductAffiliateUrl string       `gorm:"column:product_affiliate_url" json:"product_affiliate_url" form:"product_affiliate_url"`
 	Product             *Product     `gorm:"not null;foreignKey:ProductAffiliateUrl;constraint:OnDelete:CASCADE,OnUpdate:CASCADE" json:"product" form:"product"`
 	Faq_Answer_1        string       `gorm:"column:faq_answer_1" json:"faq_answer_1" form:"faq_answer_1"`
@@ -21,6 +18,4 @@ type ReviewPost struct {
 	Faq_Question_1      string       `gorm:"column:faq_question_1" json:"faq_question_1" form:"faq_question_1"`
 	Faq_Question_2      string       `gorm:"column:faq_question_2" json:"faq_question_2" form:"faq_question_2"`
 	Faq_Question_3      string       `gorm:"column:faq_question_3" json:"faq_question_3" form:"faq_question_3"`
-	ProductImageUrl     string       `gorm:"column:product_image_url" json:"product_image_url" form:"product_image_url"`
-	ProductImageAlt     string       `gorm:"column:product_image_alt" json:"product_image_alt" form:"product_image_alt"`
 }

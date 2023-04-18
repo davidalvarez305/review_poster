@@ -7,15 +7,15 @@
             <div class="row clearfix">
                 <div class="col-lg-6 col-md-12 col-sm-12 image-column">
                     <figure class="product-image">
-                        <img src="{{ review_post.product_image_url }}"
-                            alt="{{ review_post.product_image_alt }}" />
-                        <a href="{{ review_post.product_image_url }}" class="lightbox-image"><i
+                        <img src="{{ product.product_image_url }}"
+                            alt="{{ product.product_image_alt }}" />
+                        <a href="{{ product.product_image_url }}" class="lightbox-image"><i
                                 class="flaticon-search-2"></i></a>
                     </figure>
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12 content-column">
                     <div class="product-info">
-                        <h3>{{ review_post.product_name }}</h3>
+                        <h3>{{ product.product_name }}</h3>
                         <div class="customer-review clearfix">
                             <ul class="rating-box clearfix">
                                 {{ product_rating_stars|safe }}
@@ -24,7 +24,7 @@
                         </div>
                         <span class="item-price" id="product-pricing">{{ product.product_price }}</span>
                         <div class="text">
-                            <p>{{ review_post.product_description }}</p>
+                            <p>{{ product.product_description }}</p>
                             <ul class="list clearfix">
                                 <li><b><i>Ratings: </i></b>{{ product.product_ratings }}</li>
                                 <li>Sub Category: <a href="/{{ category_slug }}/{{ sub_category_slug }}/">{{ review_post.sub_category.name }}</a></li>
