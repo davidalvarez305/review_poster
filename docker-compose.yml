@@ -11,28 +11,6 @@ services:
     image: iamdavidmiguelalvarez/review_poster/cms
     ports:
     - "4008:4008"
-  crawler:
-    build: ./crawler/server
-    restart: always
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    image: iamdavidmiguelalvarez/review_poster:crawler
-    ports:
-    - "4009:4009"
-  django:
-    build: ./django
-    restart: always
-    depends_on:
-      - postgres
-    image: iamdavidmiguelalvarez/review_poster:django
-    env_file:
-      - .env
-    volumes:
-    - data:/vol/django
-    ports:
-      - "8000:8000"
   postgres:
     build: ./postgres
     restart: always
