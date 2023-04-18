@@ -10,7 +10,7 @@ from django.db.models import Prefetch
 
 class MyBaseView(View):
     groups = Group.prefetch_category_set()
-    domain = str(os.environ.get('DOMAIN'))
+    domain = str(os.environ.get('DJANGO_DOMAIN'))
     current_year = date.today().year
     google_analytics_id = str(os.environ.get('GOOGLE_ANALYTICS_ID'))
 
@@ -30,6 +30,7 @@ class MyBaseView(View):
     def get(self, request, *args, **kwargs):
         ctx = self.context
         ctx['path'] = request.path
+        print('ctx: ', ctx)
         return render(request, self.template_name, context=ctx)
 
 
