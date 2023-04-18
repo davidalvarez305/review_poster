@@ -1,16 +1,6 @@
 version: '3.7'
 
 services:
-  cms:
-    build: ./cms/server
-    restart: always
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    image: iamdavidmiguelalvarez/review_poster/cms
-    ports:
-    - "4008:4008"
   postgres:
     build: ./postgres
     restart: always
