@@ -7,9 +7,9 @@
             <div class="row clearfix">
                 <div class="col-lg-6 col-md-12 col-sm-12 image-column">
                     <figure class="product-image">
-                        <img src="{{ product.product_image_url }}"
+                        <img src="{{ product.product_image }}"
                             alt="{{ product.product_image_alt }}" />
-                        <a href="{{ product.product_image_url }}" class="lightbox-image"><i
+                        <a href="{{ product.product_image }}" class="lightbox-image"><i
                                 class="flaticon-search-2"></i></a>
                     </figure>
                 </div>
@@ -79,7 +79,7 @@
                     <div class="shop-block-one">
                         <div class="inner-box">
                             <figure class="image-box">
-                                <img src="{{ r.product_image_url }}"
+                                <img src="{{ r.product_image }}"
                                     alt="{{ r.product_image_alt }}" />
                                 <ul class="info-list clearfix">
                                     <li><a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}"><i class="flaticon-heart"></i></a></li>
