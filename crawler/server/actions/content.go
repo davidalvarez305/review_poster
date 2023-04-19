@@ -23,7 +23,7 @@ func PullDynamicContent() (types.ContentAPIResponse, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("AUTH_HEADER_STRING"))
-	req.Header.Set("X-SECRET-AGENT", os.Getenv("X_SECRET_AGENT"))
+	req.Header.Set("X-Secret-Agent", os.Getenv("X_SECRET_AGENT"))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -54,7 +54,7 @@ func PullContentDictionary() (types.DictionaryAPIResponse, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("AUTH_HEADER_STRING"))
-	req.Header.Set("X-SECRET-AGENT", os.Getenv("X_SECRET_AGENT"))
+	req.Header.Set("X-Secret-Agent", os.Getenv("X_SECRET_AGENT"))
 
 	resp, err := client.Do(req)
 	if err != nil {

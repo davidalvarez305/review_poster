@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -27,8 +26,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 	var found []string
 	path := c.OriginalURL()
 	headers := c.GetReqHeaders()
-	secretAgent := headers["X-SECRET-AGENT"]
-	fmt.Printf("headers: %+v\n", headers)
+	secretAgent := headers["X-Secret-Agent"]
 
 	for _, route := range protectedRoutes {
 		if strings.Contains(path, route) {
