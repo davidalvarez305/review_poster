@@ -164,7 +164,7 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 	post = models.ReviewPost{
 		Title:               data.ReviewPostTitle,
 		SubCategoryID:       subCategory.ID,
-		ProductAffiliateUrl: product.AffiliateUrl,
+		ProductAffiliateUrl: input.Link,
 		Slug:                slug,
 		Content:             data.ReviewPostContent + utils.GetAIResponse(additionalContent),
 		Headline:            data.ReviewPostHeadline,
