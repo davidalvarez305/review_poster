@@ -97,14 +97,15 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 			continue
 		}
 
+		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
+
+		if err != nil {
+			fmt.Printf("ERROR SAVING NEW REVIEW POST: %+v\n", err)
+			return err
+		}
+
 		fmt.Printf("Product successfully crawled: %+v\n", p.Title)
 		posts = append(posts, p)
-	}
-
-	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&posts).Error
-
-	if err != nil {
-		return err
 	}
 
 	return nil
