@@ -155,7 +155,7 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 		ProductImageAlt:    strings.ToLower(input.Name),
 	}
 
-	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).FirstOrCreate(&product).Error
+	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&product).Error
 
 	if err != nil {
 		return post, err
