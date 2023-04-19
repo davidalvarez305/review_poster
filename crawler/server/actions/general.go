@@ -16,9 +16,18 @@ type Group struct {
 }
 
 func (g *Group) GetOrCreateGroup(groupName string) error {
-	g.Name = strings.ToLower(groupName)
-	g.Slug = slug.Make(groupName)
-	return database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&g).Error
+	group := models.Group{
+		Name: strings.ToLower(groupName),
+		Slug: slug.Make(groupName),
+	}
+
+	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&group).Error
+
+	if err != nil {
+		return err
+	}
+
+	return database.DB.Where("name = ?", group.Name).First(&g).Error
 }
 
 func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*models.SubCategory, error) {
