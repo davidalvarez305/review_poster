@@ -10,12 +10,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-func filterSentences(sentence []types.Sentence, paragraph string) []string {
+func filterSentences(sentences []types.Sentence, paragraph string) []string {
 	var s []string
-	for i := 0; i < len(sentence); i++ {
-		if sentence[i].Paragraph.Name == paragraph {
+	for i := 0; i < len(sentences); i++ {
+		if sentences[i].Paragraph.Name == paragraph {
 
-			s = append(s, sentence[i].Sentence)
+			s = append(s, sentences[i].Sentence)
 		}
 	}
 	return s
