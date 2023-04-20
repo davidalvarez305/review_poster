@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/cms/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetTemplates(c *fiber.Ctx) error {
-	templates := &actions.Templates{}
 	userId := c.Params("userId")
 
-	err := templates.GetTemplates(userId)
+	templates, err := actions.GetTemplates(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -23,8 +23,7 @@ func GetTemplates(c *fiber.Ctx) error {
 }
 
 func CreateTemplate(c *fiber.Ctx) error {
-	template := &actions.Template{}
-	templates := &actions.Templates{}
+	var template models.Template
 	userId := c.Params("userId")
 
 	err := c.BodyParser(&template)
@@ -35,7 +34,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = template.CreateTemplate(userId)
+	err = actions.CreateTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -43,7 +42,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = templates.GetTemplates(userId)
+	templates, err := actions.GetTemplates(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -57,7 +56,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 }
 
 func UpdateTemplate(c *fiber.Ctx) error {
-	template := &actions.Template{}
+	var template models.Template
 	userId := c.Params("userId")
 
 	err := c.BodyParser(&template)
@@ -68,7 +67,7 @@ func UpdateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = template.UpdateTemplate(userId)
+	err = actions.UpdateTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -84,7 +83,7 @@ func UpdateTemplate(c *fiber.Ctx) error {
 func DeleteTemplate(c *fiber.Ctx) error {
 	templateId := c.Params("templateId")
 	userId := c.Params("userId")
-	template := &actions.Template{}
+	var template models.Template
 
 	if templateId == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -92,7 +91,7 @@ func DeleteTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err := template.DeleteTemplate(userId, templateId)
+	err := actions.DeleteTemplate(template, userId, templateId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
