@@ -9,7 +9,7 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 )
 
-func GetAdditionalContent(promptMsg string) (types.OpenAIResponse, error) {
+func getAIGeneratedContent(promptMsg string) (types.OpenAIResponse, error) {
 	var response types.OpenAIResponse
 	url := "https://api.openai.com/v1/completions"
 

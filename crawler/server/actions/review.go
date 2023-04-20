@@ -59,7 +59,7 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 			continue
 		}
 
-		err = InsertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary.Data, sentences.Data)
+		err = insertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary.Data, sentences.Data)
 
 		if err != nil {
 			fmt.Printf("ERROR INSERTING: %+v\n", err)
@@ -79,10 +79,10 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 	return nil
 }
 
-func InsertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Word, sentences []types.Sentence) error {
+func insertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Word, sentences []types.Sentence) error {
 	var posts []models.ReviewPost
 
-	subCategory, err := GetOrCreateSubCategory(categoryName, subCategoryName, groupName)
+	subCategory, err := newSubCategory(categoryName, subCategoryName, groupName)
 
 	if err != nil {
 		fmt.Printf("ERROR CREATING SUB_CATEGORY: %+v\n", err)
@@ -90,7 +90,7 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 	}
 
 	for i := 0; i < len(products); i++ {
-		p, err := CreateNewReviewPost(products[i], dictionary, sentences, *subCategory)
+		p, err := assembleReviewPost(products[i], dictionary, sentences, *subCategory)
 
 		if err != nil {
 			fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
@@ -111,12 +111,12 @@ func InsertReviewPosts(groupName, categoryName, subCategoryName string, products
 	return nil
 }
 
-func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategory models.SubCategory) (models.ReviewPost, error) {
+func assembleReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategory models.SubCategory) (models.ReviewPost, error) {
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
 
-	additionalContent, err := GetAdditionalContent("What are people saying about the " + input.Name)
+	additionalContent, err := getAIGeneratedContent("What are people saying about the " + input.Name)
 
 	if err != nil {
 		return post, err
@@ -124,19 +124,19 @@ func CreateNewReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word
 
 	data := utils.GenerateContentUtil(input.Name, dictionary, sentences)
 
-	FAQ_ONE, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_1)
+	FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_1)
 
 	if err != nil {
 		return post, err
 	}
 
-	FAQ_TWO, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_2)
+	FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_2)
 
 	if err != nil {
 		return post, err
 	}
 
-	FAQ_THREE, err := GetAdditionalContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_3)
+	FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_3)
 
 	if err != nil {
 		return post, err

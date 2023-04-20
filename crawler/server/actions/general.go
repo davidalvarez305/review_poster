@@ -15,7 +15,7 @@ type Group struct {
 	*models.Group
 }
 
-func (g *Group) GetOrCreateGroup(groupName string) error {
+func (g *Group) newGroup(groupName string) error {
 	group := models.Group{
 		Name: strings.ToLower(groupName),
 		Slug: slug.Make(groupName),
@@ -30,7 +30,7 @@ func (g *Group) GetOrCreateGroup(groupName string) error {
 	return database.DB.Where("name = ?", group.Name).First(&g).Error
 }
 
-func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*models.SubCategory, error) {
+func newSubCategory(categoryName, subCategoryName, groupName string) (*models.SubCategory, error) {
 	var s models.SubCategory
 
 	err := database.DB.Where("name = ?", subCategoryName).Preload("Category.Group").First(&s).Error
@@ -43,13 +43,13 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 	}
 
 	group := Group{}
-	err = group.GetOrCreateGroup(groupName)
+	err = group.newGroup(groupName)
 
 	if err != nil {
 		return &s, err
 	}
 
-	category, err := GetOrCreateCategory(categoryName, &group)
+	category, err := newCategory(categoryName, &group)
 
 	if err != nil {
 		return &s, err
@@ -70,7 +70,7 @@ func GetOrCreateSubCategory(categoryName, subCategoryName, groupName string) (*m
 	return &s, err
 }
 
-func GetOrCreateCategory(categoryName string, group *Group) (*models.Category, error) {
+func newCategory(categoryName string, group *Group) (*models.Category, error) {
 	var c models.Category
 
 	c.Name = strings.ToLower(categoryName)

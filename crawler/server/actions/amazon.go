@@ -49,7 +49,7 @@ type AmazonPaapi5RequestBody struct {
 	Resources   []string `json:"Resources"`
 }
 
-func CrawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
+func crawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
 	host := os.Getenv("P_HOST")
 	username := os.Getenv("P_USERNAME")
 	sessionId := fmt.Sprint(rand.Intn(1000000))
@@ -90,7 +90,7 @@ func CrawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
 	}
 	defer resp.Body.Close()
 
-	crawledProducts, err = ParseHtml(resp.Body, keyword)
+	crawledProducts, err = parseHTML(resp.Body, keyword)
 
 	if err != nil {
 		fmt.Println("Error while parsing HTML.", err)
@@ -111,7 +111,7 @@ func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) 
 		go func(page int) {
 			serp := fmt.Sprintf("https://www.amazon.com/s?k=%s&s=review-rank&page=%v", str, page)
 
-			products, err := CrawlPage(keyword, serp)
+			products, err := crawlPage(keyword, serp)
 
 			if err != nil {
 				fmt.Printf("Error while crawling: %+v", err.Error())
@@ -215,7 +215,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	return nil
 }
 
-func ParseHtml(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
+func parseHTML(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
 	var results AmazonSearchResultsPages
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
@@ -223,12 +223,12 @@ func ParseHtml(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
 		return &results, err
 	}
 
+	reviewsRegex := regexp.MustCompile("[0-9,]+")
+	moneyRegex := regexp.MustCompile(`[\$]+?(\d+([,\.\d]+)?)`)
+	amazonASIN := regexp.MustCompile(`(\/[A-Z0-9]{10,}\/)`)
+
 	doc.Find(".sg-col-inner").Each(func(i int, s *goquery.Selection) {
 		product := &AmazonSearchResultsPage{}
-
-		reviewsRegex := regexp.MustCompile("[0-9,]+")
-		moneyRegex := regexp.MustCompile(`[\$]+?(\d+([,\.\d]+)?)`)
-		amazonASIN := regexp.MustCompile(`(\/[A-Z0-9]{10,}\/)`)
 
 		el, _ := s.Find("a").Attr("href")
 		cond := amazonASIN.MatchString(el)

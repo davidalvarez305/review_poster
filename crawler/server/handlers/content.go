@@ -65,25 +65,3 @@ func GetDynamicContent(c *fiber.Ctx) error {
 		"data": content,
 	})
 }
-
-func GetOpenAIContent(c *fiber.Ctx) error {
-	prompt := c.Query("prompt")
-
-	if len(prompt) == 0 {
-		return c.Status(200).JSON(fiber.Map{
-			"data": "No query in URL.",
-		})
-	}
-
-	data, err := actions.GetAdditionalContent(prompt)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": data,
-	})
-}

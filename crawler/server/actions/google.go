@@ -21,7 +21,7 @@ type GoogleKeywordResults struct {
 	Results []types.GoogleResult `json:"results"`
 }
 
-func RequestGoogleAuthToken() error {
+func requestGoogleAuthToken() error {
 	config, err := utils.GetGoogleCredentials()
 	if err != nil {
 		fmt.Println("Error getting Google credentials")
@@ -63,7 +63,7 @@ func RequestGoogleAuthToken() error {
 	return nil
 }
 
-func GetGoogleAccessToken(code string) (string, error) {
+func getGoogleAccessToken(code string) (string, error) {
 	config, err := utils.GetGoogleCredentials()
 	if err != nil {
 		fmt.Println("Error getting Google credentials")
@@ -107,7 +107,7 @@ func GetGoogleAccessToken(code string) (string, error) {
 
 }
 
-func RefreshAuthToken() (string, error) {
+func refreshAuthToken() (string, error) {
 
 	type TokenResponse struct {
 		Access_Token string `json:"access_token"`
@@ -202,7 +202,7 @@ func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
 func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error {
 	time.Sleep(1 * time.Second)
 
-	authToken, err := RefreshAuthToken()
+	authToken, err := refreshAuthToken()
 
 	if err != nil {
 		return err

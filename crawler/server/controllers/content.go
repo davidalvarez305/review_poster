@@ -11,5 +11,4 @@ func DynamicContent(router fiber.Router) {
 	content.Get("/", handlers.GetContent)
 	content.Get("/dictionary", handlers.GetDictionary)
 	content.Get("/dynamic", handlers.GetDynamicContent)
-	content.Get("/ai", handlers.GetOpenAIContent)
 }
