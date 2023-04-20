@@ -156,21 +156,18 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	// These functions will filter synonyms coming from the client & compare with existing ones.
 	// It will keep anything that's new, and delete what was not sent from the client.
 
-	var sentencesToDelete actions.Sentences
-	var sentencesToAdd actions.Sentences
-
-	err = sentencesToDelete.DeleteBulkSentences(sentences, existingSentences)
+	err = actions.DeleteBulkSentences(sentences, existingSentences)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"data": err.Error(),
 		})
 	}
 
-	err = sentencesToAdd.AddBulkSentences(sentences, existingSentences, userId)
+	err = actions.AddBulkSentences(sentences, existingSentences, userId)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"data": err.Error(),
 		})
 	}

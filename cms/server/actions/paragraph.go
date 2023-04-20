@@ -80,7 +80,7 @@ func SimpleDelete(paragraphs []models.Paragraph) error {
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
-func DeleteBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph) ([]models.Paragraph, error) {
+func DeleteBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph) error {
 	var paragraphs []models.Paragraph
 
 	for _, existingParagraph := range existingParagraphs {
@@ -99,15 +99,15 @@ func DeleteBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragrap
 		err := SimpleDelete(paragraphs)
 
 		if err != nil {
-			return paragraphs, err
+			return err
 		}
 	}
 
-	return paragraphs, nil
+	return nil
 }
 
 // Take structs from client and creates them. Does not return any records.
-func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, userId string) ([]models.Paragraph, error) {
+func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, userId string) error {
 	var paragraphs []models.Paragraph
 
 	for _, clientParagraph := range clientParagraphs {
@@ -126,11 +126,11 @@ func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, 
 		err := CreateParagraphs(paragraphs, userId)
 
 		if err != nil {
-			return paragraphs, err
+			return err
 		}
 	}
 
-	return paragraphs, nil
+	return nil
 }
 
 func GetTemplatesAndParagraphs(userId string) ([]models.Paragraph, error) {
