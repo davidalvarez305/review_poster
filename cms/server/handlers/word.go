@@ -7,13 +7,11 @@ import (
 )
 
 func GetWords(c *fiber.Ctx) error {
-	words := &actions.Words{}
 	wordName := c.Query("word")
 	userId := c.Params("userId")
 
 	if len(wordName) > 0 {
-		word := &actions.Word{}
-		err := word.GetWordByName(wordName, userId)
+		word, err := actions.GetWordByName(wordName, userId)
 
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
@@ -26,7 +24,7 @@ func GetWords(c *fiber.Ctx) error {
 		})
 	}
 
-	err := words.GetWords(userId)
+	words, err := actions.GetWords(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -41,7 +39,6 @@ func GetWords(c *fiber.Ctx) error {
 
 func CreateWord(c *fiber.Ctx) error {
 	var body actions.CreateWordInput
-	word := &actions.Word{}
 	userId := c.Params("userId")
 
 	err := c.BodyParser(&body)
@@ -58,7 +55,7 @@ func CreateWord(c *fiber.Ctx) error {
 		})
 	}
 
-	word.Word = &models.Word{
+	word := models.Word{
 		ID:     body.ID,
 		Name:   body.Word,
 		Tag:    body.Tag,
@@ -69,12 +66,12 @@ func CreateWord(c *fiber.Ctx) error {
 		synonym := &models.Synonym{
 			Synonym: body.Synonyms[i],
 			WordID:  word.ID,
-			Word:    word.Word,
+			Word:    &word,
 		}
 		word.Synonyms = append(word.Synonyms, synonym)
 	}
 
-	err = word.CreateWord()
+	err = actions.CreateWord(word)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -82,9 +79,7 @@ func CreateWord(c *fiber.Ctx) error {
 		})
 	}
 
-	words := &actions.Words{}
-
-	err = words.GetWords(userId)
+	words, err := actions.GetWords(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -98,7 +93,7 @@ func CreateWord(c *fiber.Ctx) error {
 }
 
 func UpdateWord(c *fiber.Ctx) error {
-	word := &actions.Word{}
+	var word models.Word
 
 	userId := c.Params("userId")
 
@@ -110,7 +105,7 @@ func UpdateWord(c *fiber.Ctx) error {
 		})
 	}
 
-	err = word.UpdateWord(userId)
+	err = actions.UpdateWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -126,7 +121,7 @@ func UpdateWord(c *fiber.Ctx) error {
 func DeleteWord(c *fiber.Ctx) error {
 	wordId := c.Params("id")
 	userId := c.Params("userId")
-	word := &actions.Word{}
+	var word models.Word
 
 	if wordId == "" {
 		return c.Status(400).JSON(fiber.Map{
@@ -134,7 +129,7 @@ func DeleteWord(c *fiber.Ctx) error {
 		})
 	}
 
-	err := word.DeleteWord(userId, wordId)
+	err := actions.DeleteWord(word, userId, wordId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
