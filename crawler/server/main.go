@@ -16,15 +16,23 @@ func main() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatalf("Error loading env file.: %+v\n", err)
+		log.Fatalf("ERROR LOADING ENV FILE: %+v\n", err)
 	}
 
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 	}))
-	database.Connect()
+
+	err = database.Connect()
+
+	if err != nil {
+		log.Fatalf("ERROR CONNECTING TO DB: %+v\n", err)
+	}
+
+	// Can't call this and return error, it will panic on its own...
 	sessions.Init()
+
 	routes.Router(app)
 
 	app.Listen(":" + os.Getenv("CRAWLER_PORT"))

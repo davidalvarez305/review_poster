@@ -14,20 +14,20 @@ type DBInstance = *gorm.DB
 var DB DBInstance
 
 type connection struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DB       string
+	host     string
+	port     string
+	user     string
+	password string
+	dbName   string
 }
 
-func Connect() {
+func Connect() error {
 	conn := connection{
-		Host:     os.Getenv("POSTGRES_HOST"),
-		Port:     os.Getenv("POSTGRES_PORT"),
-		User:     os.Getenv("PGUSER"),
-		Password: os.Getenv("POSTGRES_PASSWORD"),
-		DB:       os.Getenv("POSTGRES_DB"),
+		host:     os.Getenv("POSTGRES_HOST"),
+		port:     os.Getenv("POSTGRES_PORT"),
+		user:     os.Getenv("PGUSER"),
+		password: os.Getenv("POSTGRES_PASSWORD"),
+		dbName:   os.Getenv("POSTGRES_DB"),
 	}
 
 	db, err := gorm.Open(postgres.Open(connToString(conn)), &gorm.Config{
@@ -38,16 +38,15 @@ func Connect() {
 	})
 
 	if err != nil {
-		fmt.Printf("Error connecting to the DB: %s\n", err.Error())
-		return
-	} else {
-		fmt.Printf("Connected to Database.")
+		return err
 	}
 
 	DB = db
+
+	return nil
 }
 
 func connToString(info connection) string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		info.Host, info.Port, info.User, info.Password, info.DB)
+		info.host, info.port, info.user, info.password, info.dbName)
 }
