@@ -5,26 +5,26 @@ import (
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
-type Synonym struct {
-	*models.Synonym
-}
-
-type Synonyms []*models.Synonym
-
 // Create a single record and return the inserted record.
-func (synonym *Synonym) CreateSynonym() error {
-	query := database.DB.Save(&synonym).First(&synonym)
-	return query.Error
+func CreateSynonym(synonym models.Synonym) (models.Synonym, error) {
+	var newSynonym models.Synonym
+
+	err := database.DB.Save(&synonym).First(&newSynonym).Error
+
+	if err != nil {
+		return newSynonym, err
+	}
+
+	return newSynonym, nil
 }
 
 // Create multiple records without returning anything.
-func (synonyms *Synonyms) CreateSynonyms() error {
-	query := database.DB.Create(&synonyms)
-	return query.Error
+func CreateSynonyms(synonyms []models.Synonym) error {
+	return database.DB.Create(&synonyms).Error
 }
 
 // Update a single record that belongs a user.
-func (synonym *Synonym) UpdateSynonym(userId, wordId string) error {
+func UpdateSynonym(synonym models.Synonym, userId, wordId string) error {
 
 	err := database.DB.Where("word_id = ? AND user_id = ?", wordId, userId).Find(&synonym).Error
 
@@ -38,44 +38,66 @@ func (synonym *Synonym) UpdateSynonym(userId, wordId string) error {
 }
 
 // Updates multiple records and returns DB values.
-func (synonyms *Synonyms) UpdateSynonyms(word, userId string) error {
+func UpdateSynonyms(synonyms []models.Synonym, word, userId string) ([]models.Synonym, error) {
 	err := database.DB.Save(&synonyms).Error
 
 	if err != nil {
-		return err
+		return synonyms, err
 	}
 
-	err = synonyms.GetSynonymsByWord(word, userId)
-	return err
+	updatedSynonyms, err := GetSynonymsByWord(word, userId)
+
+	if err != nil {
+		return updatedSynonyms, err
+	}
+
+	return updatedSynonyms, nil
 }
 
 // Select records from DB by a word string.
-func (synonyms *Synonyms) GetSynonymsByWord(word, userId string) error {
-	return database.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
+func GetSynonymsByWord(word, userId string) ([]models.Synonym, error) {
+	var synonyms []models.Synonym
+
+	err := database.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
+
+	if err != nil {
+		return synonyms, err
+	}
+
+	return synonyms, nil
 }
 
 // Delete a slice of records without returning any values.
-func (synonyms *Synonyms) DeleteSynonyms(s []int, word, userId string) error {
+func DeleteSynonyms(s []int, word, userId string) ([]models.Synonym, error) {
+	var synonyms []models.Synonym
+
 	err := database.DB.Delete(&models.Synonym{}, s).Error
 
 	if err != nil {
-		return err
+		return synonyms, err
 	}
 
-	return synonyms.GetSynonymsByWord(word, userId)
+	synonyms, err = GetSynonymsByWord(word, userId)
+
+	if err != nil {
+		return synonyms, err
+	}
+
+	return synonyms, nil
 }
 
 // Delete without returning anything.
-func (synonyms *Synonyms) SimpleDelete() error {
-	res := database.DB.Delete(&synonyms)
-	return res.Error
+func SimpleDeleteSynonyms(synonyms []models.Synonym) error {
+	return database.DB.Delete(&synonyms).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
-func (synonyms Synonyms) DeleteBulkSynonyms(clientSnonyms, existingSynonyms *Synonyms) error {
-	for _, existingSynonym := range *existingSynonyms {
+func DeleteBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]models.Synonym, error) {
+	var synonyms []models.Synonym
+
+	for _, existingSynonym := range existingSynonyms {
 		found := false
-		for _, clientSnonym := range *clientSnonyms {
+		for _, clientSnonym := range clientSnonyms {
 			if existingSynonym.Synonym == clientSnonym.Synonym {
 				found = true
 			}
@@ -86,21 +108,23 @@ func (synonyms Synonyms) DeleteBulkSynonyms(clientSnonyms, existingSynonyms *Syn
 	}
 
 	if len(synonyms) > 0 {
-		err := synonyms.SimpleDelete()
+		err := SimpleDeleteSynonyms(synonyms)
 
 		if err != nil {
-			return err
+			return synonyms, err
 		}
 	}
 
-	return nil
+	return synonyms, nil
 }
 
 // Take structs from client and creates them. Does not return any records.
-func (synonyms Synonyms) AddBulkSynonyms(clientSnonyms, existingSynonyms *Synonyms) error {
-	for _, clientSnonym := range *clientSnonyms {
+func AddBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]models.Synonym, error) {
+	var synonyms []models.Synonym
+
+	for _, clientSnonym := range clientSnonyms {
 		found := false
-		for _, existingSynonym := range *existingSynonyms {
+		for _, existingSynonym := range existingSynonyms {
 			if clientSnonym.Synonym == existingSynonym.Synonym {
 				found = true
 			}
@@ -111,12 +135,12 @@ func (synonyms Synonyms) AddBulkSynonyms(clientSnonyms, existingSynonyms *Synony
 	}
 
 	if len(synonyms) > 0 {
-		err := synonyms.CreateSynonyms()
+		err := CreateSynonyms(synonyms)
 
 		if err != nil {
-			return err
+			return synonyms, err
 		}
 	}
 
-	return nil
+	return synonyms, nil
 }
