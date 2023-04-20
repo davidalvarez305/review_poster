@@ -29,7 +29,6 @@ func CrawlAmazon(c *fiber.Ctx) error {
 
 func SearchPAAPI5(c *fiber.Ctx) error {
 	keyword := c.Query("keyword")
-	products := &actions.PAAAPI5Response{}
 
 	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
@@ -37,7 +36,7 @@ func SearchPAAPI5(c *fiber.Ctx) error {
 		})
 	}
 
-	err := products.SearchPaapi5Items(keyword)
+	products, err := actions.SearchPaapi5Items(keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

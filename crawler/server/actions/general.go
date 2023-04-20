@@ -11,11 +11,7 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
 )
 
-type Group struct {
-	*models.Group
-}
-
-func (g *Group) newGroup(groupName string) error {
+func newGroup(groupName string) (models.Group, error) {
 	group := models.Group{
 		Name: strings.ToLower(groupName),
 		Slug: slug.Make(groupName),
@@ -24,66 +20,65 @@ func (g *Group) newGroup(groupName string) error {
 	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).FirstOrCreate(&group).Error
 
 	if err != nil {
-		return err
+		return group, err
 	}
 
-	return database.DB.Where("name = ?", group.Name).First(&g).Error
+	return group, database.DB.Where("name = ?", group.Name).First(&group).Error
 }
 
-func newSubCategory(categoryName, subCategoryName, groupName string) (*models.SubCategory, error) {
-	var s models.SubCategory
+func newSubCategory(categoryName, subCategoryName, groupName string) (models.SubCategory, error) {
+	var subCategory models.SubCategory
 
-	err := database.DB.Where("name = ?", subCategoryName).Preload("Category.Group").First(&s).Error
+	err := database.DB.Where("name = ?", subCategoryName).Preload("Category.Group").First(&subCategory).Error
 
 	// If there is no error, it means that the subcategory was found, so we can return early.
 	if err == nil {
-		return &s, nil
+		return subCategory, nil
 	} else {
 		fmt.Printf("CREATING NEW SUB_CATEGORY...%+v\n", err)
 	}
 
-	group := Group{}
-	err = group.newGroup(groupName)
+	group, err := newGroup(groupName)
 
 	if err != nil {
-		return &s, err
+		return subCategory, err
 	}
 
-	category, err := newCategory(categoryName, &group)
+	category, err := newCategory(categoryName, group)
 
 	if err != nil {
-		return &s, err
+		return subCategory, err
 	}
 
-	s.Name = strings.ToLower(subCategoryName)
-	s.Slug = slug.Make(subCategoryName)
-	s.CategoryID = category.ID
+	subCategory.Name = strings.ToLower(subCategoryName)
+	subCategory.Slug = slug.Make(subCategoryName)
+	subCategory.CategoryID = category.ID
 
-	err = database.DB.Save(&s).Error
+	err = database.DB.Save(&subCategory).Error
 
 	if err != nil {
-		return &s, err
+		return subCategory, err
 	}
 
-	err = database.DB.Preload("Category.Group").First(&s).Error
+	err = database.DB.Preload("Category.Group").First(&subCategory).Error
 
-	return &s, err
+	return subCategory, err
 }
 
-func newCategory(categoryName string, group *Group) (*models.Category, error) {
-	var c models.Category
+func newCategory(categoryName string, group models.Group) (models.Category, error) {
+	var category models.Category
 
-	c.Name = strings.ToLower(categoryName)
-	c.Slug = slug.Make(categoryName)
-	c.GroupID = group.ID
+	category.Name = strings.ToLower(categoryName)
+	category.Slug = slug.Make(categoryName)
+	category.GroupID = group.ID
 
-	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&c).Error
+	err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&category).Error
 
 	if err != nil {
-		return &c, err
+		return category, err
 	}
 
-	err = database.DB.Where("slug = ?", c.Slug).Preload("Group").First(&c).Error
+	err = database.DB.Where("slug = ?", category.Slug).Preload("Group").First(&category).Error
 
-	return &c, err
+	return category, err
 }

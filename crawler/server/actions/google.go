@@ -158,7 +158,7 @@ func refreshAuthToken() (string, error) {
 	return data.Access_Token, nil
 }
 
-func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
+func GetSeedKeywords(results GoogleKeywordResults) ([]string, error) {
 	var data []string
 
 	for i := 0; i < len(results.Results); i++ {
@@ -199,13 +199,14 @@ func GetSeedKeywords(results *GoogleKeywordResults) ([]string, error) {
 	return data, nil
 }
 
-func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error {
+func QueryGoogle(query types.GoogleQuery) (GoogleKeywordResults, error) {
+	var results GoogleKeywordResults
 	time.Sleep(1 * time.Second)
 
 	authToken, err := refreshAuthToken()
 
 	if err != nil {
-		return err
+		return results, err
 	}
 
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
@@ -218,12 +219,12 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 	out, err := json.Marshal(query)
 
 	if err != nil {
-		return err
+		return results, err
 	}
 
 	req, err := http.NewRequest("POST", googleUrl, bytes.NewBuffer(out))
 	if err != nil {
-		return err
+		return results, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("developer-token", developerToken)
@@ -231,23 +232,22 @@ func (results *GoogleKeywordResults) QueryGoogle(query types.GoogleQuery) error 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return results, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
-		return errors.New("request failed")
+		return results, errors.New("request failed")
 	}
 
 	json.NewDecoder(resp.Body).Decode(&results)
 
-	return nil
+	return results, nil
 }
 
 func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 	var keywords []string
-	results := &GoogleKeywordResults{}
 	for i := 0; i < len(seedKeywords); i++ {
 
 		q := types.GoogleQuery{
@@ -257,7 +257,7 @@ func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 			},
 		}
 
-		err := results.QueryGoogle(q)
+		results, err := QueryGoogle(q)
 
 		if err != nil {
 			return keywords, err
@@ -272,7 +272,7 @@ func GetCommercialKeywords(seedKeywords []string) ([]string, error) {
 	return keywords, nil
 }
 
-func filterCommercialKeywords(results *GoogleKeywordResults, seedKeyword string) []string {
+func filterCommercialKeywords(results GoogleKeywordResults, seedKeyword string) []string {
 	var data []string
 	r := regexp.MustCompile("(used|cheap|deals|deal|sale|buy|online|on sale|discount|for sale|near me|best|for|[0-9]+)")
 

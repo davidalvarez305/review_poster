@@ -12,20 +12,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName string) error {
-	dictionary, err := PullContentDictionary()
-	googleKeywords := &GoogleKeywordResults{}
-	var results AmazonSearchResultsPages
-
-	if err != nil {
-		return err
-	}
-
-	sentences, err := PullDynamicContent()
-
-	if err != nil {
-		return err
-	}
+func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]AmazonSearchResultsPage, error) {
+	var products []AmazonSearchResultsPage
 
 	q := types.GoogleQuery{
 		Pagesize: 1000,
@@ -34,16 +22,16 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 		},
 	}
 
-	err = googleKeywords.QueryGoogle(q)
+	googleKeywords, err := QueryGoogle(q)
 
 	if err != nil {
-		return err
+		return products, err
 	}
 
 	seedKeywords, err := GetSeedKeywords(googleKeywords)
 
 	if err != nil {
-		return err
+		return products, err
 	}
 
 	for i := 0; i < len(seedKeywords); i++ {
@@ -54,32 +42,29 @@ func (products *AmazonSearchResultsPages) CreateReviewPosts(keyword, groupName s
 			continue
 		}
 
-		if len(*data) == 0 {
+		if len(data) == 0 {
 			fmt.Println("Keyword: " + seedKeywords[i] + " - 0" + "\n")
 			continue
 		}
 
-		err = insertReviewPosts(groupName, keyword, seedKeywords[i], *data, dictionary.Data, sentences.Data)
+		err = insertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary.Data, sentences.Data)
 
 		if err != nil {
 			fmt.Printf("ERROR INSERTING: %+v\n", err)
 			continue
 		}
 
-		results = append(results, *data...)
+		products = append(products, data...)
 
-		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(*data))
+		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
 		fmt.Println(total)
 	}
 
-	productsTotal := fmt.Sprintf("Total Products = %v\n", len(results))
-	fmt.Println(productsTotal)
-
-	products = &results
-	return nil
+	fmt.Printf("Total Products = %v\n", len(products))
+	return products, nil
 }
 
-func insertReviewPosts(groupName, categoryName, subCategoryName string, products AmazonSearchResultsPages, dictionary []types.Word, sentences []types.Sentence) error {
+func insertReviewPosts(groupName, categoryName, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) error {
 	var posts []models.ReviewPost
 
 	subCategory, err := newSubCategory(categoryName, subCategoryName, groupName)
@@ -90,7 +75,7 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 	}
 
 	for i := 0; i < len(products); i++ {
-		p, err := assembleReviewPost(products[i], dictionary, sentences, *subCategory)
+		p, err := assembleReviewPost(products[i], dictionary, sentences, subCategory)
 
 		if err != nil {
 			fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
@@ -111,7 +96,7 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 	return nil
 }
 
-func assembleReviewPost(input *AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategory models.SubCategory) (models.ReviewPost, error) {
+func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategory models.SubCategory) (models.ReviewPost, error) {
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)

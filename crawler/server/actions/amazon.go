@@ -33,8 +33,6 @@ type AmazonSearchResultsPage struct {
 	Category string `json:"category"`
 }
 
-type AmazonSearchResultsPages []*AmazonSearchResultsPage
-
 type PAAAPI5Response struct {
 	SearchResult types.SearchResult `json:"SearchResult"`
 }
@@ -49,12 +47,13 @@ type AmazonPaapi5RequestBody struct {
 	Resources   []string `json:"Resources"`
 }
 
-func crawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
+func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
+	var crawledProducts []AmazonSearchResultsPage
+
 	host := os.Getenv("P_HOST")
 	username := os.Getenv("P_USERNAME")
 	sessionId := fmt.Sprint(rand.Intn(1000000))
 	path := username + sessionId + ":" + host
-	crawledProducts := &AmazonSearchResultsPages{}
 
 	u, err := url.Parse(path)
 
@@ -100,8 +99,9 @@ func crawlPage(keyword, page string) (*AmazonSearchResultsPages, error) {
 	return crawledProducts, nil
 }
 
-func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) {
-	var results AmazonSearchResultsPages
+func ScrapeSearchResultsPage(keyword string) ([]AmazonSearchResultsPage, error) {
+	var results []AmazonSearchResultsPage
+
 	str := url.QueryEscape(keyword)
 
 	wg := sync.WaitGroup{}
@@ -117,16 +117,18 @@ func ScrapeSearchResultsPage(keyword string) (*AmazonSearchResultsPages, error) 
 				fmt.Printf("Error while crawling: %+v", err.Error())
 			}
 
-			results = append(results, *products...)
+			results = append(results, products...)
 			wg.Done()
 		}(i)
 	}
 
 	wg.Wait()
-	return &results, nil
+	return results, nil
 }
 
-func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
+func SearchPaapi5Items(keyword string) (PAAAPI5Response, error) {
+	var products PAAAPI5Response
+
 	resources := []string{
 		"Images.Primary.Medium",
 		"ItemInfo.Title",
@@ -148,7 +150,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	body, err := json.Marshal(d)
 
 	if err != nil {
-		return err
+		return products, err
 	}
 
 	method := "POST"
@@ -179,7 +181,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	signature, err := utils.BuildSignature(stringToSign, signingKey)
 	if err != nil {
 		fmt.Println("Error while building signature.")
-		return err
+		return products, err
 	}
 
 	authorizationHeader := "AWS4-HMAC-SHA256" + " Credential=" + os.Getenv("AWS_PAAPI_ACCESS_KEY") + "/" + credentialScope + " SignedHeaders=" + signedHeaders + " Signature=" + signature
@@ -188,7 +190,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 
 	if err != nil {
 		fmt.Println("Request failed: ", err)
-		return err
+		return products, err
 	}
 
 	req.Header.Set("content-encoding", contentEncoding)
@@ -201,7 +203,7 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while fetching Amazon SERP", err)
-		return err
+		return products, err
 	}
 	defer resp.Body.Close()
 
@@ -209,18 +211,18 @@ func (products *PAAAPI5Response) SearchPaapi5Items(keyword string) error {
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
-		return errors.New("request failed")
+		return products, errors.New("request failed")
 	}
 
-	return nil
+	return products, nil
 }
 
-func parseHTML(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
-	var results AmazonSearchResultsPages
+func parseHTML(r io.Reader, keyword string) ([]AmazonSearchResultsPage, error) {
+	var results []AmazonSearchResultsPage
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
 		fmt.Println("Error trying to parse document.")
-		return &results, err
+		return results, err
 	}
 
 	reviewsRegex := regexp.MustCompile("[0-9,]+")
@@ -228,7 +230,7 @@ func parseHTML(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
 	amazonASIN := regexp.MustCompile(`(\/[A-Z0-9]{10,}\/)`)
 
 	doc.Find(".sg-col-inner").Each(func(i int, s *goquery.Selection) {
-		product := &AmazonSearchResultsPage{}
+		var product AmazonSearchResultsPage
 
 		el, _ := s.Find("a").Attr("href")
 		cond := amazonASIN.MatchString(el)
@@ -261,5 +263,5 @@ func parseHTML(r io.Reader, keyword string) (*AmazonSearchResultsPages, error) {
 		}
 	})
 
-	return &results, nil
+	return results, nil
 }

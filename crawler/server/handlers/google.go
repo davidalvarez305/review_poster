@@ -8,7 +8,6 @@ import (
 
 func GetCommercialKeywords(c *fiber.Ctx) error {
 	keyword := c.Query("keyword")
-	results := &actions.GoogleKeywordResults{}
 
 	if len(keyword) == 0 {
 		return c.Status(400).JSON(fiber.Map{
@@ -23,7 +22,7 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 		},
 	}
 
-	err := results.QueryGoogle(q)
+	results, err := actions.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -71,7 +70,6 @@ func GetCommercialKeywords(c *fiber.Ctx) error {
 }
 
 func GetSeedKeywords(c *fiber.Ctx) error {
-	results := &actions.GoogleKeywordResults{}
 	keyword := c.Query("keyword")
 
 	if len(keyword) == 0 {
@@ -87,7 +85,7 @@ func GetSeedKeywords(c *fiber.Ctx) error {
 		},
 	}
 
-	err := results.QueryGoogle(q)
+	results, err := actions.QueryGoogle(q)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

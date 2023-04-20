@@ -8,9 +8,24 @@ import (
 
 func CreatePosts(c *fiber.Ctx) error {
 	var body types.CreateReviewPostsInput
-	products := &actions.AmazonSearchResultsPages{}
 
-	err := c.BodyParser(&body)
+	dictionary, err := actions.PullContentDictionary()
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch dictionary data.",
+		})
+	}
+
+	sentences, err := actions.PullDynamicContent()
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch dynamic content data.",
+		})
+	}
+
+	err = c.BodyParser(&body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -18,7 +33,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	err = products.CreateReviewPosts(body.Keyword, body.GroupName)
+	products, err := actions.CreateReviewPosts(body.Keyword, body.GroupName, dictionary, sentences)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
