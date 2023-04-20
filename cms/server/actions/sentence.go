@@ -84,7 +84,7 @@ func SimpleDeleteSentences(sentences []models.Sentence) error {
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
-func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) ([]models.Sentence, error) {
+func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) error {
 	var sentences []models.Sentence
 
 	for _, existingSentence := range existingSentences {
@@ -103,15 +103,15 @@ func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) (
 		err := SimpleDeleteSentences(sentences)
 
 		if err != nil {
-			return sentences, err
+			return err
 		}
 	}
 
-	return sentences, nil
+	return nil
 }
 
 // Take structs from client and creates them. Does not return any records.
-func AddBulkSentences(clientSentences, existingSentences []models.Sentence, userId string) ([]models.Sentence, error) {
+func AddBulkSentences(clientSentences, existingSentences []models.Sentence, userId string) error {
 	var sentences []models.Sentence
 
 	for _, clientSentence := range clientSentences {
@@ -130,9 +130,9 @@ func AddBulkSentences(clientSentences, existingSentences []models.Sentence, user
 		err := CreateSentences(sentences, userId)
 
 		if err != nil {
-			return sentences, err
+			return err
 		}
 	}
 
-	return sentences, nil
+	return nil
 }

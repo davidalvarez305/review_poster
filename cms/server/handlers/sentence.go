@@ -2,17 +2,17 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/cms/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"github.com/davidalvarez305/review_poster/cms/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetSentences(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
 	userId := c.Params("userId")
 	paragraph := c.Query("paragraph")
 
 	if len(paragraph) > 0 {
-		err := sentences.GetSentencesByParagraph(paragraph, userId)
+		sentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
@@ -25,7 +25,7 @@ func GetSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err := sentences.GetAllSentences(userId)
+	sentences, err := actions.GetAllSentences(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -39,8 +39,7 @@ func GetSentences(c *fiber.Ctx) error {
 }
 
 func CreateSentences(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
-	paragraphs := &actions.Paragraphs{}
+	var sentences []models.Sentence
 	userId := c.Params("userId")
 
 	err := c.BodyParser(&sentences)
@@ -51,7 +50,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentences.CreateSentences(userId)
+	err = actions.CreateSentences(sentences, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -59,7 +58,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = paragraphs.GetTemplatesAndParagraphs(userId)
+	paragraphs, err := actions.GetTemplatesAndParagraphs(userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -73,11 +72,11 @@ func CreateSentences(c *fiber.Ctx) error {
 }
 
 func UpdateSentences(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
+	var sentencesFromClient []models.Sentence
 	paragraph := c.Query("paragraph")
 	userId := c.Params("userId")
 
-	err := c.BodyParser(&sentences)
+	err := c.BodyParser(&sentencesFromClient)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -85,7 +84,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentences.UpdateSentences(paragraph, userId)
+	updatedSentences, err := actions.UpdateSentences(sentencesFromClient, paragraph, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -94,12 +93,11 @@ func UpdateSentences(c *fiber.Ctx) error {
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": sentences,
+		"data": updatedSentences,
 	})
 }
 
 func DeleteSentence(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
 	s := c.Query("sentences")
 	paragraph := c.Query("paragraph")
 	userId := c.Params("userId")
@@ -112,7 +110,7 @@ func DeleteSentence(c *fiber.Ctx) error {
 		})
 	}
 
-	err = sentences.DeleteSentences(ids, paragraph, userId)
+	sentences, err := actions.DeleteSentences(ids, paragraph, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -126,7 +124,8 @@ func DeleteSentence(c *fiber.Ctx) error {
 }
 
 func BulkSentencesUpdate(c *fiber.Ctx) error {
-	sentences := &actions.Sentences{}
+	var sentencesFromClient []models.Sentence
+
 	paragraph := c.Query("paragraph")
 	userId := c.Params("userId")
 
@@ -136,7 +135,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	err := c.BodyParser(&sentences)
+	err := c.BodyParser(&sentencesFromClient)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -144,8 +143,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	existingSentences := &actions.Sentences{}
-	err = existingSentences.GetSentencesByParagraph(paragraph, userId)
+	existingSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -156,7 +154,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	// These functions will filter synonyms coming from the client & compare with existing ones.
 	// It will keep anything that's new, and delete what was not sent from the client.
 
-	err = actions.DeleteBulkSentences(sentences, existingSentences)
+	err = actions.DeleteBulkSentences(sentencesFromClient, existingSentences)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -164,7 +162,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.AddBulkSentences(sentences, existingSentences, userId)
+	err = actions.AddBulkSentences(sentencesFromClient, existingSentences, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -173,7 +171,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	}
 
 	// Re-assign sentences to what's now on the database.
-	err = sentences.GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -182,6 +180,6 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": sentences,
+		"data": updatedSentences,
 	})
 }
