@@ -6,7 +6,6 @@ import (
 )
 
 func GetContent(c *fiber.Ctx) error {
-	content := &actions.Content{}
 	template := c.Query("template")
 	userId := c.Params("userId")
 
@@ -16,27 +15,26 @@ func GetContent(c *fiber.Ctx) error {
 		})
 	}
 
-	err := content.GetSentences(template, userId)
+	sentences, err := actions.GetSentences(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to query sentences.",
 		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": content,
+		"data": sentences,
 	})
 }
 
 func GetDictionary(c *fiber.Ctx) error {
-	dict := &actions.Dictionary{}
 	userId := c.Params("userId")
-	err := dict.GetDictionary(userId)
+	dict, err := actions.GetDictionary(userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to query dictionary.",
 		})
 	}
 

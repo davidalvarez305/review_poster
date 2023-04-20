@@ -5,12 +5,6 @@ import (
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
-type Word struct {
-	*models.Word
-}
-
-type Words []*Word
-
 type CreateWordInput struct {
 	ID       int      `json:"id"`
 	Word     string   `json:"word"`
@@ -19,24 +13,38 @@ type CreateWordInput struct {
 	Synonyms []string `json:"synonyms"`
 }
 
-func (word *Word) GetWordByName(name, userId string) error {
-	return database.DB.Where("name = ? AND user_id = ?", name, userId).Find(&word).Error
+func GetWordByName(name, userId string) (models.Word, error) {
+	var word models.Word
+
+	err := database.DB.Where("name = ? AND user_id = ?", name, userId).Find(&word).Error
+
+	if err != nil {
+		return word, err
+	}
+
+	return word, nil
 }
 
-func (words *Words) GetWords(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
+func GetWords(userId string) ([]models.Word, error) {
+	var words []models.Word
+
+	err := database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
+
+	if err != nil {
+		return words, err
+	}
+
+	return words, nil
 }
 
-func (word *Word) CreateWord() error {
+func CreateWord(word models.Word) error {
 	return database.DB.Where("user_id = ?", word.UserID).Save(&word).Error
 }
 
-func (word *Word) UpdateWord(userId string) error {
+func UpdateWord(word models.Word, userId string) error {
 	return database.DB.Where("user_id = ? AND id = ?", userId, word.ID).Save(&word).First(&word).Error
 }
 
-func (word *Word) DeleteWord(userId, word_id string) error {
-	result := database.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word)
-
-	return result.Error
+func DeleteWord(word models.Word, userId, word_id string) error {
+	return database.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word).Error
 }

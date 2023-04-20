@@ -5,14 +5,26 @@ import (
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
-type Content []*models.Sentence
+func GetSentences(template, userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
 
-type Dictionary []*models.Word
+	err := database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
 
-func (c *Content) GetSentences(template, userId string) error {
-	return database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&c).Error
+	if err != nil {
+		return sentences, err
+	}
+
+	return sentences, nil
 }
 
-func (d *Dictionary) GetDictionary(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&d).Error
+func GetDictionary(userId string) ([]models.Word, error) {
+	var words []models.Word
+
+	err := database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&words).Error
+
+	if err != nil {
+		return words, err
+	}
+
+	return words, nil
 }

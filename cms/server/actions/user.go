@@ -18,17 +18,11 @@ import (
 	"google.golang.org/api/option"
 )
 
-type User struct {
-	*models.User
+func SaveUser(user models.User) error {
+	return database.DB.Save(&user).First(&user).Error
 }
 
-func (user *User) Save() error {
-	result := database.DB.Save(&user).First(&user)
-
-	return result.Error
-}
-
-func (user *User) Logout(c *fiber.Ctx) error {
+func Logout(c *fiber.Ctx) error {
 	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
@@ -40,55 +34,47 @@ func (user *User) Logout(c *fiber.Ctx) error {
 	return err
 }
 
-func (user *User) Delete() error {
-	result := database.DB.Delete(&user)
-
-	return result.Error
+func Delete(user models.User) error {
+	return database.DB.Delete(&user).Error
 }
 
-func (user *User) CreateUser() error {
+func CreateUser(user models.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		return err
 	}
 
-	token := &Token{}
-
-	err = token.GenerateToken()
+	token, err := GenerateToken()
 
 	if err != nil {
 		return err
 	}
 
 	user.Password = string(hashedPassword)
-	user.Token = token.Token
+	user.Token = &token
 
-	return user.Save()
+	return SaveUser(user)
 }
 
-func (user *User) UpdateUser(body User) error {
+func UpdateUser(user models.User, body models.User) error {
 
 	user.Username = body.Username
 	user.Email = body.Email
 
-	token := &Token{}
-
-	err := token.GenerateToken()
+	token, err := GenerateToken()
 
 	if err != nil {
 		return err
 	}
 
-	user.Token = token.Token
+	user.Token = &token
 
-	return user.Save()
+	return SaveUser(user)
 }
 
-func (user *User) GetUserById(userId string) error {
-	result := database.DB.Where("id = ?", userId).First(&user)
-
-	return result.Error
+func GetUserById(user models.User, userId string) error {
+	return database.DB.Where("id = ?", userId).First(&user).Error
 }
 
 func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
@@ -110,27 +96,33 @@ func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 	return userId, nil
 }
 
-func (user *User) GetUserFromSession(c *fiber.Ctx) error {
+func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
+	var user models.User
+
 	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
-		return err
+		return user, err
 	}
 
 	userId := sess.Get("userId")
 
 	if userId == nil {
-		return errors.New("user not found")
+		return user, errors.New("user not found")
 	}
 
 	uId := fmt.Sprintf("%v", userId)
 
-	err = user.GetUserById(uId)
+	err = GetUserById(user, uId)
 
-	return err
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
-func (user *User) Login(c *fiber.Ctx) error {
+func Login(user models.User, c *fiber.Ctx) error {
 	userPassword := user.Password
 	err := database.DB.Where("username = ?", user.Username).First(&user).Error
 
@@ -157,42 +149,49 @@ func (user *User) Login(c *fiber.Ctx) error {
 	return err
 }
 
-func (user *User) RequestChangePasswordCode() error {
-	token := &Token{}
+func RequestChangePasswordCode(user models.User) error {
+	var token models.Token
 
-	err := token.GenerateToken()
+	token, err := GenerateToken()
 
 	if err != nil {
 		return err
 	}
 
-	return user.SendGmail(token.UUID)
+	return SendGmail(user, token.UUID)
 }
 
-func (user *User) ChangePassword(password string) error {
+func ChangePassword(user models.User, password string) (models.User, error) {
+	var newUser models.User
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return err
+		return newUser, err
 	}
 
 	user.Password = string(hashedPassword)
 
-	token := &Token{}
-
-	err = token.GenerateToken()
+	token, err := GenerateToken()
 
 	if err != nil {
-		return err
+		return newUser, err
 	}
 
-	user.Token = token.Token
+	user.Token = &token
 
-	return user.Save()
+	newUser = user
+
+	err = SaveUser(newUser)
+
+	if err != nil {
+		return newUser, err
+	}
+
+	return newUser, nil
 }
 
-func (user *User) SendGmail(uuidCode string) error {
+func SendGmail(user models.User, uuidCode string) error {
 
 	// Load & Read Credentials From Credentials JSON File
 	ctx := context.Background()

@@ -5,69 +5,91 @@ import (
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
-type Sentence struct {
-	*models.Sentence
+func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+
+	err := database.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
+
+	if err != nil {
+		return sentences, err
+	}
+
+	return sentences, nil
 }
 
-type Sentences []*models.Sentence
+func GetAllSentences(userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+	err := database.DB.Where("user_id = ?", userId).Find(&sentences).Error
 
-func (sentences *Sentences) GetSentencesByParagraph(paragraph, userId string) error {
-	return database.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
-}
+	if err != nil {
+		return sentences, err
+	}
 
-func (sentences *Sentences) GetAllSentences(userId string) error {
-	result := database.DB.Where("user_id = ?", userId).Find(&sentences)
-	return result.Error
+	return sentences, nil
 }
 
 // Create a single sentence. This assumes that input will have been validated elsewhere.
-func (sentence *Sentence) CreateSentence() error {
-	result := database.DB.Save(&sentence).First(&sentence)
-	return result.Error
-}
-
-// Create many sentences. This assumes that input will have been validated elsewhere.
-func (sentences *Sentences) CreateSentences(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
-}
-
-func (sentences *Sentences) UpdateSentences(paragraph, userId string) error {
-	err := database.DB.Where("user_id = ?", userId).Save(&sentences).Error
+func CreateSentence(sentence models.Sentence) error {
+	err := database.DB.Save(&sentence).First(&sentence).Error
 
 	if err != nil {
 		return err
 	}
 
-	return sentences.GetSentencesByParagraph(paragraph, userId)
+	return nil
 }
 
-func (sentences *Sentences) DeleteSentences(ids []int, paragraph, userId string) error {
-	res := database.DB.Delete(&models.Sentence{}, ids)
+// Create many sentences. This assumes that input will have been validated elsewhere.
+func CreateSentences(sentences []models.Sentence, userId string) error {
+	return database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
+}
 
-	if res.Error != nil {
-		return res.Error
+func UpdateSentences(sentences []models.Sentence, paragraph, userId string) ([]models.Sentence, error) {
+	err := database.DB.Where("user_id = ?", userId).Save(&sentences).Error
+
+	if err != nil {
+		return sentences, err
 	}
 
-	err := sentences.GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := GetSentencesByParagraph(paragraph, userId)
 
-	return err
+	if err != nil {
+		return sentences, err
+	}
+
+	return updatedSentences, nil
+}
+
+func DeleteSentences(ids []int, paragraph, userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+
+	err := database.DB.Delete(&models.Sentence{}, ids).Error
+
+	if err != nil {
+		return sentences, err
+	}
+
+	newSentences, err := GetSentencesByParagraph(paragraph, userId)
+
+	if err != nil {
+		return newSentences, err
+	}
+
+	return newSentences, nil
 }
 
 // Delete records without checking user or paragraph id. Assumes that this is being checked elsewhere.
-func (sentences *Sentences) SimpleDelete() error {
-	res := database.DB.Delete(&sentences)
-	return res.Error
-}
-
-func (p *Paragraphs) GetTemplatesAndParagraphs(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Preload("Template").Find(&p).Error
+func SimpleDeleteSentences(sentences []models.Sentence) error {
+	return database.DB.Delete(&sentences).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
-func (sentences Sentences) DeleteBulkSentences(clientSentences, existingSentences *Sentences) error {
-	for _, existingSentence := range *existingSentences {
+func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+
+	for _, existingSentence := range existingSentences {
 		found := false
-		for _, clientSentence := range *clientSentences {
+		for _, clientSentence := range clientSentences {
 			if existingSentence.Sentence == clientSentence.Sentence {
 				found = true
 			}
@@ -78,21 +100,23 @@ func (sentences Sentences) DeleteBulkSentences(clientSentences, existingSentence
 	}
 
 	if len(sentences) > 0 {
-		err := sentences.SimpleDelete()
+		err := SimpleDeleteSentences(sentences)
 
 		if err != nil {
-			return err
+			return sentences, err
 		}
 	}
 
-	return nil
+	return sentences, nil
 }
 
 // Take structs from client and creates them. Does not return any records.
-func (sentences Sentences) AddBulkSentences(clientSentences, existingSentences *Sentences, userId string) error {
-	for _, clientSentence := range *clientSentences {
+func AddBulkSentences(clientSentences, existingSentences []models.Sentence, userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+
+	for _, clientSentence := range clientSentences {
 		found := false
-		for _, existingSentence := range *existingSentences {
+		for _, existingSentence := range existingSentences {
 			if clientSentence.Sentence == existingSentence.Sentence {
 				found = true
 			}
@@ -103,12 +127,12 @@ func (sentences Sentences) AddBulkSentences(clientSentences, existingSentences *
 	}
 
 	if len(sentences) > 0 {
-		err := sentences.CreateSentences(userId)
+		err := CreateSentences(sentences, userId)
 
 		if err != nil {
-			return err
+			return sentences, err
 		}
 	}
 
-	return nil
+	return sentences, nil
 }

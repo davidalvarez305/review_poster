@@ -8,27 +8,34 @@ import (
 	"github.com/google/uuid"
 )
 
-type Token struct {
-	*models.Token
-}
-
-func (token *Token) GenerateToken() error {
+func GenerateToken() (models.Token, error) {
 
 	// Initialize & Generate Token
-	token.Token = &models.Token{
+	token := models.Token{
 		UUID:      uuid.New().String(),
 		CreatedAt: time.Now().Unix(),
 	}
 
-	return database.DB.Save(&token).First(&token).Error
+	err := database.DB.Save(&token).First(&token).Error
+
+	if err != nil {
+		return token, err
+	}
+
+	return token, nil
 }
 
-func (token *Token) GetToken(uuid string, userId int) error {
-	result := database.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token)
-	return result.Error
+func GetToken(uuid string, userId int) (models.Token, error) {
+	var token models.Token
+	err := database.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token).Error
+
+	if err != nil {
+		return token, err
+	}
+
+	return token, nil
 }
 
-func (token *Token) DeleteToken() error {
-	result := database.DB.Delete(&token)
-	return result.Error
+func DeleteToken(token models.Token) error {
+	return database.DB.Delete(&token).Error
 }

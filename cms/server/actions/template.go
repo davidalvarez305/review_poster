@@ -5,34 +5,44 @@ import (
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 )
 
-type Template struct {
-	*models.Template
+func GetTemplates(userId string) ([]models.Template, error) {
+	var templates []models.Template
+
+	err := database.DB.Where("user_id = ?", userId).Find(&templates).Error
+
+	if err != nil {
+		return templates, err
+	}
+
+	return templates, nil
 }
 
-type Templates []*Template
+func GetTemplateByID(id string) (models.Template, error) {
+	var template models.Template
 
-func (templates *Templates) GetTemplates(userId string) error {
-	return database.DB.Where("user_id = ?", userId).Find(&templates).Error
+	err := database.DB.Where("id = ?", id).Find(&template).Error
+
+	if err != nil {
+		return template, err
+	}
+
+	return template, nil
 }
 
-func (template *Template) GetTemplateByID(id string) error {
-	return database.DB.Where("id = ?", id).First(&template).Error
-}
-
-func (template *Template) CreateTemplate(userId string) error {
+func CreateTemplate(template models.Template, userId string) error {
 	return database.DB.Where("user_id = ?").Save(&template).Error
 }
 
-func (template *Template) UpdateTemplate(userId string) error {
+func UpdateTemplate(template models.Template, userId string) error {
 
 	// Set updateable values aside
 	templateName := template.Name
 
 	// Query to find record
-	query := database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template)
+	err := database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template).Error
 
-	if query.Error != nil {
-		return query.Error
+	if err != nil {
+		return err
 	}
 
 	// If record is found, update. If not, DB will throw error.
@@ -41,6 +51,6 @@ func (template *Template) UpdateTemplate(userId string) error {
 	return database.DB.Save(&template).First(&template).Error
 }
 
-func (template *Template) DeleteTemplate(userId, template_id string) error {
+func DeleteTemplate(template models.Template, userId, template_id string) error {
 	return database.DB.Where("user_id = ? AND id = ?", userId, template_id).Delete(&template).Error
 }
