@@ -9,10 +9,6 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-type DBInstance = *gorm.DB
-
-var DB DBInstance
-
 type connection struct {
 	host     string
 	port     string
@@ -21,7 +17,7 @@ type connection struct {
 	dbName   string
 }
 
-func Connect() error {
+func Connect() (*gorm.DB, error) {
 	conn := connection{
 		host:     os.Getenv("POSTGRES_HOST"),
 		port:     os.Getenv("POSTGRES_PORT"),
@@ -38,12 +34,10 @@ func Connect() error {
 	})
 
 	if err != nil {
-		return err
+		return db, err
 	}
 
-	DB = db
-
-	return nil
+	return db, nil
 }
 
 func connToString(info connection) string {

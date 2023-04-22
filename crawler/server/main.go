@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
-	"github.com/davidalvarez305/review_poster/crawler/server/routes"
-	"github.com/davidalvarez305/review_poster/crawler/server/sessions"
+	"github.com/davidalvarez305/review_poster/crawler/server/server"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -19,21 +17,17 @@ func main() {
 		log.Fatalf("ERROR LOADING ENV FILE: %+v\n", err)
 	}
 
-	app := fiber.New()
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-	}))
-
-	err = database.Connect()
+	db, err := database.Connect()
 
 	if err != nil {
 		log.Fatalf("ERROR CONNECTING TO DB: %+v\n", err)
 	}
 
-	// Can't call this and return error, it will panic on its own...
-	sessions.Init()
+	server := server.NewServer(&server.Server{
+		App:  fiber.New(),
+		DB:   db,
+		Port: os.Getenv("CRAWLER_PORT"),
+	})
 
-	routes.Router(app)
-
-	app.Listen(":" + os.Getenv("CRAWLER_PORT"))
+	server.Start()
 }
