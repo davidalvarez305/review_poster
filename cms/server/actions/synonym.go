@@ -6,16 +6,8 @@ import (
 )
 
 // Create a single record and return the inserted record.
-func CreateSynonym(synonym models.Synonym) (models.Synonym, error) {
-	var newSynonym models.Synonym
-
-	err := database.DB.Save(&synonym).First(&newSynonym).Error
-
-	if err != nil {
-		return newSynonym, err
-	}
-
-	return newSynonym, nil
+func CreateSynonym(synonym models.Synonym) error {
+	return database.DB.Save(&synonym).First(&synonym).Error
 }
 
 // Create multiple records without returning anything.
@@ -92,7 +84,7 @@ func SimpleDeleteSynonyms(synonyms []models.Synonym) error {
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
-func DeleteBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]models.Synonym, error) {
+func DeleteBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) error {
 	var synonyms []models.Synonym
 
 	for _, existingSynonym := range existingSynonyms {
@@ -111,15 +103,15 @@ func DeleteBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]mod
 		err := SimpleDeleteSynonyms(synonyms)
 
 		if err != nil {
-			return synonyms, err
+			return err
 		}
 	}
 
-	return synonyms, nil
+	return nil
 }
 
 // Take structs from client and creates them. Does not return any records.
-func AddBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]models.Synonym, error) {
+func AddBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) error {
 	var synonyms []models.Synonym
 
 	for _, clientSnonym := range clientSnonyms {
@@ -138,9 +130,9 @@ func AddBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) ([]models
 		err := CreateSynonyms(synonyms)
 
 		if err != nil {
-			return synonyms, err
+			return err
 		}
 	}
 
-	return synonyms, nil
+	return nil
 }

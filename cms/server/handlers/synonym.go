@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/cms/server/actions"
+	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"github.com/davidalvarez305/review_poster/cms/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CreateSynonym(c *fiber.Ctx) error {
-	synonym := &actions.Synonym{}
+	var synonym models.Synonym
 
 	err := c.BodyParser(&synonym)
 
@@ -17,7 +18,7 @@ func CreateSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err = synonym.CreateSynonym()
+	err = actions.CreateSynonym(synonym)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -31,7 +32,7 @@ func CreateSynonym(c *fiber.Ctx) error {
 }
 
 func UpdateSynonyms(c *fiber.Ctx) error {
-	synonyms := &actions.Synonyms{}
+	var synonyms []models.Synonym
 	word := c.Query("word")
 
 	if word == "" {
@@ -56,7 +57,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	err = synonyms.UpdateSynonyms(word, userId)
+	updatedSynonyms, err := actions.UpdateSynonyms(synonyms, word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -65,12 +66,11 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": synonyms,
+		"data": updatedSynonyms,
 	})
 }
 
 func GetSelectedSynonyms(c *fiber.Ctx) error {
-	synonyms := &actions.Synonyms{}
 	word := c.Query("word")
 	userId := c.Params("userId")
 
@@ -80,7 +80,7 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	err := synonyms.GetSynonymsByWord(word, userId)
+	synonyms, err := actions.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -94,7 +94,6 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 }
 
 func DeleteSynonym(c *fiber.Ctx) error {
-	synonyms := &actions.Synonyms{}
 	s := c.Query("synonyms")
 	word := c.Query("word")
 	userId := c.Params("userId")
@@ -107,7 +106,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err = synonyms.DeleteSynonyms(ids, word, userId)
+	synonyms, err := actions.DeleteSynonyms(ids, word, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -121,7 +120,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 }
 
 func BulkSynonymsPost(c *fiber.Ctx) error {
-	synonyms := &actions.Synonyms{}
+	var clientSynonyms []models.Synonym
 	word := c.Query("word")
 	userId := c.Params("userId")
 
@@ -131,7 +130,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 		})
 	}
 
-	err := c.BodyParser(&synonyms)
+	err := c.BodyParser(&clientSynonyms)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -139,8 +138,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 		})
 	}
 
-	existingSynonyms := &actions.Synonyms{}
-	err = existingSynonyms.GetSynonymsByWord(word, userId)
+	existingSynonyms, err := actions.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -150,11 +148,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	// These functions will filter synonyms coming from the client & compare with existing ones.
 	// It will keep anything that's new, and delete what was not sent from the client.
-
-	var synonymsToDelete actions.Synonyms
-	var synonymsToAdd actions.Synonyms
-
-	err = synonymsToDelete.DeleteBulkSynonyms(synonyms, existingSynonyms)
+	err = actions.DeleteBulkSynonyms(clientSynonyms, existingSynonyms)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -162,7 +156,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 		})
 	}
 
-	err = synonymsToAdd.AddBulkSynonyms(synonyms, existingSynonyms)
+	err = actions.AddBulkSynonyms(clientSynonyms, existingSynonyms)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -171,7 +165,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 	}
 
 	// Re-assign synonyms to what's now on the database.
-	err = synonyms.GetSynonymsByWord(word, userId)
+	updatedSynonyms, err := actions.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -180,6 +174,6 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": synonyms,
+		"data": updatedSynonyms,
 	})
 }
