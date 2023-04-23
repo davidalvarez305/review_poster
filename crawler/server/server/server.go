@@ -5,7 +5,6 @@ import (
 	"github.com/davidalvarez305/review_poster/crawler/server/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"gorm.io/gorm"
 )
 
 type Server struct {
@@ -23,6 +22,8 @@ func NewServer(opts *Server) *Server {
 }
 
 func (server *Server) Start() {
+	DB := &gorm.DB{}
+
 	server.App.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 	}))
@@ -33,6 +34,8 @@ func (server *Server) Start() {
 	controllers.Amazon(api)
 	controllers.ReviewPost(api)
 	controllers.DynamicContent(api)
+
+	DB = server.DB
 
 	server.App.Listen(":" + server.Port)
 }

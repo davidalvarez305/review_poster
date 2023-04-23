@@ -25,7 +25,6 @@ func main() {
 
 	server := server.NewServer(&server.Server{
 		App:  fiber.New(),
-		DB:   db,
 		Port: os.Getenv("CRAWLER_PORT"),
 	})
 
