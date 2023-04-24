@@ -9,7 +9,6 @@ import (
 
 	"github.com/davidalvarez305/review_poster/cms/server/models"
 	"github.com/davidalvarez305/review_poster/cms/server/server"
-	"github.com/davidalvarez305/review_poster/cms/server/sessions"
 	"github.com/davidalvarez305/review_poster/cms/server/utils"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -23,7 +22,7 @@ func SaveUser(user models.User) error {
 }
 
 func Logout(c *fiber.Ctx) error {
-	sess, err := sessions.Sessions.Get(c)
+	sess, err := server.Sessions.Get(c)
 
 	if err != nil {
 		return err
@@ -79,7 +78,7 @@ func GetUserById(user models.User, userId string) error {
 
 func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 	var userId string
-	sess, err := sessions.Sessions.Get(c)
+	sess, err := server.Sessions.Get(c)
 
 	if err != nil {
 		return userId, err
@@ -99,7 +98,7 @@ func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
 	var user models.User
 
-	sess, err := sessions.Sessions.Get(c)
+	sess, err := server.Sessions.Get(c)
 
 	if err != nil {
 		return user, err
@@ -136,7 +135,7 @@ func Login(user models.User, c *fiber.Ctx) error {
 		return errors.New("incorrect password")
 	}
 
-	sess, err := sessions.Sessions.Get(c)
+	sess, err := server.Sessions.Get(c)
 
 	if err != nil {
 		return err
