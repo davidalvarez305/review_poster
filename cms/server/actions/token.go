@@ -3,8 +3,8 @@ package actions
 import (
 	"time"
 
-	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/server"
 	"github.com/google/uuid"
 )
 
@@ -16,7 +16,7 @@ func GenerateToken() (models.Token, error) {
 		CreatedAt: time.Now().Unix(),
 	}
 
-	err := database.DB.Save(&token).First(&token).Error
+	err := server.DB.Save(&token).First(&token).Error
 
 	if err != nil {
 		return token, err
@@ -27,7 +27,7 @@ func GenerateToken() (models.Token, error) {
 
 func GetToken(uuid string, userId int) (models.Token, error) {
 	var token models.Token
-	err := database.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token).Error
+	err := server.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token).Error
 
 	if err != nil {
 		return token, err
@@ -37,5 +37,5 @@ func GetToken(uuid string, userId int) (models.Token, error) {
 }
 
 func DeleteToken(token models.Token) error {
-	return database.DB.Delete(&token).Error
+	return server.DB.Delete(&token).Error
 }

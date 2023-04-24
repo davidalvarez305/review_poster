@@ -10,9 +10,7 @@ import (
 	"github.com/gofiber/storage/postgres"
 )
 
-var Sessions *session.Store
-
-func Init() {
+func Init() *session.Store {
 	storage := postgres.New(postgres.Config{
 		Username:   os.Getenv("POSTGRES_USER"),
 		Password:   os.Getenv("POSTGRES_PASSWORD"),
@@ -34,6 +32,5 @@ func Init() {
 		KeyGenerator:   utils.UUID,
 	})
 
-	Sessions = store
-	fmt.Println(store)
+	return store
 }

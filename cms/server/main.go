@@ -7,10 +7,9 @@ import (
 
 	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/routes"
+	"github.com/davidalvarez305/review_poster/cms/server/server"
 	"github.com/davidalvarez305/review_poster/cms/server/sessions"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -23,18 +22,20 @@ func main() {
 		log.Fatalf("Error loading env file.: %+v\n", err)
 	}
 
-	CLIENT_URL := os.Getenv("CONTENT_CLIENT_URL")
-	PORT := os.Getenv("CMS_PORT")
+	db, err := database.Connect()
 
-	app := fiber.New()
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     CLIENT_URL,
-		AllowCredentials: true,
-	}))
+	if err != nil {
+		log.Fatalf("ERROR CONNECTING TO DB: %+v\n", err)
+	}
 
-	database.Connect()
-	sessions.Init()
+	sessionStore := sessions.Init()
 
-	routes.Router(app)
-	app.Listen(":" + PORT)
+	server := server.NewServer(&server.Server{
+		App:   fiber.New(),
+		DB:    db,
+		Store: sessionStore,
+		Port:  os.Getenv("CMS_PORT"),
+	})
+
+	server.Start()
 }

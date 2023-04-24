@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/server"
 )
 
 type CreateWordInput struct {
@@ -16,7 +16,7 @@ type CreateWordInput struct {
 func GetWordByName(name, userId string) (models.Word, error) {
 	var word models.Word
 
-	err := database.DB.Where("name = ? AND user_id = ?", name, userId).Find(&word).Error
+	err := server.DB.Where("name = ? AND user_id = ?", name, userId).Find(&word).Error
 
 	if err != nil {
 		return word, err
@@ -28,7 +28,7 @@ func GetWordByName(name, userId string) (models.Word, error) {
 func GetWords(userId string) ([]models.Word, error) {
 	var words []models.Word
 
-	err := database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
+	err := server.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
 
 	if err != nil {
 		return words, err
@@ -38,13 +38,13 @@ func GetWords(userId string) ([]models.Word, error) {
 }
 
 func CreateWord(word models.Word) error {
-	return database.DB.Where("user_id = ?", word.UserID).Save(&word).Error
+	return server.DB.Where("user_id = ?", word.UserID).Save(&word).Error
 }
 
 func UpdateWord(word models.Word, userId string) error {
-	return database.DB.Where("user_id = ? AND id = ?", userId, word.ID).Save(&word).First(&word).Error
+	return server.DB.Where("user_id = ? AND id = ?", userId, word.ID).Save(&word).First(&word).Error
 }
 
 func DeleteWord(word models.Word, userId, word_id string) error {
-	return database.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word).Error
+	return server.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word).Error
 }

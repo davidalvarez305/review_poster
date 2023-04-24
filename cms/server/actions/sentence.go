@@ -1,14 +1,14 @@
 package actions
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/server"
 )
 
 func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
+	err := server.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err
@@ -19,7 +19,7 @@ func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error
 
 func GetAllSentences(userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
-	err := database.DB.Where("user_id = ?", userId).Find(&sentences).Error
+	err := server.DB.Where("user_id = ?", userId).Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err
@@ -30,7 +30,7 @@ func GetAllSentences(userId string) ([]models.Sentence, error) {
 
 // Create a single sentence. This assumes that input will have been validated elsewhere.
 func CreateSentence(sentence models.Sentence) error {
-	err := database.DB.Save(&sentence).First(&sentence).Error
+	err := server.DB.Save(&sentence).First(&sentence).Error
 
 	if err != nil {
 		return err
@@ -41,11 +41,11 @@ func CreateSentence(sentence models.Sentence) error {
 
 // Create many sentences. This assumes that input will have been validated elsewhere.
 func CreateSentences(sentences []models.Sentence, userId string) error {
-	return database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
+	return server.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
 }
 
 func UpdateSentences(sentences []models.Sentence, paragraph, userId string) ([]models.Sentence, error) {
-	err := database.DB.Where("user_id = ?", userId).Save(&sentences).Error
+	err := server.DB.Where("user_id = ?", userId).Save(&sentences).Error
 
 	if err != nil {
 		return sentences, err
@@ -63,7 +63,7 @@ func UpdateSentences(sentences []models.Sentence, paragraph, userId string) ([]m
 func DeleteSentences(ids []int, paragraph, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Delete(&models.Sentence{}, ids).Error
+	err := server.DB.Delete(&models.Sentence{}, ids).Error
 
 	if err != nil {
 		return sentences, err
@@ -80,7 +80,7 @@ func DeleteSentences(ids []int, paragraph, userId string) ([]models.Sentence, er
 
 // Delete records without checking user or paragraph id. Assumes that this is being checked elsewhere.
 func SimpleDeleteSentences(sentences []models.Sentence) error {
-	return database.DB.Delete(&sentences).Error
+	return server.DB.Delete(&sentences).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.

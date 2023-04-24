@@ -1,37 +1,37 @@
 package actions
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/cms/server/server"
 )
 
 // Create a single record and return the inserted record.
 func CreateSynonym(synonym models.Synonym) error {
-	return database.DB.Save(&synonym).First(&synonym).Error
+	return server.DB.Save(&synonym).First(&synonym).Error
 }
 
 // Create multiple records without returning anything.
 func CreateSynonyms(synonyms []models.Synonym) error {
-	return database.DB.Create(&synonyms).Error
+	return server.DB.Create(&synonyms).Error
 }
 
 // Update a single record that belongs a user.
 func UpdateSynonym(synonym models.Synonym, userId, wordId string) error {
 
-	err := database.DB.Where("word_id = ? AND user_id = ?", wordId, userId).Find(&synonym).Error
+	err := server.DB.Where("word_id = ? AND user_id = ?", wordId, userId).Find(&synonym).Error
 
 	if err != nil {
 		return err
 	}
 
-	err = database.DB.Save(&synonym).First(&synonym).Error
+	err = server.DB.Save(&synonym).First(&synonym).Error
 
 	return err
 }
 
 // Updates multiple records and returns DB values.
 func UpdateSynonyms(synonyms []models.Synonym, word, userId string) ([]models.Synonym, error) {
-	err := database.DB.Save(&synonyms).Error
+	err := server.DB.Save(&synonyms).Error
 
 	if err != nil {
 		return synonyms, err
@@ -50,7 +50,7 @@ func UpdateSynonyms(synonyms []models.Synonym, word, userId string) ([]models.Sy
 func GetSynonymsByWord(word, userId string) ([]models.Synonym, error) {
 	var synonyms []models.Synonym
 
-	err := database.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
+	err := server.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
 
 	if err != nil {
 		return synonyms, err
@@ -63,7 +63,7 @@ func GetSynonymsByWord(word, userId string) ([]models.Synonym, error) {
 func DeleteSynonyms(s []int, word, userId string) ([]models.Synonym, error) {
 	var synonyms []models.Synonym
 
-	err := database.DB.Delete(&models.Synonym{}, s).Error
+	err := server.DB.Delete(&models.Synonym{}, s).Error
 
 	if err != nil {
 		return synonyms, err
@@ -80,7 +80,7 @@ func DeleteSynonyms(s []int, word, userId string) ([]models.Synonym, error) {
 
 // Delete without returning anything.
 func SimpleDeleteSynonyms(synonyms []models.Synonym) error {
-	return database.DB.Delete(&synonyms).Error
+	return server.DB.Delete(&synonyms).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
