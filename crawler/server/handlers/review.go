@@ -9,10 +9,24 @@ import (
 func CreatePosts(c *fiber.Ctx) error {
 	var body types.CreateReviewPostsInput
 
-	dictionary, err := actions.PullContentDictionary()
+	err := c.BodyParser(&body)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse request body.",
+		})
+	}
+
+	if len(body.GroupName) == 0 || len(body.Keyword) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Either group or keyword is missing in request body.",
+		})
+	}
+
+	dictionary, err := actions.PullContentDictionary()
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
 			"data": "Failed to fetch dictionary data.",
 		})
 	}
@@ -20,16 +34,8 @@ func CreatePosts(c *fiber.Ctx) error {
 	sentences, err := actions.PullDynamicContent()
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"data": "Failed to fetch dynamic content data.",
-		})
-	}
-
-	err = c.BodyParser(&body)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse request body.",
 		})
 	}
 

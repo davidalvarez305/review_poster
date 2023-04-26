@@ -22,7 +22,7 @@ func createSubCategories(subCategories []string, category models.Category) ([]mo
 		fmt.Printf("ERROR FING EXISTING SUBCATEGORIES: %+v", err)
 	}
 
-	var sc []models.SubCategory
+	var subCategoriesToCreate []models.SubCategory
 	for _, subcategory := range subCategories {
 		var lowerCaseSubCategory = strings.ToLower(subcategory)
 		var slugSubCategory = slug.Make(subcategory)
@@ -41,17 +41,19 @@ func createSubCategories(subCategories []string, category models.Category) ([]mo
 			break
 		}
 
-		sc = append(sc, models.SubCategory{
+		subCategoriesToCreate = append(subCategoriesToCreate, models.SubCategory{
 			Name:       lowerCaseSubCategory,
 			Slug:       slugSubCategory,
 			CategoryID: category.ID,
 		})
 	}
 
-	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&sc).Error
+	if len(subCategoriesToCreate) > 0 {
+		err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&subCategoriesToCreate).Error
 
-	if err != nil {
-		return createdSubcategories, err
+		if err != nil {
+			return createdSubcategories, err
+		}
 	}
 
 	err = database.DB.Preload("Category.Group").Find(&createdSubcategories).Error

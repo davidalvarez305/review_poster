@@ -13,8 +13,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func CreateReviewPosts(categoryName, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]AmazonSearchResultsPage, error) {
-	var products []AmazonSearchResultsPage
+func CreateReviewPosts(categoryName, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]models.ReviewPost, error) {
+	var readyReviewPosts []models.ReviewPost
 
 	q := types.GoogleQuery{
 		Pagesize: 1000,
@@ -26,27 +26,27 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	googleKeywords, err := QueryGoogle(q)
 
 	if err != nil {
-		return products, err
+		return readyReviewPosts, err
 	}
 
 	seedKeywords, err := GetSeedKeywords(googleKeywords)
 
 	if err != nil {
-		return products, err
+		return readyReviewPosts, err
 	}
 
 	category, err := createOrFindCategory(categoryName, groupName)
 
 	if err != nil {
 		fmt.Printf("ERROR FINDING OR CREATING CATEGORY: %+v\n", err)
-		return products, err
+		return readyReviewPosts, err
 	}
 
 	subCategories, err := createSubCategories(seedKeywords, category)
 
 	if err != nil {
 		fmt.Printf("ERROR CREATING SUBCATEGORIES: %+v\n", err)
-		return products, err
+		return readyReviewPosts, err
 	}
 
 	wg := sync.WaitGroup{}
@@ -57,33 +57,84 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 
 			if err != nil {
 				fmt.Printf("ERROR SCRAPING: %+v\n", err)
+				return
 			}
 
 			if len(data) == 0 {
 				fmt.Println("Keyword: " + seedKeywords[keywordNum] + " - 0" + "\n")
+				return
 			}
 
-			err = insertReviewPosts(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
+			reviewPosts, err := insertReviewPosts(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
 
 			if err != nil {
 				fmt.Printf("ERROR INSERTING: %+v\n", err)
+				return
 			}
 
-			products = append(products, data...)
+			readyReviewPosts = append(readyReviewPosts, reviewPosts...)
 
 			total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", keywordNum+1, len(seedKeywords), seedKeywords[keywordNum], len(data))
 			fmt.Println(total)
 
-			fmt.Printf("Total Products = %v\n", len(products))
+			fmt.Printf("Total Products = %v\n", len(reviewPosts))
 			wg.Done()
 		}(i)
 	}
 
 	wg.Wait()
-	return products, nil
+
+	// Pull existing review posts so that I can exclude them from the slice of reviews to be created
+	var existingReviewPosts []models.ReviewPost
+	err = database.DB.Preload("Product").Find(&existingReviewPosts).Error
+	if err != nil {
+		fmt.Printf("ERROR FINDING EXISTING REVIEW POSTS: %+v\n", err)
+		return readyReviewPosts, err
+	}
+
+	var reviewPostsTobeCreated []models.ReviewPost
+
+	for _, post := range readyReviewPosts {
+		exists := false
+
+		// Ensure that no duplicates exist in DB
+		for _, existingReviewPost := range existingReviewPosts {
+			if post.Slug == existingReviewPost.Slug || post.Product.AffiliateUrl == existingReviewPost.ProductAffiliateUrl {
+				exists = true
+				break
+			}
+		}
+
+		// If the first loop already found a duplicate, no need to execute the following code
+		// Continue to next review post
+		if exists {
+			continue
+		}
+
+		// This code will make sure that not only the review post nor the product exist in the DB, but also don't exist in the current "TO BE CREATED" slice
+		for _, acceptedReviewPost := range reviewPostsTobeCreated {
+			if post.Slug == acceptedReviewPost.Slug || post.Product.AffiliateUrl == acceptedReviewPost.ProductAffiliateUrl {
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			reviewPostsTobeCreated = append(reviewPostsTobeCreated, post)
+		}
+	}
+
+	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&reviewPostsTobeCreated).Find(&reviewPostsTobeCreated).Error
+
+	if err != nil {
+		fmt.Printf("ERROR SAVING REVIEW POSTS: %+v\n", err)
+		return reviewPostsTobeCreated, err
+	}
+
+	return reviewPostsTobeCreated, nil
 }
 
-func insertReviewPosts(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) error {
+func insertReviewPosts(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
 	var posts []models.ReviewPost
 
 	wg := sync.WaitGroup{}
@@ -94,12 +145,7 @@ func insertReviewPosts(subCategories []models.SubCategory, subCategoryName strin
 
 			if err != nil {
 				fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
-			}
-
-			err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
-
-			if err != nil {
-				fmt.Printf("ERROR SAVING NEW REVIEW POST: %+v\n", err)
+				return
 			}
 
 			fmt.Printf("Product successfully crawled: %+v\n", p.Title)
@@ -110,7 +156,7 @@ func insertReviewPosts(subCategories []models.SubCategory, subCategoryName strin
 
 	wg.Wait()
 
-	return nil
+	return posts, nil
 }
 
 func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategories []models.SubCategory, keyword string) (models.ReviewPost, error) {
@@ -144,26 +190,6 @@ func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, 
 		return post, err
 	}
 
-	// I'm creating this separately because there's a chance that the product already exists, in which case, it will be updated
-
-	product := models.Product{
-		AffiliateUrl:       input.Link,
-		ProductPrice:       input.Price,
-		ProductReviews:     input.Reviews,
-		ProductRatings:     input.Rating,
-		ProductImage:       replacedImage,
-		ProductLabel:       data.ReviewPostProductLabel,
-		ProductName:        input.Name,
-		ProductDescription: data.ReviewPostProductDescription,
-		ProductImageAlt:    strings.ToLower(input.Name),
-	}
-
-	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&product).Error
-
-	if err != nil {
-		return post, err
-	}
-
 	var subCategoryId int
 	for _, subcategory := range subCategories {
 		if subcategory.Name == keyword {
@@ -175,7 +201,6 @@ func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, 
 	post = models.ReviewPost{
 		Title:               data.ReviewPostTitle,
 		SubCategoryID:       subCategoryId,
-		ProductAffiliateUrl: input.Link,
 		Slug:                slug,
 		Content:             data.ReviewPostContent + utils.GetAIResponse(additionalContent),
 		Headline:            data.ReviewPostHeadline,
@@ -187,6 +212,18 @@ func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, 
 		Faq_Question_1:      data.ReviewPostFaq_Question_1,
 		Faq_Question_2:      data.ReviewPostFaq_Question_2,
 		Faq_Question_3:      data.ReviewPostFaq_Question_3,
+		ProductAffiliateUrl: input.Link,
+		Product: &models.Product{
+			AffiliateUrl:       input.Link,
+			ProductPrice:       input.Price,
+			ProductReviews:     input.Reviews,
+			ProductRatings:     input.Rating,
+			ProductImage:       replacedImage,
+			ProductLabel:       data.ReviewPostProductLabel,
+			ProductName:        input.Name,
+			ProductDescription: data.ReviewPostProductDescription,
+			ProductImageAlt:    strings.ToLower(input.Name),
+		},
 	}
 
 	return post, nil
