@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
@@ -34,33 +35,35 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 		return products, err
 	}
 
-	for i := 0; i < len(seedKeywords); i++ {
-		data, err := ScrapeSearchResultsPage(seedKeywords[i])
+	wg := sync.WaitGroup{}
+	for i := 0; i < len(seedKeywords)-1; i++ {
+		wg.Add(1)
+		go func(keywordNum int) {
+			data, err := ScrapeSearchResultsPage(seedKeywords[keywordNum])
 
-		if err != nil {
-			fmt.Printf("ERROR SCRAPING: %+v\n", err)
-			continue
-		}
+			if err != nil {
+				fmt.Printf("ERROR SCRAPING: %+v\n", err)
+			}
 
-		if len(data) == 0 {
-			fmt.Println("Keyword: " + seedKeywords[i] + " - 0" + "\n")
-			continue
-		}
+			if len(data) == 0 {
+				fmt.Println("Keyword: " + seedKeywords[i] + " - 0" + "\n")
+			}
 
-		err = insertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary.Data, sentences.Data)
+			err = insertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary.Data, sentences.Data)
 
-		if err != nil {
-			fmt.Printf("ERROR INSERTING: %+v\n", err)
-			continue
-		}
+			if err != nil {
+				fmt.Printf("ERROR INSERTING: %+v\n", err)
+			}
 
-		products = append(products, data...)
+			products = append(products, data...)
 
-		total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
-		fmt.Println(total)
+			total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
+			fmt.Println(total)
+
+			fmt.Printf("Total Products = %v\n", len(products))
+		}(i)
+		wg.Done()
 	}
-
-	fmt.Printf("Total Products = %v\n", len(products))
 	return products, nil
 }
 
@@ -74,23 +77,26 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 		return err
 	}
 
-	for i := 0; i < len(products); i++ {
-		p, err := assembleReviewPost(products[i], dictionary, sentences, subCategory)
+	wg := sync.WaitGroup{}
+	for i := 0; i < len(products)-1; i++ {
+		wg.Add(1)
+		go func(keywordNum int) {
+			p, err := assembleReviewPost(products[i], dictionary, sentences, subCategory)
 
-		if err != nil {
-			fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
-			continue
-		}
+			if err != nil {
+				fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
+			}
 
-		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
+			err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
 
-		if err != nil {
-			fmt.Printf("ERROR SAVING NEW REVIEW POST: %+v\n", err)
-			return err
-		}
+			if err != nil {
+				fmt.Printf("ERROR SAVING NEW REVIEW POST: %+v\n", err)
+			}
 
-		fmt.Printf("Product successfully crawled: %+v\n", p.Title)
-		posts = append(posts, p)
+			fmt.Printf("Product successfully crawled: %+v\n", p.Title)
+			posts = append(posts, p)
+		}(i)
+		wg.Done()
 	}
 
 	return nil
