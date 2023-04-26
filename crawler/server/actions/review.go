@@ -127,7 +127,6 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&reviewPostsTobeCreated).Find(&reviewPostsTobeCreated).Error
 
 	if err != nil {
-		fmt.Printf("ERROR SAVING REVIEW POSTS: %+v\n", err)
 		return reviewPostsTobeCreated, err
 	}
 

@@ -11,7 +11,7 @@ type ReviewPost struct {
 	Intro               string       `json:"intro" form:"intro"`
 	Description         string       `json:"description" form:"description"`
 	ProductAffiliateUrl string       `gorm:"column:product_affiliate_url" json:"product_affiliate_url" form:"product_affiliate_url"`
-	Product             *Product     `gorm:"not null;foreignKey:ProductAffiliateUrl;constraint:OnDelete:CASCADE,OnUpdate:CASCADE" json:"product" form:"product"`
+	Product             *Product     `gorm:"not null;foreignKey:ProductAffiliateUrl;references:AffiliateUrl;constraint:OnDelete:CASCADE,OnUpdate:CASCADE" json:"product" form:"product"`
 	Faq_Answer_1        string       `gorm:"column:faq_answer_1" json:"faq_answer_1" form:"faq_answer_1"`
 	Faq_Answer_2        string       `gorm:"column:faq_answer_2" json:"faq_answer_2" form:"faq_answer_2"`
 	Faq_Answer_3        string       `gorm:"column:faq_answer_3" json:"faq_answer_3" form:"faq_answer_3"`
