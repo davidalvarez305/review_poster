@@ -46,10 +46,10 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 			}
 
 			if len(data) == 0 {
-				fmt.Println("Keyword: " + seedKeywords[i] + " - 0" + "\n")
+				fmt.Println("Keyword: " + seedKeywords[keywordNum] + " - 0" + "\n")
 			}
 
-			err = insertReviewPosts(groupName, keyword, seedKeywords[i], data, dictionary.Data, sentences.Data)
+			err = insertReviewPosts(groupName, keyword, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
 
 			if err != nil {
 				fmt.Printf("ERROR INSERTING: %+v\n", err)
@@ -57,13 +57,15 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 
 			products = append(products, data...)
 
-			total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", i+1, len(seedKeywords), seedKeywords[i], len(data))
+			total := fmt.Sprintf("Keyword #%v of %v - %s - Total Products = %v\n", keywordNum+1, len(seedKeywords), seedKeywords[keywordNum], len(data))
 			fmt.Println(total)
 
 			fmt.Printf("Total Products = %v\n", len(products))
+			wg.Done()
 		}(i)
-		wg.Done()
 	}
+
+	wg.Wait()
 	return products, nil
 }
 
@@ -80,8 +82,8 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 	wg := sync.WaitGroup{}
 	for i := 0; i < len(products)-1; i++ {
 		wg.Add(1)
-		go func(keywordNum int) {
-			p, err := assembleReviewPost(products[i], dictionary, sentences, subCategory)
+		go func(productNum int) {
+			p, err := assembleReviewPost(products[productNum], dictionary, sentences, subCategory)
 
 			if err != nil {
 				fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
@@ -95,9 +97,11 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 
 			fmt.Printf("Product successfully crawled: %+v\n", p.Title)
 			posts = append(posts, p)
+			wg.Done()
 		}(i)
-		wg.Done()
 	}
+
+	wg.Wait()
 
 	return nil
 }
