@@ -13,13 +13,13 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]AmazonSearchResultsPage, error) {
+func CreateReviewPosts(categoryName, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]AmazonSearchResultsPage, error) {
 	var products []AmazonSearchResultsPage
 
 	q := types.GoogleQuery{
 		Pagesize: 1000,
 		KeywordSeed: types.KeywordSeed{
-			Keywords: [1]string{keyword},
+			Keywords: [1]string{categoryName},
 		},
 	}
 
@@ -32,6 +32,19 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 	seedKeywords, err := GetSeedKeywords(googleKeywords)
 
 	if err != nil {
+		return products, err
+	}
+
+	category, err := createOrFindCategory(categoryName, groupName)
+
+	if err != nil {
+		return products, err
+	}
+
+	subCategories, err := createSubCategories(seedKeywords, category)
+
+	if err != nil {
+		fmt.Printf("ERROR CREATING SUBCATEGORIES: %+v\n", err)
 		return products, err
 	}
 
@@ -49,7 +62,7 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 				fmt.Println("Keyword: " + seedKeywords[keywordNum] + " - 0" + "\n")
 			}
 
-			err = insertReviewPosts(groupName, keyword, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
+			err = insertReviewPosts(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
 
 			if err != nil {
 				fmt.Printf("ERROR INSERTING: %+v\n", err)
@@ -69,21 +82,14 @@ func CreateReviewPosts(keyword, groupName string, dictionary types.DictionaryAPI
 	return products, nil
 }
 
-func insertReviewPosts(groupName, categoryName, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) error {
+func insertReviewPosts(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) error {
 	var posts []models.ReviewPost
-
-	subCategory, err := newSubCategory(categoryName, subCategoryName, groupName)
-
-	if err != nil {
-		fmt.Printf("ERROR CREATING SUB_CATEGORY: %+v\n", err)
-		return err
-	}
 
 	wg := sync.WaitGroup{}
 	for i := 0; i < len(products)-1; i++ {
 		wg.Add(1)
 		go func(productNum int) {
-			p, err := assembleReviewPost(products[productNum], dictionary, sentences, subCategory)
+			p, err := assembleReviewPost(products[productNum], dictionary, sentences, subCategories, subCategoryName)
 
 			if err != nil {
 				fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
@@ -106,7 +112,7 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 	return nil
 }
 
-func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategory models.SubCategory) (models.ReviewPost, error) {
+func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategories []models.SubCategory, keyword string) (models.ReviewPost, error) {
 	var post models.ReviewPost
 	slug := slug.Make(input.Name)
 	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
@@ -157,9 +163,17 @@ func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, 
 		return post, err
 	}
 
+	var subCategoryId int
+	for _, subcategory := range subCategories {
+		if subcategory.Name == keyword {
+			subCategoryId = subcategory.ID
+			break
+		}
+	}
+
 	post = models.ReviewPost{
 		Title:               data.ReviewPostTitle,
-		SubCategoryID:       subCategory.ID,
+		SubCategoryID:       subCategoryId,
 		ProductAffiliateUrl: input.Link,
 		Slug:                slug,
 		Content:             data.ReviewPostContent + utils.GetAIResponse(additionalContent),
