@@ -3,6 +3,8 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -44,6 +46,13 @@ func getAIGeneratedContent(promptMsg string) (types.OpenAIResponse, error) {
 		return response, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		fmt.Printf("ERR BODY: %+v\n", resp.Body)
+		os.Exit(1)
+		return response, errors.New("request failed")
+	}
 
 	json.NewDecoder(resp.Body).Decode(&response)
 

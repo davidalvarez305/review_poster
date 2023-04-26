@@ -50,7 +50,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	}
 
 	wg := sync.WaitGroup{}
-	for i := 0; i < len(seedKeywords)-1; i++ {
+	for i := 0; i < 2 /* len(seedKeywords) */ -1; i++ {
 		wg.Add(1)
 		go func(keywordNum int) {
 			data, err := ScrapeSearchResultsPage(seedKeywords[keywordNum])
