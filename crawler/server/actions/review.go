@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
-	"github.com/davidalvarez305/review_poster/crawler/server/server"
 	"github.com/davidalvarez305/review_poster/crawler/server/types"
 	"github.com/davidalvarez305/review_poster/crawler/server/utils"
 	"github.com/gosimple/slug"
@@ -82,7 +82,7 @@ func insertReviewPosts(groupName, categoryName, subCategoryName string, products
 			continue
 		}
 
-		err = server.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
+		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&p).Error
 
 		if err != nil {
 			fmt.Printf("ERROR SAVING NEW REVIEW POST: %+v\n", err)
@@ -141,7 +141,7 @@ func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, 
 		ProductImageAlt:    strings.ToLower(input.Name),
 	}
 
-	err = server.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&product).Error
+	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&product).Error
 
 	if err != nil {
 		return post, err

@@ -14,8 +14,6 @@ type Server struct {
 	Port string
 }
 
-var DB gorm.DB
-
 func NewServer(opts *Server) *Server {
 	return &Server{
 		App:  opts.App,
@@ -36,8 +34,6 @@ func (server *Server) Start() {
 	controllers.Amazon(api)
 	controllers.ReviewPost(api)
 	controllers.DynamicContent(api)
-
-	DB = *server.DB
 
 	server.App.Listen(":" + server.Port)
 }

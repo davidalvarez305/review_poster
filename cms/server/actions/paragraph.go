@@ -1,14 +1,14 @@
 package actions
 
 import (
+	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/server"
 )
 
 func GetParagraphs(userId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := server.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
+	err := database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err
@@ -18,19 +18,19 @@ func GetParagraphs(userId string) ([]models.Paragraph, error) {
 }
 
 func CreateParagraph(paragraph models.Paragraph) error {
-	return server.DB.Save(&paragraph).First(&paragraph).Error
+	return database.DB.Save(&paragraph).First(&paragraph).Error
 }
 
 func CreateParagraphs(paragraphs []models.Paragraph, userId string) error {
-	return server.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
+	return database.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
 }
 
 func UpdateParagraph(paragraph models.Paragraph, userId string) error {
-	return server.DB.Where("user_id = ?", userId).Save(&paragraph).First(&paragraph).Error
+	return database.DB.Where("user_id = ?", userId).Save(&paragraph).First(&paragraph).Error
 }
 
 func UpdateParagraphs(paragraphs []models.Paragraph, paragraphId, userId, template string) ([]models.Paragraph, error) {
-	err := server.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
+	err := database.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err
@@ -48,13 +48,13 @@ func UpdateParagraphs(paragraphs []models.Paragraph, paragraphId, userId, templa
 func DeleteParagraphs(ids []int, templateId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := server.DB.Delete(&models.Paragraph{}, ids).Error
+	err := database.DB.Delete(&models.Paragraph{}, ids).Error
 
 	if err != nil {
 		return paragraphs, err
 	}
 
-	err = server.DB.Where("template_id = ?", templateId).Find(&paragraphs).Error
+	err = database.DB.Where("template_id = ?", templateId).Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err
@@ -66,7 +66,7 @@ func DeleteParagraphs(ids []int, templateId string) ([]models.Paragraph, error) 
 func GetParagraphsByTemplate(template, userId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := server.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
+	err := database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err
@@ -76,7 +76,7 @@ func GetParagraphsByTemplate(template, userId string) ([]models.Paragraph, error
 }
 
 func SimpleDelete(paragraphs []models.Paragraph) error {
-	return server.DB.Delete(&paragraphs).Error
+	return database.DB.Delete(&paragraphs).Error
 }
 
 // Takes structs from the client & deletes them. Does not return records from DB.
@@ -136,7 +136,7 @@ func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, 
 func GetTemplatesAndParagraphs(userId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := server.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
+	err := database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err

@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/storage/postgres"
 )
 
+var Sessions session.Store
+
 func Init() *session.Store {
 	storage := postgres.New(postgres.Config{
 		Username:   os.Getenv("POSTGRES_USER"),
@@ -31,6 +33,8 @@ func Init() *session.Store {
 		CookieSameSite: "lax",
 		KeyGenerator:   utils.UUID,
 	})
+
+	Sessions = *store
 
 	return store
 }

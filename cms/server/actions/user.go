@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/davidalvarez305/review_poster/cms/server/database"
 	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/server"
+	"github.com/davidalvarez305/review_poster/cms/server/sessions"
 	"github.com/davidalvarez305/review_poster/cms/server/utils"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -18,11 +19,11 @@ import (
 )
 
 func SaveUser(user models.User) error {
-	return server.DB.Save(&user).First(&user).Error
+	return database.DB.Save(&user).First(&user).Error
 }
 
 func Logout(c *fiber.Ctx) error {
-	sess, err := server.Sessions.Get(c)
+	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
 		return err
@@ -34,7 +35,7 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func Delete(user models.User) error {
-	return server.DB.Delete(&user).Error
+	return database.DB.Delete(&user).Error
 }
 
 func CreateUser(user models.User) error {
@@ -73,12 +74,12 @@ func UpdateUser(user models.User, body models.User) error {
 }
 
 func GetUserById(user models.User, userId string) error {
-	return server.DB.Where("id = ?", userId).First(&user).Error
+	return database.DB.Where("id = ?", userId).First(&user).Error
 }
 
 func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 	var userId string
-	sess, err := server.Sessions.Get(c)
+	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
 		return userId, err
@@ -98,7 +99,7 @@ func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
 	var user models.User
 
-	sess, err := server.Sessions.Get(c)
+	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
 		return user, err
@@ -123,7 +124,7 @@ func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
 
 func Login(user models.User, c *fiber.Ctx) error {
 	userPassword := user.Password
-	err := server.DB.Where("username = ?", user.Username).First(&user).Error
+	err := database.DB.Where("username = ?", user.Username).First(&user).Error
 
 	if err != nil {
 		return errors.New("incorrect username")
@@ -135,7 +136,7 @@ func Login(user models.User, c *fiber.Ctx) error {
 		return errors.New("incorrect password")
 	}
 
-	sess, err := server.Sessions.Get(c)
+	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
 		return err

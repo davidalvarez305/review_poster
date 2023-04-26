@@ -18,10 +18,6 @@ type Server struct {
 	Port  string
 }
 
-var DB gorm.DB
-
-var Sessions session.Store
-
 func NewServer(opts *Server) *Server {
 	return &Server{
 		App:   opts.App,
@@ -45,8 +41,6 @@ func (server *Server) Start() {
 	api := server.App.Group("api", middleware.AuthMiddleware, middleware.ResourceAccessRestriction)
 
 	controllers.User(api)
-
-	DB = *server.DB
 
 	server.App.Listen(":" + server.Port)
 }

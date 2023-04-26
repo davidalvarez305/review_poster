@@ -17,6 +17,8 @@ type connection struct {
 	dbName   string
 }
 
+var DB gorm.DB
+
 func Connect() (*gorm.DB, error) {
 	conn := connection{
 		host:     os.Getenv("POSTGRES_HOST"),
@@ -36,6 +38,8 @@ func Connect() (*gorm.DB, error) {
 	if err != nil {
 		return db, err
 	}
+
+	DB = *db
 
 	return db, nil
 }
