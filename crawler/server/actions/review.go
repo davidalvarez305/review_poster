@@ -38,6 +38,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	category, err := createOrFindCategory(categoryName, groupName)
 
 	if err != nil {
+		fmt.Printf("ERROR FINDING OR CREATING CATEGORY: %+v\n", err)
 		return products, err
 	}
 

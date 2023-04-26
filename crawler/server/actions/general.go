@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gosimple/slug"
@@ -12,17 +13,42 @@ import (
 
 func createSubCategories(subCategories []string, category models.Category) ([]models.SubCategory, error) {
 	var createdSubcategories []models.SubCategory
+	var existingSubcategories []models.SubCategory
+
+	// Ensure that that subcategories that will be inserted don't already exist -- otherwise the entire category will not be inserted
+	err := database.DB.Find(&existingSubcategories).Error
+
+	if err != nil {
+		fmt.Printf("ERROR FING EXISTING SUBCATEGORIES: %+v", err)
+	}
 
 	var sc []models.SubCategory
 	for _, subcategory := range subCategories {
+		var lowerCaseSubCategory = strings.ToLower(subcategory)
+		var slugSubCategory = slug.Make(subcategory)
+
+		exists := false
+
+		for _, existingSubCategory := range existingSubcategories {
+			if existingSubCategory.Name == lowerCaseSubCategory {
+				exists = true
+				break
+			}
+		}
+
+		// subcategory will be omitted if it exists already, avoiding that this function errors out for existing entities
+		if exists {
+			break
+		}
+
 		sc = append(sc, models.SubCategory{
-			Name:       strings.ToLower(subcategory),
-			Slug:       slug.Make(subcategory),
+			Name:       lowerCaseSubCategory,
+			Slug:       slugSubCategory,
 			CategoryID: category.ID,
 		})
 	}
 
-	err := database.DB.Save(&sc).Error
+	err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&sc).Error
 
 	if err != nil {
 		return createdSubcategories, err
