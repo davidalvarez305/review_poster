@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
@@ -65,7 +66,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 				return
 			}
 
-			reviewPosts, err := insertReviewPosts(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
+			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
 
 			if err != nil {
 				fmt.Printf("ERROR INSERTING: %+v\n", err)
@@ -124,106 +125,117 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		}
 	}
 
-	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&reviewPostsTobeCreated).Find(&reviewPostsTobeCreated).Error
+	finalContent := replaceContentWithChatGPT(reviewPostsTobeCreated)
+
+	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&finalContent).Find(&finalContent).Error
 
 	if err != nil {
-		return reviewPostsTobeCreated, err
+		return finalContent, err
 	}
 
-	return reviewPostsTobeCreated, nil
+	return finalContent, nil
 }
 
-func insertReviewPosts(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
+func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
 	var posts []models.ReviewPost
 
-	wg := sync.WaitGroup{}
-	for i := 0; i < len(products)-1; i++ {
-		wg.Add(1)
-		go func(productNum int) {
-			p, err := assembleReviewPost(products[productNum], dictionary, sentences, subCategories, subCategoryName)
+	for i := 0; i < len(products); i++ {
+		slug := slug.Make(products[i].Name)
+		replacedImage := strings.Replace(products[i].Image, "UL320", "UL640", 1)
 
-			if err != nil {
-				fmt.Printf("ERROR CREATING NEW REVIEW POST: %+v\n", err)
-				return
+		data := utils.GenerateContentUtil(products[i].Name, dictionary, sentences)
+
+		var subCategoryId int
+		for _, subcategory := range subCategories {
+			if subcategory.Name == subCategoryName {
+				subCategoryId = subcategory.ID
+				break
 			}
+		}
 
-			fmt.Printf("Product successfully crawled: %+v\n", p.Title)
-			posts = append(posts, p)
-			wg.Done()
-		}(i)
+		post := models.ReviewPost{
+			Title:               data.ReviewPostTitle,
+			SubCategoryID:       subCategoryId,
+			Slug:                slug,
+			Content:             data.ReviewPostContent,
+			Headline:            data.ReviewPostHeadline,
+			Intro:               data.ReviewPostIntro,
+			Description:         data.ReviewPostDescription,
+			Faq_Answer_1:        data.ReviewPostFaq_Answer_1,
+			Faq_Answer_2:        data.ReviewPostFaq_Answer_2,
+			Faq_Answer_3:        data.ReviewPostFaq_Answer_3,
+			Faq_Question_1:      data.ReviewPostFaq_Question_1,
+			Faq_Question_2:      data.ReviewPostFaq_Question_2,
+			Faq_Question_3:      data.ReviewPostFaq_Question_3,
+			ProductAffiliateUrl: products[i].Link,
+			Product: &models.Product{
+				AffiliateUrl:       products[i].Link,
+				ProductPrice:       products[i].Price,
+				ProductReviews:     products[i].Reviews,
+				ProductRatings:     products[i].Rating,
+				ProductImage:       replacedImage,
+				ProductLabel:       data.ReviewPostProductLabel,
+				ProductName:        products[i].Name,
+				ProductDescription: data.ReviewPostProductDescription,
+				ProductImageAlt:    strings.ToLower(products[i].Name),
+			},
+		}
+		posts = append(posts, post)
 	}
-
-	wg.Wait()
 
 	return posts, nil
 }
 
-func assembleReviewPost(input AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence, subCategories []models.SubCategory, keyword string) (models.ReviewPost, error) {
-	var post models.ReviewPost
-	slug := slug.Make(input.Name)
-	replacedImage := strings.Replace(input.Image, "UL320", "UL640", 1)
-
-	additionalContent, err := getAIGeneratedContent("What are people saying about the " + input.Name)
-
-	if err != nil {
-		return post, err
+func rateLimit(counter *int) {
+	if *counter >= 10 {
+		time.Sleep(60 * time.Second)
+		*counter = 0
 	}
+}
 
-	data := utils.GenerateContentUtil(input.Name, dictionary, sentences)
+func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
+	var newReviewPosts []models.ReviewPost
+	counter := 0
+	for _, post := range posts {
+		defer rateLimit(&counter)
 
-	FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_1)
+		additionalContent, err := getAIGeneratedContent("What are people saying about the " + post.Product.ProductName)
 
-	if err != nil {
-		return post, err
-	}
-
-	FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_2)
-
-	if err != nil {
-		return post, err
-	}
-
-	FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + data.ReviewPostFaq_Answer_3)
-
-	if err != nil {
-		return post, err
-	}
-
-	var subCategoryId int
-	for _, subcategory := range subCategories {
-		if subcategory.Name == keyword {
-			subCategoryId = subcategory.ID
-			break
+		if err != nil {
+			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+			continue
 		}
+
+		FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_1)
+
+		if err != nil {
+			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+			continue
+		}
+
+		FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_2)
+
+		if err != nil {
+			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+			continue
+		}
+
+		FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_3)
+
+		if err != nil {
+			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+			continue
+		}
+
+		post.Content = post.Content + utils.GetAIResponse(additionalContent)
+		post.Faq_Answer_1 = utils.GetAIResponse(FAQ_ONE)
+		post.Faq_Answer_2 = utils.GetAIResponse(FAQ_TWO)
+		post.Faq_Answer_3 = utils.GetAIResponse(FAQ_THREE)
+
+		newReviewPosts = append(newReviewPosts, post)
+
+		counter += 1
 	}
 
-	post = models.ReviewPost{
-		Title:               data.ReviewPostTitle,
-		SubCategoryID:       subCategoryId,
-		Slug:                slug,
-		Content:             data.ReviewPostContent + utils.GetAIResponse(additionalContent),
-		Headline:            data.ReviewPostHeadline,
-		Intro:               data.ReviewPostIntro,
-		Description:         data.ReviewPostDescription,
-		Faq_Answer_1:        utils.GetAIResponse(FAQ_ONE),
-		Faq_Answer_2:        utils.GetAIResponse(FAQ_TWO),
-		Faq_Answer_3:        utils.GetAIResponse(FAQ_THREE),
-		Faq_Question_1:      data.ReviewPostFaq_Question_1,
-		Faq_Question_2:      data.ReviewPostFaq_Question_2,
-		Faq_Question_3:      data.ReviewPostFaq_Question_3,
-		ProductAffiliateUrl: input.Link,
-		Product: &models.Product{
-			AffiliateUrl:       input.Link,
-			ProductPrice:       input.Price,
-			ProductReviews:     input.Reviews,
-			ProductRatings:     input.Rating,
-			ProductImage:       replacedImage,
-			ProductLabel:       data.ReviewPostProductLabel,
-			ProductName:        input.Name,
-			ProductDescription: data.ReviewPostProductDescription,
-			ProductImageAlt:    strings.ToLower(input.Name),
-		},
-	}
-
-	return post, nil
+	return newReviewPosts
 }
