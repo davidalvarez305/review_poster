@@ -51,7 +51,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	}
 
 	wg := sync.WaitGroup{}
-	for i := 0; i < 2 /* len(seedKeywords) */ -1; i++ {
+	for i := 0; i < len(seedKeywords)-1; i++ {
 		wg.Add(1)
 		go func(keywordNum int) {
 			data, err := ScrapeSearchResultsPage(seedKeywords[keywordNum])
@@ -186,60 +186,74 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 	return posts, nil
 }
 
-func rateLimit(counter *int) {
-	fmt.Printf("COUNTER: %+v\n", counter)
-	if *counter >= 10 {
+// What this function does is it limits the requests to OpenAI to 1,000 every 60 seconds.
+// The Requests Per Minute (RPM) Rate Limit is 3,500 but 1,000 requests is roughly $7.
+func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
+	var newReviewPosts []models.ReviewPost
+
+	limit := 1000
+	for i := 0; i < len(posts); {
+		reviewPosts := asyncRequestsToOpenAI(posts[i:limit])
+		newReviewPosts = append(newReviewPosts, reviewPosts...)
+		i = limit
+		limit += 1000
+
 		fmt.Println("STARTING A 60-SECOND PAUSE")
 		time.Sleep(60 * time.Second)
 		fmt.Println("COMPLETED A 60-SECOND PAUSE")
-		*counter = 0
-	}
-}
-
-func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
-	var newReviewPosts []models.ReviewPost
-	counter := 0
-	for _, post := range posts {
-		fmt.Println("REQUESTING CONTENT FROM OPEN AI")
-
-		additionalContent, err := getAIGeneratedContent("What are people saying about the " + post.Product.ProductName)
-
-		if err != nil {
-			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-			continue
-		}
-
-		FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_1)
-
-		if err != nil {
-			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-			continue
-		}
-
-		FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_2)
-
-		if err != nil {
-			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-			continue
-		}
-
-		FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_3)
-
-		if err != nil {
-			fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-			continue
-		}
-
-		post.Content = post.Content + utils.GetAIResponse(additionalContent)
-		post.Faq_Answer_1 = utils.GetAIResponse(FAQ_ONE)
-		post.Faq_Answer_2 = utils.GetAIResponse(FAQ_TWO)
-		post.Faq_Answer_3 = utils.GetAIResponse(FAQ_THREE)
-
-		newReviewPosts = append(newReviewPosts, post)
-
-		counter += 1
-		rateLimit(&counter)
 	}
 
 	return newReviewPosts
+}
+
+func asyncRequestsToOpenAI(posts []models.ReviewPost) []models.ReviewPost {
+	var reviewPosts []models.ReviewPost
+	wg := sync.WaitGroup{}
+	for i := 0; i < len(posts)-1; i++ {
+		wg.Add(1)
+		go func(postNum int) {
+			fmt.Println("REQUESTING CONTENT FROM OPEN AI")
+			var post = posts[postNum]
+
+			additionalContent, err := getAIGeneratedContent("What are people saying about the " + post.Product.ProductName)
+
+			if err != nil {
+				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+				return
+			}
+
+			FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_1)
+
+			if err != nil {
+				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+				return
+			}
+
+			FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_2)
+
+			if err != nil {
+				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+				return
+			}
+
+			FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_3)
+
+			if err != nil {
+				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
+				return
+			}
+
+			post.Content = post.Content + utils.GetAIResponse(additionalContent)
+			post.Faq_Answer_1 = utils.GetAIResponse(FAQ_ONE)
+			post.Faq_Answer_2 = utils.GetAIResponse(FAQ_TWO)
+			post.Faq_Answer_3 = utils.GetAIResponse(FAQ_THREE)
+
+			reviewPosts = append(reviewPosts, post)
+
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	return reviewPosts
 }
