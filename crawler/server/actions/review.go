@@ -187,8 +187,11 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 }
 
 func rateLimit(counter *int) {
+	fmt.Printf("COUNTER: %+v\n", counter)
 	if *counter >= 10 {
+		fmt.Println("STARTING A 60-SECOND PAUSE")
 		time.Sleep(60 * time.Second)
+		fmt.Println("COMPLETED A 60-SECOND PAUSE")
 		*counter = 0
 	}
 }
@@ -197,7 +200,7 @@ func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
 	var newReviewPosts []models.ReviewPost
 	counter := 0
 	for _, post := range posts {
-		defer rateLimit(&counter)
+		fmt.Println("REQUESTING CONTENT FROM OPEN AI")
 
 		additionalContent, err := getAIGeneratedContent("What are people saying about the " + post.Product.ProductName)
 
@@ -235,6 +238,7 @@ func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
 		newReviewPosts = append(newReviewPosts, post)
 
 		counter += 1
+		rateLimit(&counter)
 	}
 
 	return newReviewPosts
