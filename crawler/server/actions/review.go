@@ -125,15 +125,13 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		}
 	}
 
-	finalContent := replaceContentWithChatGPT(reviewPostsTobeCreated)
-
-	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&finalContent).Find(&finalContent).Error
+	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&reviewPostsTobeCreated).Find(&reviewPostsTobeCreated).Error
 
 	if err != nil {
-		return finalContent, err
+		return reviewPostsTobeCreated, err
 	}
 
-	return finalContent, nil
+	return reviewPostsTobeCreated, nil
 }
 
 func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
