@@ -75,10 +75,14 @@ func createOrFindCategory(categoryName, groupName string) (models.Category, erro
 	category.Slug = slug.Make(categoryName)
 	category.GroupID = group.ID
 
-	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Preload("Group").FirstOrCreate(&category).Error
+	err = database.DB.Where("name = ?", category.Name).Preload("Group").First(&category).Error
 
 	if err != nil {
-		return category, err
+		err = database.DB.Save(&category).Preload("Group").First(&category).Error
+
+		if err != nil {
+			return category, err
+		}
 	}
 
 	return category, nil
