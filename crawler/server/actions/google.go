@@ -53,6 +53,11 @@ func requestGoogleAuthToken() error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return content, errors.New("request failed")
+	}
+
 	var data http.Response
 
 	err = json.NewDecoder(resp.Body).Decode(&data)
@@ -94,6 +99,11 @@ func getGoogleAccessToken(code string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return content, errors.New("request failed")
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
