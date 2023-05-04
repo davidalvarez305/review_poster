@@ -124,13 +124,26 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		}
 	}
 
-	err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&reviewPostsTobeCreated).Find(&reviewPostsTobeCreated).Error
+	// Slicing the review posts because in the case of an insertion error, I don't want to lose all of the progress.
+	var createdPosts []models.ReviewPost
 
-	if err != nil {
-		return reviewPostsTobeCreated, err
+	for i := 0; i < len(reviewPostsTobeCreated); i += 50 {
+		end := i + 50
+		if end > len(reviewPostsTobeCreated) {
+			end = len(reviewPostsTobeCreated)
+		}
+		slicedList := reviewPostsTobeCreated[i:end]
+
+		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&slicedList).Find(&slicedList).Error
+
+		if err != nil {
+			continue
+		}
+
+		createdPosts = append(createdPosts, slicedList...)
 	}
 
-	return reviewPostsTobeCreated, nil
+	return createdPosts, nil
 }
 
 func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
