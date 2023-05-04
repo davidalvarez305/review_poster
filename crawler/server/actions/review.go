@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/davidalvarez305/review_poster/crawler/server/database"
 	"github.com/davidalvarez305/review_poster/crawler/server/models"
@@ -186,7 +185,7 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 
 // What this function does is it limits the requests to OpenAI to 1,000 every 60 seconds.
 // The Requests Per Minute (RPM) Rate Limit is 3,500 but 1,000 requests is roughly $7.
-func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
+/* func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
 	var newReviewPosts []models.ReviewPost
 
 	limit := 1000
@@ -254,4 +253,4 @@ func asyncRequestsToOpenAI(posts []models.ReviewPost) []models.ReviewPost {
 
 	wg.Wait()
 	return reviewPosts
-}
+} */
