@@ -89,6 +89,11 @@ func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+		return content, errors.New("request failed")
+	}
+
 	crawledProducts, err = parseHTML(resp.Body, keyword)
 
 	if err != nil {
