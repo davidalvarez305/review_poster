@@ -1,12 +1,13 @@
 from datetime import date
 import math
 import os
-from django.http import HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.db import connection
 from .models import *
-from django.db.models import Prefetch
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.contrib.auth import authenticate, login, logout
 
 class MyBaseView(View):
     groups = Group.prefetch_category_set()
@@ -203,7 +204,8 @@ class AffiliateDisclaimer(MyBaseView):
 class PrivacyPolicy(MyBaseView):
     template_name = 'blog/privacy_policy.html'
 
-class CreatePost(MyBaseView):
+class CreatePost(LoginRequiredMixin, MyBaseView):
+    login_url="/login"
     template_name = 'blog/create_post.html'
 
     def get(self, request, *args, **kwargs):
@@ -219,3 +221,24 @@ class CreatePost(MyBaseView):
         context['page_title'] = "Create Review Posts - " + context['site_name']
         context['auth_header_string'] = os.environ.get('AUTH_HEADER_STRING')
         return render(request, self.template_name, context)
+
+class Login(MyBaseView):
+    template_name = 'blog/login.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+    
+    def post(self, request, *args, **kwargs):
+        form = request.POST.dict()
+        user = authenticate(request=request, username=form.get('username'), password=form.get('password'))
+
+        if user is not None:
+            login(request, user)
+            return JsonResponse({ 'data': 'Success.'}, status=200)
+        else:
+            return JsonResponse({ 'data': 'Authentication failed.'}, status=400)
+        
+class Logout(MyBaseView):
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return JsonResponse({ 'data': 'Logged out.'}, status=200)

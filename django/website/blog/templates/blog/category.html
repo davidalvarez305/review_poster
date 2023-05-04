@@ -14,7 +14,7 @@
                                 <div class="shop-block-one">
                                     <div class="inner-box">
                                         <figure class="image-box">
-                                            <img src="{{ sub_category.reviewpost_set.first.product_set.first.product_image }}" alt="{{ sub_category.reviewpost_set.first.product_set.first.product_image_alt }}">
+                                            <img src="{{ sub_category.reviewpost.first.product.first.product_image }}" alt="{{ sub_category.reviewpost.first.product.first.product_image_alt }}">
                                             <ul class="info-list clearfix">
                                                 <li><a href="#"><i class="flaticon-heart"></i></a></li>
                                                 <li><a href="/{{ category.slug }}/{{ sub_category.slug }}/">Learn More</a></li>
@@ -40,7 +40,7 @@
                         <div class="widget-content">
                             <ul class="categories-list clearfix">
                                 {% for sub_category in sub_categories %}
-                                    <li><a href="/{{ category.slug }}/{{ p.sub_category.slug }}/{{ p.slug }}">{{ sub_category.reviewpost_set.first.product_name }}</a></li>
+                                    <li><a href="/{{ category.slug }}/{{ p.sub_category.slug }}/{{ p.slug }}">{{ sub_category.reviewpost.first.product_name }}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>
