@@ -2,6 +2,7 @@ package actions
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/hex"
@@ -10,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -48,6 +50,9 @@ type AmazonPaapi5RequestBody struct {
 }
 
 func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
+	const TIME_OUT_SECONDS = 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT_SECONDS)
+	defer cancel()
 	var crawledProducts []AmazonSearchResultsPage
 
 	host := os.Getenv("P_HOST")
@@ -67,13 +72,17 @@ func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
+		ResponseHeaderTimeout: TIME_OUT_SECONDS,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSHandshakeTimeout:   TIME_OUT_SECONDS,
+		DialContext:           (&net.Dialer{Timeout: TIME_OUT_SECONDS}).DialContext,
 	}
 
 	client := &http.Client{
 		Transport: tr,
 	}
 
-	req, err := http.NewRequest("GET", page, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", page, nil)
 
 	if err != nil {
 		fmt.Println("Error With Proxy Request: ", err)
@@ -115,6 +124,7 @@ func ScrapeSearchResultsPage(keyword string) ([]AmazonSearchResultsPage, error) 
 
 			if err != nil {
 				fmt.Printf("Error while crawling: %+v", err.Error())
+				return
 			}
 
 			results = append(results, products...)
