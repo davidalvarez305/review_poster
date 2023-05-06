@@ -63,7 +63,7 @@ class ReviewPost(models.Model):
     headline = models.TextField()
     intro = models.TextField()
     description = models.TextField()
-    product_affiliate_url = models.ForeignKey(Product, db_column='product_affiliate_url', to_field='affiliate_url', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, db_column='product_affiliate_url', to_field='affiliate_url', on_delete=models.CASCADE)
     faq_answer_1 = models.TextField()
     faq_answer_2 = models.TextField()
     faq_answer_3 = models.TextField()

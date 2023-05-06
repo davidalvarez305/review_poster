@@ -79,6 +79,7 @@ class CategoryView(MyBaseView):
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
+
         return render(request, self.template_name, context)
 
 
@@ -105,23 +106,21 @@ class ReviewPostView(MyBaseView):
         sub_category_slug = kwargs['sub_category']
 
         review_post = get_object_or_404(ReviewPost.objects.select_related('sub_category'), slug=slug)
-        product = get_object_or_404(Product, affiliate_url=review_post.product_affiliate_url)
+        related_review_posts = ReviewPost.objects.filter(sub_category__slug=sub_category_slug)
 
         i = 0
         product_rating_stars = ""
-        if product.product_ratings == "":
+        if review_post.product.product_ratings == "":
             product_rating_stars = 0
         else:
-            while i < float(product.product_ratings):
+            while i < float(review_post.product.product_ratings):
                 product_rating_stars += '<li><i class="flaticon-star"></i></li>'
                 i += 1
 
-        related_review_posts = ReviewPost.objects.filter(sub_category__slug=sub_category_slug)
         context['related_review_posts'] = related_review_posts
         context['review_post'] = review_post
         context['meta_description'] = review_post.description
         context['page_title'] = review_post.title + " - " + str(os.environ.get('SITE_NAME'))
-        context['product'] = product
         context['product_rating_stars'] = product_rating_stars
         context['sub_category_slug'] = kwargs['sub_category']
         context['category_slug'] = kwargs['category']
