@@ -50,7 +50,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	}
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 5)
+	sem := make(chan struct{}, 2)
 
 	for i := 0; i < len(seedKeywords); i++ {
 		wg.Add(1)
