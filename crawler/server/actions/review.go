@@ -80,10 +80,11 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 			fmt.Println(total)
 
 			fmt.Printf("Total Products = %v\n", len(reviewPosts))
+			
+			<-sem
+
 			wg.Done()
 		}(i)
-
-		<-sem
 	}
 
 	wg.Wait()
@@ -146,6 +147,8 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 
 		createdPosts = append(createdPosts, slicedList...)
 	}
+
+	// runtime.GC()
 
 	return createdPosts, nil
 }
