@@ -141,7 +141,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		}
 		slicedList := reviewPostsTobeCreated[i:end]
 
-		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&slicedList).Find(&slicedList).Error
+		err = database.DB.Clauses(clause.OnConflict{UpdateAll: true}).Save(&slicedList).Find(&slicedList).Error
 
 		if err != nil {
 			continue
@@ -149,8 +149,6 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 
 		createdPosts = append(createdPosts, slicedList...)
 	}
-
-	// runtime.GC()
 
 	return createdPosts, nil
 }
@@ -170,6 +168,10 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 				subCategoryId = subcategory.ID
 				break
 			}
+		}
+
+		if subCategoryId == 0 {
+			break
 		}
 
 		post := models.ReviewPost{

@@ -78,7 +78,13 @@ func createOrFindCategory(categoryName, groupName string) (models.Category, erro
 	err = database.DB.Where("name = ?", category.Name).Preload("Group").First(&category).Error
 
 	if err != nil {
-		err = database.DB.Save(&category).Preload("Group").First(&category).Error
+		err = database.DB.Save(&category).Error
+
+		if err != nil {
+			return category, err
+		}
+
+		err = database.DB.Preload("Group").First(&category).Error
 
 		if err != nil {
 			return category, err
