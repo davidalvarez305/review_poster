@@ -49,16 +49,21 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		return readyReviewPosts, err
 	}
 
-	wg := sync.WaitGroup{}
-	sem := make(chan struct{}, 20)
-	for i := 0; i < len(seedKeywords)-1; i++ {
-		sem <- struct{}{}
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5)
+
+	for i := 0; i < len(seedKeywords); i++ {
 		wg.Add(1)
+		sem <- struct{}{}
 		go func(keywordNum int) {
+			defer func() {
+				<-sem
+				wg.Done()
+			}()
 			data, err := ScrapeSearchResultsPage(seedKeywords[keywordNum])
 
 			if err != nil {
-				fmt.Printf("ERROR SCRAPING: %+v\n", err)
+				fmt.Printf("KEYWORD #%v - ERROR SCRAPING: %+v\n", keywordNum, err)
 				return
 			}
 
@@ -70,7 +75,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
 
 			if err != nil {
-				fmt.Printf("ERROR INSERTING: %+v\n", err)
+				fmt.Printf("KEYWORD #%v - ERROR IN FACTORY: %+v\n", keywordNum, err)
 				return
 			}
 
@@ -80,13 +85,10 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 			fmt.Println(total)
 
 			fmt.Printf("Total Products = %v\n", len(reviewPosts))
-			
-			<-sem
-
-			wg.Done()
 		}(i)
 	}
 
+	close(sem)
 	wg.Wait()
 
 	// Pull existing review posts so that I can exclude them from the slice of reviews to be created

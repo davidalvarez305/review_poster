@@ -63,7 +63,6 @@ func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
 	u, err := url.Parse(path)
 
 	if err != nil {
-		fmt.Println("Error With URL Parse: ", err)
 		return crawledProducts, err
 	}
 
@@ -85,7 +84,6 @@ func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", page, nil)
 
 	if err != nil {
-		fmt.Println("Error With Proxy Request: ", err)
 		return crawledProducts, err
 	}
 
@@ -93,20 +91,17 @@ func crawlPage(keyword, page string) ([]AmazonSearchResultsPage, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error while fetching Amazon SERP", err)
 		return crawledProducts, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
 		return crawledProducts, errors.New("request failed")
 	}
 
 	crawledProducts, err = parseHTML(resp.Body, keyword)
 
 	if err != nil {
-		fmt.Println("Error while parsing HTML.", err)
 		return crawledProducts, err
 	}
 
@@ -123,17 +118,16 @@ func ScrapeSearchResultsPage(keyword string) ([]AmazonSearchResultsPage, error) 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
 		go func(page int) {
+			defer wg.Done()
 			serp := fmt.Sprintf("https://www.amazon.com/s?k=%s&s=review-rank&page=%v", str, page)
 
 			products, err := crawlPage(keyword, serp)
 
 			if err != nil {
-				fmt.Printf("Error while crawling: %+v", err.Error())
 				return
 			}
 
 			results = append(results, products...)
-			wg.Done()
 		}(i)
 	}
 
@@ -236,7 +230,6 @@ func parseHTML(r io.Reader, keyword string) ([]AmazonSearchResultsPage, error) {
 	var results []AmazonSearchResultsPage
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
-		fmt.Println("Error trying to parse document.")
 		return results, err
 	}
 
