@@ -50,7 +50,9 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	}
 
 	wg := sync.WaitGroup{}
+	sem := make(chan struct{}, 20)
 	for i := 0; i < len(seedKeywords)-1; i++ {
+		sem <- struct{}{}
 		wg.Add(1)
 		go func(keywordNum int) {
 			data, err := ScrapeSearchResultsPage(seedKeywords[keywordNum])
@@ -80,6 +82,8 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 			fmt.Printf("Total Products = %v\n", len(reviewPosts))
 			wg.Done()
 		}(i)
+
+		<-sem
 	}
 
 	wg.Wait()
