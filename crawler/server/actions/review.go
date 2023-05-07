@@ -141,7 +141,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 		}
 		slicedList := reviewPostsTobeCreated[i:end]
 
-		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&slicedList).Find(&slicedList).Error
+		err = database.DB.Clauses(clause.OnConflict{DoNothing: true}).Save(&slicedList).Error
 
 		if err != nil {
 			continue
