@@ -136,3 +136,17 @@ func AddBulkSentences(clientSentences, existingSentences []models.Sentence, user
 
 	return nil
 }
+
+
+
+func GetTemplatesAndParagraphs(userId string) ([]models.Paragraph, error) {
+	var paragraphs []models.Paragraph
+
+	err := database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
+
+	if err != nil {
+		return paragraphs, err
+	}
+
+	return paragraphs, nil
+}

@@ -17,7 +17,7 @@ func GetParagraphs(c *fiber.Ctx) error {
 
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
-				"data": err.Error(),
+				"data": "Failed to fetch paragraphs.",
 			})
 		}
 
@@ -26,11 +26,20 @@ func GetParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	paragraphs, err := actions.GetParagraphs(userId)
+	// Return all paragraphs without filter
+	var paragraphs []models.Paragraph
+
+	err := database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch paragraphs.",
+		})
+	}
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch paragraphs.",
 		})
 	}
 
@@ -48,15 +57,15 @@ func CreateParagraphs(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
-	err = actions.CreateParagraphs(paragraphs, userId)
+	err = database.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to create paragraphs.",
 		})
 	}
 
@@ -76,15 +85,23 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
-	updatedParagraphs, err := actions.UpdateParagraphs(paragraphs, paragraphId, userId, template)
+	err = database.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to update paragraphs.",
+		})
+	}
+
+	err := database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch paragraphs by template after updating.",
 		})
 	}
 
@@ -94,26 +111,43 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 }
 
 func DeleteParagraph(c *fiber.Ctx) error {
-	p := c.Query("paragraphs")
+	paragraphsToDelete := c.Query("paragraphs")
 	template := c.Query("template")
-	ids, err := utils.GetIds(p)
 
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+	if len(template) == 0 || len(paragraphsToDelete) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No template or paragraphs found in querystring.",
 		})
 	}
 
-	newParagraphs, err := actions.DeleteParagraphs(ids, template)
+	ids, err := utils.GetIds(paragraphsToDelete)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse paragraph ID's.",
+		})
+	}
+
+	var paragraphs []models.Paragraph
+
+	err := database.DB.Delete(&models.Paragraph{}, ids).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to delete paragraphs.",
+		})
+	}
+
+	err = database.DB.Where("template_id = ?", template).Find(&paragraphs).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch paragraphs after deletion.",
 		})
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": newParagraphs,
+		"data": paragraphs,
 	})
 }
 
@@ -122,9 +156,9 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 	template := c.Query("template")
 	userId := c.Params("userId")
 
-	if template == "" {
+	if len(template) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No template in query.",
+			"data": "No template in querystring.",
 		})
 	}
 
@@ -132,7 +166,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
@@ -140,7 +174,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch paragraphs by template.",
 		})
 	}
 
@@ -148,7 +182,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete paragraphs in bulk.",
 		})
 	}
 
@@ -156,7 +190,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to add new bulk paragraphs.",
 		})
 	}
 
@@ -165,7 +199,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch paragraphs by template after saving.",
 		})
 	}
 
