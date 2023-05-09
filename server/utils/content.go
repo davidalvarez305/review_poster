@@ -92,6 +92,7 @@ func selectRandomSentences(productName string, sentences []types.ProcessedConten
 	return content
 }
 
+// In the future, this might have to be re-worked.
 func GenerateContentUtil(productName string, dictionary []types.Word, sentences []types.Sentence) types.FinalizedContent {
 	var content []types.ProcessedContent
 	var finalContent types.FinalizedContent
