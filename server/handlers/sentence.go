@@ -16,7 +16,7 @@ func GetSentences(c *fiber.Ctx) error {
 
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
-				"data": err.Error(),
+				"data": "Failed to fetch sentences by paragraph.",
 			})
 		}
 
@@ -25,11 +25,13 @@ func GetSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	sentences, err := actions.GetAllSentences(userId)
+	var sentences []models.Sentence
+
+	err := database.DB.Where("user_id = ?", userId).Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch all sentences.",
 		})
 	}
 
@@ -46,23 +48,25 @@ func CreateSentences(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
-	err = actions.CreateSentences(sentences, userId)
+	err = database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to create sentences.",
 		})
 	}
 
-	paragraphs, err := actions.GetTemplatesAndParagraphs(userId)
+	var paragraphs []models.Paragraph
+
+	err = database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch templates and paragraphs.",
 		})
 	}
 
@@ -80,15 +84,23 @@ func UpdateSentences(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
-	updatedSentences, err := actions.UpdateSentences(sentencesFromClient, paragraph, userId)
+	err := database.DB.Where("user_id = ?", userId).Save(&sentencesFromClient).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to save sentences.",
+		})
+	}
+
+	updatedSentences, err := GetSentencesByParagraph(paragraph, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch sentences by paragraph after updating.",
 		})
 	}
 
@@ -106,20 +118,28 @@ func DeleteSentence(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse ids.",
 		})
 	}
 
-	sentences, err := actions.DeleteSentences(ids, paragraph, userId)
+	err := database.DB.Delete(&models.Sentence{}, ids).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete sentences.",
+		})
+	}
+
+	newSentences, err := GetSentencesByParagraph(paragraph, userId)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch sentences by paragraph.",
 		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": sentences,
+		"data": newSentences,
 	})
 }
 
@@ -139,7 +159,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
@@ -147,7 +167,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch sentences by paragraph.",
 		})
 	}
 
@@ -158,7 +178,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete sentences.",
 		})
 	}
 
@@ -166,7 +186,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to save bulk sentences.",
 		})
 	}
 
@@ -175,7 +195,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch sentences by paragraph.",
 		})
 	}
 
