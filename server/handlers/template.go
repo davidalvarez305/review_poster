@@ -8,12 +8,13 @@ import (
 
 func GetTemplates(c *fiber.Ctx) error {
 	userId := c.Params("userId")
+	var templates []models.Template
 
-	templates, err := actions.GetTemplates(userId)
+	err := database.DB.Where("user_id = ?", userId).Find(&templates).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch templates.",
 		})
 	}
 
@@ -30,28 +31,28 @@ func CreateTemplate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Unable to Parse Request Body.",
+			"data": "Failed to Parse Request Body.",
 		})
 	}
 
-	err = actions.CreateTemplate(template, userId)
+	err = database.DB.Where("user_id = ?", userId).Save(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to save templates",
 		})
 	}
 
-	templates, err := actions.GetTemplates(userId)
+	err := database.DB.Where("id = ?", id).Find(&template).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to find template after saving.",
 		})
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": templates,
+		"data": template,
 	})
 }
 
@@ -67,11 +68,26 @@ func UpdateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.UpdateTemplate(template, userId)
+	// Set updateable values aside
+	templateName := template.Name
+
+	// Query to find record
+	err := database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to find template.",
+		})
+	}
+
+	// If record is found, update. If not, DB will throw error.
+	template.Name = templateName
+
+	err = database.DB.Save(&template).First(&template).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to update template.",
 		})
 	}
 
@@ -81,21 +97,21 @@ func UpdateTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteTemplate(c *fiber.Ctx) error {
-	templateId := c.Params("templateId")
+	templateId := c.Query("template")
 	userId := c.Params("userId")
 	var template models.Template
 
-	if templateId == "" {
+	if len(templateId) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No template in params.",
 		})
 	}
 
-	err := actions.DeleteTemplate(template, userId, templateId)
+	err := database.DB.Where("user_id = ? AND id = ?", userId, templateId).Delete(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete template.",
 		})
 	}
 
