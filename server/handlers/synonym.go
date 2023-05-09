@@ -14,15 +14,15 @@ func CreateSynonym(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
-	err = actions.CreateSynonym(synonym)
+	err = database.DB.Save(&synonym).First(&synonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to save synonym.",
 		})
 	}
 
@@ -35,7 +35,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 	var synonyms []models.Synonym
 	word := c.Query("word")
 
-	if word == "" {
+	if len(word) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No word in query.",
 		})
@@ -45,7 +45,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
@@ -53,15 +53,23 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch user ID from session.",
 		})
 	}
 
-	updatedSynonyms, err := actions.UpdateSynonyms(synonyms, word, userId)
+	err := database.DB.Save(&synonyms).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to save synonyms.",
+		})
+	}
+
+	updatedSynonyms, err := GetSynonymsByWord(word, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
@@ -74,7 +82,7 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 	word := c.Query("word")
 	userId := c.Params("userId")
 
-	if word == "" {
+	if len(word) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No word in query.",
 		})
@@ -84,7 +92,7 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
@@ -102,15 +110,23 @@ func DeleteSynonym(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse IDs.",
 		})
 	}
 
-	synonyms, err := actions.DeleteSynonyms(ids, word, userId)
+	err := database.DB.Delete(&models.Synonym{}, ids).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete synonyms.",
+		})
+	}
+
+	synonyms, err = GetSynonymsByWord(word, userId)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
@@ -124,7 +140,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 	word := c.Query("word")
 	userId := c.Params("userId")
 
-	if word == "" {
+	if len(word) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No word in query.",
 		})
@@ -134,7 +150,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
@@ -142,7 +158,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
@@ -152,7 +168,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete bulk synonyms.",
 		})
 	}
 
@@ -160,7 +176,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to add bulk synonyms.",
 		})
 	}
 
@@ -169,7 +185,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
