@@ -24,11 +24,14 @@ func NewServer(opts *Server) *Server {
 
 func (server *Server) Start() {
 
+	CLIENT_URL := os.Getenv("CONTENT_CLIENT_URL")
+
 	server.App.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
+		AllowOrigins:     CLIENT_URL,
+		AllowCredentials: true,
 	}))
 
-	api := server.App.Group("api", middleware.AuthMiddleware)
+	api := app.Group("api", middleware.AuthMiddleware, middleware.ResourceAccessRestriction)
 
 	controllers.Google(api)
 	controllers.Amazon(api)
