@@ -34,7 +34,7 @@ func main() {
 		App:     fiber.New(),
 		DB:      db,
 		Session: sessionStore,
-		Port:    os.Getenv("CRAWLER_PORT"),
+		Port:    os.Getenv("SERVER_PORT"),
 	})
 
 	server.Start()
