@@ -210,13 +210,8 @@ class CreatePost(LoginRequiredMixin, MyBaseView):
     def get(self, request, *args, **kwargs):
         context = self.context
 
-        options = self.context['groups']
-        select_options = ""
-        for option in options:
-            select_options += f'<option value={option}>{option}</option>'
-
-        context['crawler_api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
-        context['select_options'] = select_options
+        context['templates'] = ['ReviewPost']
+        context['api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
         context['page_title'] = "Create Review Posts - " + context['site_name']
         context['auth_header_string'] = os.environ.get('AUTH_HEADER_STRING')
         return render(request, self.template_name, context)

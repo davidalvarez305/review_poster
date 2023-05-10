@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func CreateReviewPosts(categoryName, groupName string, dictionary types.DictionaryAPIResponse, sentences types.ContentAPIResponse) ([]models.ReviewPost, error) {
+func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word, sentences []models.Sentence) ([]models.ReviewPost, error) {
 	var readyReviewPosts []models.ReviewPost
 
 	q := types.GoogleQuery{
@@ -72,7 +72,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 				return
 			}
 
-			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary.Data, sentences.Data)
+			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary, sentences)
 
 			if err != nil {
 				fmt.Printf("KEYWORD #%v - ERROR IN FACTORY: %+v\n", keywordNum, err)

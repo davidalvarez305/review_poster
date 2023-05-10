@@ -4,14 +4,6 @@ import (
 	"github.com/davidalvarez305/review_poster/server/models"
 )
 
-type DictionaryAPIResponse struct {
-	Data []models.Word `json:"data"`
-}
-
-type ContentAPIResponse struct {
-	Data []models.Sentence `json:"data"`
-}
-
 type Synonym struct {
 	ID      int          `json:"id" form:"id"`
 	Synonym string       `json:"synonym" form:"synonym"`

@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/types"
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,7 +25,17 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	dictionary, err := actions.PullContentDictionary()
+	userId, err := actions.GetUserIdFromSession(c)
+
+	if err != nil {
+		return c.Status(429).JSON(fiber.Map{
+			"data": "Failed to get user ID from session.",
+		})
+	}
+
+	var words []models.Word
+
+	err = database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&words).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -31,15 +43,15 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	sentences, err := actions.PullDynamicContent()
+	sentences, err := actions.GetSentencesByTemplate(body.Template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch dynamic content data.",
+			"data": "Failed to fetch sentences.",
 		})
 	}
 
-	products, err := actions.CreateReviewPosts(body.Keyword, body.GroupName, dictionary, sentences)
+	products, err := actions.CreateReviewPosts(body.Keyword, body.GroupName, words, sentences)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

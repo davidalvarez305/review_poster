@@ -17,6 +17,18 @@ func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error
 	return sentences, nil
 }
 
+func GetSentencesByTemplate(template, userId string) ([]models.Sentence, error) {
+	var sentences []models.Sentence
+
+	err := database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
+
+	if err != nil {
+		return sentences, err
+	}
+
+	return sentences, nil
+}
+
 // Takes structs from the client & deletes them. Does not return records from DB.
 func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) error {
 	var sentences []models.Sentence

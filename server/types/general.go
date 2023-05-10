@@ -17,6 +17,7 @@ type Keyword struct {
 type CreateReviewPostsInput struct {
 	Keyword   string `json:"keyword" form:"keyword"`
 	GroupName string `json:"group_name" form:"group_name"`
+	Template  string `json:"template" form:"template"`
 }
 
 type OpenAIResponse struct {
