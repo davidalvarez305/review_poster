@@ -5,12 +5,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/types"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-func filterSentences(sentences []types.Sentence, paragraph string) []string {
+func filterSentences(sentences []models.Sentence, paragraph string) []string {
 	var s []string
 	for i := 0; i < len(sentences); i++ {
 		if sentences[i].Paragraph.Name == paragraph {
@@ -21,7 +22,7 @@ func filterSentences(sentences []types.Sentence, paragraph string) []string {
 	return s
 }
 
-func processSentence(productName, sentence string, dictionary []types.Word) string {
+func processSentence(productName, sentence string, dictionary []models.Word) string {
 	var s string
 
 	r := regexp.MustCompile(`(\([#@]\w+:[A-Z]+)\)|(\([#@]\w+)\)`)
@@ -38,7 +39,7 @@ func processSentence(productName, sentence string, dictionary []types.Word) stri
 	return s
 }
 
-func switchWords(matchedWord string, dictionary []types.Word) string {
+func switchWords(matchedWord string, dictionary []models.Word) string {
 	for i := 0; i < len(dictionary); i++ {
 		if dictionary[i].Tag == matchedWord {
 			matchedWord = dictionary[i].Synonyms[rand.Intn(len(dictionary[i].Synonyms))].Synonym
@@ -47,7 +48,7 @@ func switchWords(matchedWord string, dictionary []types.Word) string {
 	return matchedWord
 }
 
-func spinnerFunction(productName, matchedWord string, dictionary []types.Word) string {
+func spinnerFunction(productName, matchedWord string, dictionary []models.Word) string {
 	makeTitle := cases.Title(language.English)
 	if matchedWord == "(@ProductName)" {
 		matchedWord = productName
@@ -72,7 +73,7 @@ func spinnerFunction(productName, matchedWord string, dictionary []types.Word) s
 	return matchedWord
 }
 
-func selectRandomSentences(productName string, sentences []types.ProcessedContent, dictionary []types.Word) types.FinalizedContent {
+func selectRandomSentences(productName string, sentences []types.ProcessedContent, dictionary []models.Word) types.FinalizedContent {
 	var content types.FinalizedContent
 	for i := 0; i < len(sentences); i++ {
 		content.ReviewPostTitle = processSentence(productName, sentences[i].ReviewPostTitle[rand.Intn(len(sentences[i].ReviewPostTitle))], dictionary)
@@ -93,7 +94,7 @@ func selectRandomSentences(productName string, sentences []types.ProcessedConten
 }
 
 // In the future, this might have to be re-worked.
-func GenerateContentUtil(productName string, dictionary []types.Word, sentences []types.Sentence) types.FinalizedContent {
+func GenerateContentUtil(productName string, dictionary []models.Word, sentences []models.Sentence) types.FinalizedContent {
 	var content []types.ProcessedContent
 	var finalContent types.FinalizedContent
 
