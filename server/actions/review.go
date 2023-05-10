@@ -50,7 +50,12 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 	}
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 2)
+	sem := make(chan struct{}, 20)
+
+	// Unable to get any keywords -> stop
+	if len(seedKeywords) == 0 {
+		return readyReviewPosts, nil
+	}
 
 	for i := 0; i < len(seedKeywords); i++ {
 		wg.Add(1)
@@ -91,6 +96,11 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 	close(sem)
 	wg.Wait()
 
+	// Unable to crawl any review posts -> stop
+	if len(readyReviewPosts) == 0 {
+		return readyReviewPosts, nil
+	}
+
 	// Pull existing review posts so that I can exclude them from the slice of reviews to be created
 	var existingReviewPosts []models.ReviewPost
 	err = database.DB.Preload("Product").Find(&existingReviewPosts).Error
@@ -129,6 +139,10 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 		if !exists {
 			reviewPostsTobeCreated = append(reviewPostsTobeCreated, post)
 		}
+	}
+
+	if len(reviewPostsTobeCreated) == 0 {
+		return reviewPostsTobeCreated, nil
 	}
 
 	// Slicing the review posts because in the case of an insertion error, I don't want to lose all of the progress.
