@@ -13,8 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
-	"github.com/davidalvarez305/review_poster/crawler/server/utils"
+	"github.com/davidalvarez305/review_poster/server/types"
+	"github.com/davidalvarez305/review_poster/server/utils"
+	"golang.org/x/oauth2"
 )
 
 type GoogleKeywordResults struct {
@@ -117,19 +118,13 @@ func getGoogleAccessToken(code string) (string, error) {
 
 }
 
-func refreshAuthToken() (string, error) {
-
-	type TokenResponse struct {
-		Access_Token string `json:"access_token"`
-		Expires_In   string `json:"expires_in"`
-		Scope        string `json:"scope"`
-		Token_Type   string `json:"token_type"`
-	}
+func refreshAuthToken() (oauth2.Token, error) {
+	var token oauth2.Token
 
 	config, err := utils.GetGoogleCredentials()
 	if err != nil {
 		fmt.Println("Error getting Google credentials")
-		return "", err
+		return token, err
 	}
 
 	refreshToken := os.Getenv("GOOGLE_API_REFRESH_TOKEN")
@@ -139,7 +134,7 @@ func refreshAuthToken() (string, error) {
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		fmt.Println("Request failed: ", err)
-		return "", err
+		return token, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -152,20 +147,18 @@ func refreshAuthToken() (string, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error while getting auth token: ", err)
-		return "", err
+		return token, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
-		return "", errors.New("request failed")
+		return token, errors.New("request failed")
 	}
 
-	var data TokenResponse
+	json.NewDecoder(resp.Body).Decode(&token)
 
-	json.NewDecoder(resp.Body).Decode(&data)
-
-	return data.Access_Token, nil
+	return token, nil
 }
 
 func GetSeedKeywords(results GoogleKeywordResults) ([]string, error) {
@@ -222,7 +215,7 @@ func QueryGoogle(query types.GoogleQuery) (GoogleKeywordResults, error) {
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
 	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v12/customers/%s:generateKeywordIdeas", googleCustomerID)
 	developerToken := os.Getenv("GOOGLE_DEVELOPER_TOKEN")
-	authorizationHeader := fmt.Sprintf("Bearer %s", authToken)
+	authorizationHeader := fmt.Sprintf("Bearer %s", authToken.AccessToken)
 
 	client := &http.Client{}
 

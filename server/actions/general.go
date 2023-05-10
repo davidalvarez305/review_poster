@@ -7,8 +7,8 @@ import (
 	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/database"
-	"github.com/davidalvarez305/review_poster/crawler/server/models"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
 )
 
 func createSubCategories(subCategories []string, category models.Category) ([]models.SubCategory, error) {

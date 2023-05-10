@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateToken() (models.Token, error) {
+func generateToken() (models.Token, error) {
 
 	// Initialize & Generate Token
 	token := models.Token{

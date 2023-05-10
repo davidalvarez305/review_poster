@@ -7,36 +7,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/davidalvarez305/review_poster/cms/server/database"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/sessions"
-	"github.com/davidalvarez305/review_poster/cms/server/utils"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/sessions"
+	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
 )
-
-func SaveUser(user models.User) error {
-	return database.DB.Save(&user).First(&user).Error
-}
-
-func Logout(c *fiber.Ctx) error {
-	sess, err := sessions.Sessions.Get(c)
-
-	if err != nil {
-		return err
-	}
-
-	err = sess.Destroy()
-
-	return err
-}
-
-func Delete(user models.User) error {
-	return database.DB.Delete(&user).Error
-}
 
 func CreateUser(user models.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -45,7 +25,7 @@ func CreateUser(user models.User) error {
 		return err
 	}
 
-	token, err := GenerateToken()
+	token, err := generateToken()
 
 	if err != nil {
 		return err
@@ -54,7 +34,7 @@ func CreateUser(user models.User) error {
 	user.Password = string(hashedPassword)
 	user.Token = &token
 
-	return SaveUser(user)
+	return database.DB.Save(&user).First(&user).Error
 }
 
 func UpdateUser(user models.User, body models.User) error {
@@ -62,7 +42,7 @@ func UpdateUser(user models.User, body models.User) error {
 	user.Username = body.Username
 	user.Email = body.Email
 
-	token, err := GenerateToken()
+	token, err := generateToken()
 
 	if err != nil {
 		return err
@@ -70,7 +50,7 @@ func UpdateUser(user models.User, body models.User) error {
 
 	user.Token = &token
 
-	return SaveUser(user)
+	return database.DB.Save(&user).First(&user).Error
 }
 
 func GetUserById(user models.User, userId string) error {
@@ -152,7 +132,7 @@ func Login(user models.User, c *fiber.Ctx) error {
 func RequestChangePasswordCode(user models.User) error {
 	var token models.Token
 
-	token, err := GenerateToken()
+	token, err := generateToken()
 
 	if err != nil {
 		return err
@@ -172,7 +152,7 @@ func ChangePassword(user models.User, password string) (models.User, error) {
 
 	user.Password = string(hashedPassword)
 
-	token, err := GenerateToken()
+	token, err := generateToken()
 
 	if err != nil {
 		return newUser, err
@@ -182,7 +162,7 @@ func ChangePassword(user models.User, password string) (models.User, error) {
 
 	newUser = user
 
-	err = SaveUser(newUser)
+	err = database.DB.Save(&newUser).First(&newUser).Error
 
 	if err != nil {
 		return newUser, err
@@ -215,14 +195,14 @@ func SendGmail(user models.User, uuidCode string) error {
 	}
 
 	// Refresh Token
-	token, err := utils.RefreshAuthToken()
+	token, err := refreshAuthToken()
 
 	if err != nil {
 		return err
 	}
 
 	// Initialize Client & Service With Credentials
-	client := config.Client(context.Background(), token)
+	client := config.Client(context.Background(), &token)
 
 	srv, err := gmail.NewService(ctx, option.WithHTTPClient(client))
 

@@ -4,8 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/davidalvarez305/review_poster/cms/server/actions"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/sessions"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -67,7 +69,13 @@ func Logout(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.Logout(c)
+	sess, err := sessions.Sessions.Get(c)
+
+	if err != nil {
+		return err
+	}
+
+	err = sess.Destroy()
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -109,14 +117,16 @@ func UpdateUser(c *fiber.Ctx) error {
 	err := c.BodyParser(&body)
 
 	if err != nil {
-		return err
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to parse body.",
+		})
 	}
 
 	user, err := actions.GetUserFromSession(c)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get user from session.",
 		})
 	}
 
@@ -124,7 +134,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to update user.",
 		})
 	}
 
@@ -138,23 +148,31 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get user from session.",
 		})
 	}
 
-	err = actions.Delete(user)
+	err = database.DB.Delete(&user).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete user.",
 		})
 	}
 
-	err = actions.Logout(c)
+	sess, err := sessions.Sessions.Get(c)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get current session.",
+		})
+	}
+
+	err = sess.Destroy()
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to logout.",
 		})
 	}
 
@@ -171,7 +189,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 	code := c.Params("code")
 
-	if code == "" {
+	if len(code) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "No code sent in request.",
 		})
@@ -184,7 +202,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse body.",
 		})
 	}
 
@@ -193,7 +211,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get user from session.",
 		})
 	}
 
@@ -202,7 +220,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get token.",
 		})
 	}
 
@@ -220,7 +238,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to get user.",
 		})
 	}
 
@@ -229,7 +247,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to delete token.",
 		})
 	}
 

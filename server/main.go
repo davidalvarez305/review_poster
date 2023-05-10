@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/database"
-	"github.com/davidalvarez305/review_poster/crawler/server/server"
-	"github.com/davidalvarez305/review_poster/crawler/server/sessions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/server"
+	"github.com/davidalvarez305/review_poster/server/sessions"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
@@ -31,10 +31,10 @@ func main() {
 	}
 
 	server := server.NewServer(&server.Server{
-		App:  fiber.New(),
-		DB:   db,
+		App:   fiber.New(),
+		DB:    db,
 		Store: sessionStore,
-		Port: os.Getenv("CRAWLER_PORT"),
+		Port:  os.Getenv("CRAWLER_PORT"),
 	})
 
 	server.Start()
