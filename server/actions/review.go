@@ -153,7 +153,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary types.Dictiona
 	return createdPosts, nil
 }
 
-func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []types.Word, sentences []types.Sentence) ([]models.ReviewPost, error) {
+func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []models.Word, sentences []models.Sentence) ([]models.ReviewPost, error) {
 	var posts []models.ReviewPost
 
 	for i := 0; i < len(products); i++ {
