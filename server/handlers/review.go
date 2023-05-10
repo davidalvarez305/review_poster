@@ -25,17 +25,9 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	userId := c.Query("userId")
-
-	if len(userId) == 0 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "userId missing from querystring.",
-		})
-	}
-
 	var words []models.Word
 
-	err = database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&words).Error
+	err = database.DB.Preload("Synonyms").Find(&words).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -43,7 +35,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	sentences, err := actions.GetSentencesByTemplate(body.Template, userId)
+	sentences, err := actions.GetSentencesByTemplate(body.Template)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
