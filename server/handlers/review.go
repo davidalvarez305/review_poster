@@ -25,11 +25,11 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
+	userId := c.Query("userId")
 
-	if err != nil {
-		return c.Status(429).JSON(fiber.Map{
-			"data": "Failed to get user ID from session.",
+	if len(userId) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "userId missing from querystring.",
 		})
 	}
 
