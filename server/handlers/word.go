@@ -11,11 +11,13 @@ func GetWords(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 
 	if len(wordName) > 0 {
-		word, err := actions.GetWordByName(wordName, userId)
+		var word models.Word
+
+		err := database.DB.Where("name = ? AND user_id = ?", wordName, userId).Find(&word).Error
 
 		if err != nil {
-			return c.Status(400).JSON(fiber.Map{
-				"data": "Failed to query word by name.",
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to fetch word by name.",
 			})
 		}
 
@@ -24,7 +26,9 @@ func GetWords(c *fiber.Ctx) error {
 		})
 	}
 
-	words, err := actions.GetWords(userId)
+	var words []models.Word
+
+	err := database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -54,6 +58,8 @@ func CreateWord(c *fiber.Ctx) error {
 			"data": "Must have synonyms to create word.",
 		})
 	}
+	
+	get user from session, wtf
 
 	word := models.Word{
 		ID:     body.ID,
@@ -71,7 +77,7 @@ func CreateWord(c *fiber.Ctx) error {
 		word.Synonyms = append(word.Synonyms, synonym)
 	}
 
-	err = actions.CreateWord(word)
+	err = database.DB.Where("user_id = ?", word.UserID).Save(&word).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -79,7 +85,9 @@ func CreateWord(c *fiber.Ctx) error {
 		})
 	}
 
-	words, err := actions.GetWords(userId)
+	var updatedWords []models.Word
+
+	err = database.DB.Where("user_id = ?", userId).Find(&updatedWords).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -88,7 +96,7 @@ func CreateWord(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": words,
+		"data": updatedWords,
 	})
 }
 
@@ -105,7 +113,7 @@ func UpdateWord(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.UpdateWord(word, userId)
+	err = database.DB.Where("user_id = ? AND id = ?", userId, word.ID).Save(&word).First(&word).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -123,13 +131,13 @@ func DeleteWord(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	var word models.Word
 
-	if wordId == "" {
+	if len(wordId) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No word in query.",
+			"data": "No word in querystring.",
 		})
 	}
 
-	err := actions.DeleteWord(word, userId, wordId)
+	err := database.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
