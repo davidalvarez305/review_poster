@@ -1,24 +1,14 @@
 version: '3.7'
 
 services:
-  cms:
-    build: ./cms/server
+  server:
+    build: ./server/server
     restart: always
     depends_on:
       - postgres
     env_file:
-      - .env
-    image: iamdavidmiguelalvarez/review_poster/cms
-    ports:
-    - "4008:4008"
-  crawler:
-    build: ./crawler/server
-    restart: always
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    image: iamdavidmiguelalvarez/review_poster:crawler
+      - ./server/.env
+    image: iamdavidmiguelalvarez/review_poster:server
     ports:
     - "4009:4009"
   django:
@@ -28,7 +18,7 @@ services:
       - postgres
     image: iamdavidmiguelalvarez/review_poster:django
     env_file:
-      - .env
+      - ./server/.env
     volumes:
     - data:/vol/django
     ports:
@@ -37,7 +27,7 @@ services:
     build: ./postgres
     restart: always
     env_file:
-      - .env
+      - ./server/.env
     image: iamdavidmiguelalvarez/review_poster:postgres
     volumes:
     - data:/var/lib/postgresql/data
