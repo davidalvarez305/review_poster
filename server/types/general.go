@@ -47,6 +47,5 @@ type CreateWordInput struct {
 	ID       int      `json:"id"`
 	Word     string   `json:"word"`
 	Tag      string   `json:"tag"`
-	UserID   int      `json:"user_id"`
 	Synonyms []string `json:"synonyms"`
 }

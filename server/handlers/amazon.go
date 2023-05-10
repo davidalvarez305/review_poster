@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/crawler/server/actions"
+	"github.com/davidalvarez305/review_poster/server/actions"
 	"github.com/gofiber/fiber/v2"
 )
 

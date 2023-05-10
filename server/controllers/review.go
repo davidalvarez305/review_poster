@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/davidalvarez305/review_poster/crawler/server/handlers"
+	"github.com/davidalvarez305/review_poster/server/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 

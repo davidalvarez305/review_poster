@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
+	"github.com/davidalvarez305/review_poster/server/types"
 )
 
 func GetGoogleCredentials() (types.GoogleConfigData, error) {

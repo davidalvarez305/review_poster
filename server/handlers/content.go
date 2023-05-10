@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/server/actions"
-	"github.com/davidalvarez305/review_poster/server/utils"
+	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -34,6 +34,7 @@ func GetContent(c *fiber.Ctx) error {
 
 func GetDictionary(c *fiber.Ctx) error {
 	var words []models.Word
+	userId := c.Params("userId")
 
 	err := database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&words).Error
 
@@ -53,9 +54,9 @@ func GetDynamicContent(c *fiber.Ctx) error {
 	template := c.Query("template")
 	userId := c.Params("userId")
 
-	if len(template) == 0 || len(userId) == 0 || len(productName) == 0 {
+	if len(template) == 0 || len(productName) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Incorrect query or URL params.",
+			"data": "Incorrect querystring.",
 		})
 	}
 
@@ -73,7 +74,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 	// Second get the sentences
 	var sentences []models.Sentence
 
-	err := database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
+	err = database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

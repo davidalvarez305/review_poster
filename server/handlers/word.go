@@ -1,8 +1,10 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/actions"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -42,7 +44,7 @@ func GetWords(c *fiber.Ctx) error {
 }
 
 func CreateWord(c *fiber.Ctx) error {
-	var body actions.CreateWordInput
+	var body types.CreateWordInput
 	userId := c.Params("userId")
 
 	err := c.BodyParser(&body)
@@ -58,14 +60,20 @@ func CreateWord(c *fiber.Ctx) error {
 			"data": "Must have synonyms to create word.",
 		})
 	}
-	
-	get user from session, wtf
+
+	user, err := actions.GetUserFromSession(c)
+
+	if len(body.Synonyms) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to get user ID from session.",
+		})
+	}
 
 	word := models.Word{
 		ID:     body.ID,
 		Name:   body.Word,
 		Tag:    body.Tag,
-		UserID: body.UserID,
+		UserID: user.ID,
 	}
 
 	for i := 0; i < len(body.Synonyms); i++ {
@@ -77,7 +85,7 @@ func CreateWord(c *fiber.Ctx) error {
 		word.Synonyms = append(word.Synonyms, synonym)
 	}
 
-	err = database.DB.Where("user_id = ?", word.UserID).Save(&word).Error
+	err = database.DB.Where("user_id = ?", user.ID).Save(&word).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -137,7 +145,7 @@ func DeleteWord(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Where("user_id = ? AND id = ?", userId, word_id).Delete(&word).Error
+	err := database.DB.Where("user_id = ? AND id = ?", userId, wordId).Delete(&word).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

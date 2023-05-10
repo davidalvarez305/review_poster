@@ -31,10 +31,10 @@ func main() {
 	}
 
 	server := server.NewServer(&server.Server{
-		App:   fiber.New(),
-		DB:    db,
-		Store: sessionStore,
-		Port:  os.Getenv("CRAWLER_PORT"),
+		App:     fiber.New(),
+		DB:      db,
+		Session: sessionStore,
+		Port:    os.Getenv("CRAWLER_PORT"),
 	})
 
 	server.Start()

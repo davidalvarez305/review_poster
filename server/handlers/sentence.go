@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
@@ -88,7 +89,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Where("user_id = ?", userId).Save(&sentencesFromClient).Error
+	err = database.DB.Where("user_id = ?", userId).Save(&sentencesFromClient).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -96,7 +97,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedSentences, err := GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -122,7 +123,7 @@ func DeleteSentence(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Delete(&models.Sentence{}, ids).Error
+	err = database.DB.Delete(&models.Sentence{}, ids).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -130,7 +131,7 @@ func DeleteSentence(c *fiber.Ctx) error {
 		})
 	}
 
-	newSentences, err := GetSentencesByParagraph(paragraph, userId)
+	newSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

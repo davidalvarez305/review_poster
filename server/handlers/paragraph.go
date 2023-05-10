@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/actions"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/utils"
+	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -97,7 +98,9 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
+	var updatedParagraphs []models.Paragraph
+
+	err = database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&updatedParagraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -130,7 +133,7 @@ func DeleteParagraph(c *fiber.Ctx) error {
 
 	var paragraphs []models.Paragraph
 
-	err := database.DB.Delete(&models.Paragraph{}, ids).Error
+	err = database.DB.Delete(&models.Paragraph{}, ids).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

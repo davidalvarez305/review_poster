@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
-	"github.com/davidalvarez305/review_poster/crawler/server/utils"
+	"github.com/davidalvarez305/review_poster/server/types"
+	"github.com/davidalvarez305/review_poster/server/utils"
 )
 
 type AmazonSearchResultsPage struct {

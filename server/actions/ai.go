@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
+	"github.com/davidalvarez305/review_poster/server/types"
 )
 
 func getAIGeneratedContent(promptMsg string) (types.OpenAIResponse, error) {

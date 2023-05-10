@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
+	"github.com/davidalvarez305/review_poster/server/types"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

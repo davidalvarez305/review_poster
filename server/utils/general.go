@@ -1,6 +1,6 @@
 package utils
 
-import "github.com/davidalvarez305/review_poster/crawler/server/types"
+import "github.com/davidalvarez305/review_poster/server/types"
 
 func GetAIResponse(response types.OpenAIResponse) string {
 	var result string

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/davidalvarez305/review_poster/crawler/server/database"
-	"github.com/davidalvarez305/review_poster/crawler/server/models"
-	"github.com/davidalvarez305/review_poster/crawler/server/types"
-	"github.com/davidalvarez305/review_poster/crawler/server/utils"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/types"
+	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 )

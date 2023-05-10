@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/actions"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,7 +43,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Where("id = ?", id).Find(&template).Error
+	err = database.DB.Where("user_id = ?", userId).Find(&template).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -72,7 +72,7 @@ func UpdateTemplate(c *fiber.Ctx) error {
 	templateName := template.Name
 
 	// Query to find record
-	err := database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template).Error
+	err = database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

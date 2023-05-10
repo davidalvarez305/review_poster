@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/davidalvarez305/review_poster/cms/server/actions"
-	"github.com/davidalvarez305/review_poster/cms/server/models"
-	"github.com/davidalvarez305/review_poster/cms/server/utils"
+	"github.com/davidalvarez305/review_poster/server/actions"
+	"github.com/davidalvarez305/review_poster/server/database"
+	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -57,7 +58,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Save(&synonyms).Error
+	err = database.DB.Save(&synonyms).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -65,7 +66,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedSynonyms, err := GetSynonymsByWord(word, userId)
+	updatedSynonyms, err := actions.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -114,7 +115,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err := database.DB.Delete(&models.Synonym{}, ids).Error
+	err = database.DB.Delete(&models.Synonym{}, ids).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -122,7 +123,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	synonyms, err = GetSynonymsByWord(word, userId)
+	synonyms, err := actions.GetSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
