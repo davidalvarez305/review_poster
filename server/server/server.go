@@ -42,6 +42,7 @@ func (server *Server) Start() {
 	controllers.Amazon(api)
 	controllers.ReviewPost(api)
 	controllers.DynamicContent(api)
+	controllers.Ai(api)
 
 	server.App.Listen(":" + server.Port)
 }
