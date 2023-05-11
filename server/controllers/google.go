@@ -10,4 +10,5 @@ func Google(router fiber.Router) {
 
 	google.Get("/keywords", handlers.GetCommercialKeywords)
 	google.Get("/seed", handlers.GetSeedKeywords)
+	google.Get("/generate", handlers.GenerateKeywords)
 }

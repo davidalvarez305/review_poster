@@ -8,3 +8,4 @@ cms_build
 uwsgi_params
 replicate.sh
 download.sh
+test.sh

@@ -189,7 +189,7 @@ func GetSeedKeywords(results GoogleKeywordResults) ([]string, error) {
 		keywordLength := len(strings.Split(results.Results[i].Text, " "))
 
 		conditionOne := compIndex == 100
-		conditionTwo := searchVol > 4000
+		conditionTwo := searchVol > 1000
 		conditionThree := keywordLength >= 2 && keywordLength <= 4
 
 		if conditionOne && conditionTwo && conditionThree {

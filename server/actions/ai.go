@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 
 	"github.com/davidalvarez305/review_poster/server/types"
 )
 
-func getAIGeneratedContent(promptMsg string) (types.OpenAIResponse, error) {
+func QueryOpenAI(promptMsg string) (types.OpenAIResponse, error) {
 	var response types.OpenAIResponse
 	url := "https://api.openai.com/v1/completions"
 
@@ -50,11 +52,50 @@ func getAIGeneratedContent(promptMsg string) (types.OpenAIResponse, error) {
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
 		fmt.Printf("ERR BODY: %+v\n", resp.Body)
-		os.Exit(1)
 		return response, errors.New("request failed")
 	}
 
 	json.NewDecoder(resp.Body).Decode(&response)
 
 	return response, nil
+}
+
+func GenerateKeywordsWithOpenAI(categoryName string, seedKeywords []string) []string {
+	var generatedKeywords []string
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5)
+
+	for _, seedKeyword := range seedKeywords {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(keyword string) {
+			defer func() {
+				<-sem
+				wg.Done()
+			}()
+			response, err := QueryOpenAI(fmt.Sprintf("Please give me a list of the top brands on Amazon.com for the %s category. Please do not enumarate the list, and list all entries lowercased, and separated by lines.", keyword))
+
+			if err != nil {
+				fmt.Printf("ERROR GETTING KEYWORDS FROM OPEN AI: %+v\n", err)
+				return
+			}
+
+			if len(response.Choices) > 0 {
+				var filteredEntries []string
+
+				for _, result := range strings.Split(response.Choices[0].Text, "\n") {
+					if len(result) > 0 {
+						filteredEntries = append(filteredEntries, result+" "+categoryName)
+					}
+				}
+
+				generatedKeywords = append(generatedKeywords, filteredEntries...)
+			}
+		}(seedKeyword)
+	}
+
+	close(sem)
+	wg.Wait()
+
+	return generatedKeywords
 }

@@ -117,3 +117,54 @@ func GetSeedKeywords(c *fiber.Ctx) error {
 		"data": seedKeywords,
 	})
 }
+
+func GenerateKeywords(c *fiber.Ctx) error {
+	keyword := c.Query("keyword")
+
+	if len(keyword) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse request body.",
+		})
+	}
+
+	q := types.GoogleQuery{
+		Pagesize: 1000,
+		KeywordSeed: types.KeywordSeed{
+			Keywords: [1]string{keyword},
+		},
+	}
+
+	results, err := actions.QueryGoogle(q)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to query Google.",
+		})
+	}
+
+	if len(results.Results) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Bad Request.",
+		})
+	}
+
+	seedKeywords, err := actions.GetSeedKeywords(results)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to get seed keywords.",
+		})
+	}
+
+	if len(seedKeywords) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No Seed Keywords Found.",
+		})
+	}
+
+	seedKeywords = append(seedKeywords, actions.GenerateKeywordsWithOpenAI(keyword, seedKeywords)...)
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": seedKeywords,
+	})
+}

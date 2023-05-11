@@ -35,6 +35,16 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 		return readyReviewPosts, err
 	}
 
+	// Unable to get any keywords -> stop
+	if len(seedKeywords) == 0 {
+		return readyReviewPosts, nil
+	}
+
+	// Generate more keywords from Open AI
+	if len(seedKeywords) < 5 {
+		seedKeywords = append(seedKeywords, GenerateKeywordsWithOpenAI(categoryName, seedKeywords)...)
+	}
+
 	category, err := createOrFindCategory(categoryName, groupName)
 
 	if err != nil {
@@ -51,11 +61,6 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, 20)
-
-	// Unable to get any keywords -> stop
-	if len(seedKeywords) == 0 {
-		return readyReviewPosts, nil
-	}
 
 	for i := 0; i < len(seedKeywords); i++ {
 		wg.Add(1)
