@@ -19,7 +19,7 @@ interface Props {}
 
 export const Dictionary: React.FC<Props> = () => {
   const { user } = useContext(UserContext);
-  const { isLoading, makeRequest, cancelToken, error } = useFetch();
+  const { isLoading, makeRequest, error } = useFetch();
   const [words, setWords] = useState<Word[]>([]);
   const toast = useToast();
   useLoginRequired();
@@ -65,7 +65,7 @@ export const Dictionary: React.FC<Props> = () => {
         setWords(res.data.data);
       }
     );
-  }, [cancelToken, makeRequest, user.id]);
+  }, [makeRequest, user.id]);
 
   return (
     <Layout>

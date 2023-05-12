@@ -18,7 +18,7 @@ interface Props {}
 
 export const CreateSentence: React.FC<Props> = () => {
   const { user } = useContext(UserContext);
-  const { isLoading, makeRequest, cancelToken, error } = useFetch();
+  const { isLoading, makeRequest, error } = useFetch();
   const [paragraphs, setParagraphs] = useState<Array<Paragraph>>([]);
   const [templates, setTemplates] = useState<Array<Template>>([]);
   const toast = useToast();
@@ -103,10 +103,7 @@ export const CreateSentence: React.FC<Props> = () => {
         );
       }
     );
-    return () => {
-      cancelToken.cancel();
-    };
-  }, [makeRequest, cancelToken, user]);
+  }, [makeRequest, user]);
 
   return (
     <Layout>

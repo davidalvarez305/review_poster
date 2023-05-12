@@ -19,7 +19,7 @@ interface Props {}
 
 export const CreateParagraph: React.FC<Props> = () => {
   const { user } = useContext(UserContext);
-  const { isLoading, makeRequest, cancelToken, error } = useFetch();
+  const { isLoading, makeRequest, error } = useFetch();
   const [templates, setTemplates] = useState<Template[]>([]);
   const toast = useToast();
   useLoginRequired();
@@ -101,10 +101,7 @@ export const CreateParagraph: React.FC<Props> = () => {
         setTemplates(res.data.data);
       }
     );
-    return () => {
-      cancelToken.cancel();
-    };
-  }, [makeRequest, cancelToken, user.id]);
+  }, [makeRequest, user.id]);
 
   return (
     <Layout>

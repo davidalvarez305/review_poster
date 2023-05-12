@@ -29,7 +29,7 @@ export const SynonymsList: React.FC = () => {
   const { user } = useContext(UserContext);
   const location = useLocation();
   const word = location.pathname.split("/word/")[1];
-  const { makeRequest, isLoading, cancelToken, error } = useFetch();
+  const { makeRequest, isLoading, error } = useFetch();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -66,10 +66,7 @@ export const SynonymsList: React.FC = () => {
         setOptions(res.data.data);
       }
     );
-    return () => {
-      cancelToken.cancel();
-    };
-  }, [editModal, word, makeRequest, cancelToken, user.id]);
+  }, [editModal, word, makeRequest, user.id]);
 
   const columns = ["id", "synonym", "action"];
 

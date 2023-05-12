@@ -30,7 +30,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
   useLoginRequired();
   const location = useLocation();
   const template = location.pathname.split("/template/")[1];
-  const { makeRequest, isLoading, cancelToken, error } = useFetch();
+  const { makeRequest, isLoading, error } = useFetch();
   const toast = useToast();
   const { user } = useContext(UserContext);
 
@@ -67,10 +67,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
         setOptions(res.data.data);
       }
     );
-    return () => {
-      cancelToken.cancel();
-    };
-  }, [editModal, template, makeRequest, cancelToken, user.id]);
+  }, [editModal, template, makeRequest, user.id]);
   const columns = ["id", "name", "order", "action"];
 
   function handleDelete(id: number) {

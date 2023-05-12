@@ -27,7 +27,7 @@ import { transformContent } from "../utils/transformContent";
 import { transformDictionary } from "../utils/transformDictionary";
 
 const Generate: React.FC = () => {
-  const { makeRequest, isLoading, cancelToken } = useFetch();
+  const { makeRequest, isLoading } = useFetch();
   const { user } = useContext(UserContext);
   const toast = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -101,7 +101,7 @@ const Generate: React.FC = () => {
       // On Change Template => set the content back to an empty array.
       setGeneratedContent([]);
     }
-  }, [makeRequest, cancelToken, selectedTemplate, user.id]);
+  }, [makeRequest, selectedTemplate, user.id]);
 
   // This function will use the Set Sentences to send a "bulk request" to the server.
   // The server will take care of the rest.

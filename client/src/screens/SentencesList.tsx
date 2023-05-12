@@ -28,7 +28,7 @@ export const SentencesList: React.FC = () => {
   useLoginRequired();
   const location = useLocation();
   const paragraph = location.pathname.split("/paragraph/")[1];
-  const { makeRequest, isLoading, cancelToken, error } = useFetch();
+  const { makeRequest, isLoading, error } = useFetch();
   const navigate = useNavigate();
   const toast = useToast();
   const { user } = useContext(UserContext);
@@ -68,7 +68,7 @@ export const SentencesList: React.FC = () => {
         setOptions(res.data.data);
       }
     );
-  }, [editModal, paragraph, makeRequest, cancelToken, user.id]);
+  }, [editModal, paragraph, makeRequest, user.id]);
 
   const headers = ["id", "sentence", "action"];
 
