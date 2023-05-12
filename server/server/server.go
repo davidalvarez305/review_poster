@@ -43,6 +43,7 @@ func (server *Server) Start() {
 	controllers.ReviewPost(api)
 	controllers.DynamicContent(api)
 	controllers.Ai(api)
+	controllers.User(api)
 
 	server.App.Listen(":" + server.Port)
 }
