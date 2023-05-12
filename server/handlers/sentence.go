@@ -28,7 +28,7 @@ func GetSentences(c *fiber.Ctx) error {
 
 	var sentences []models.Sentence
 
-	err := database.DB.Where("user_id = ?", userId).Find(&sentences).Error
+	err := database.DB.Where("\"Template\".user_id = ?", userId).Preload("Paragraph").Joins("Template").Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

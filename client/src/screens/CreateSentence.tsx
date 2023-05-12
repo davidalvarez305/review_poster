@@ -77,18 +77,22 @@ export const CreateSentence: React.FC<Props> = () => {
       },
       (res) => {
         const response: Sentence[] = res.data.data;
-        setParagraphs(() =>
-          response.map((r) => {
-            return {
+        let paragraphs: Paragraph[] = [];
+        
+        for (let i = 0; i < response.length; i++) {
+          if (paragraphs.filter(p => p.name === response[i].paragraph?.name).length === 0) {
+            paragraphs.push({
               user_id: user.id,
-              template_id: r.template_id,
-              name: r.paragraph!.name,
-              id: r.paragraph_id,
-              template: r.template,
+              template_id: response[i].template_id,
+              name: response[i].paragraph!.name,
+              id: response[i].paragraph_id,
+              template: response[i].template,
               user: user,
-            };
-          })
-        );
+            });
+          }
+        }
+
+        setParagraphs([...paragraphs]);
 
         setTemplates(() =>
           response.map((r) => {

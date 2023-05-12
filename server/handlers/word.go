@@ -80,7 +80,6 @@ func CreateWord(c *fiber.Ctx) error {
 		synonym := &models.Synonym{
 			Synonym: body.Synonyms[i],
 			WordID:  word.ID,
-			Word:    &word,
 		}
 		word.Synonyms = append(word.Synonyms, synonym)
 	}
