@@ -38,13 +38,13 @@ func GetUser(c *fiber.Ctx) error {
 	user, err := actions.GetUserFromSession(c)
 
 	if err != nil {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(401).JSON(fiber.Map{
 			"data": err.Error(),
 		})
 	}
 
 	if user.Email == "" {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(401).JSON(fiber.Map{
 			"data": errors.New("no user found"),
 		})
 	}

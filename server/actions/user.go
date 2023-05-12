@@ -53,8 +53,12 @@ func UpdateUser(user models.User, body models.User) error {
 	return database.DB.Save(&user).First(&user).Error
 }
 
-func GetUserById(user models.User, userId string) error {
-	return database.DB.Where("id = ?", userId).First(&user).Error
+func GetUserById(userId string) (models.User, error) {
+	var user models.User
+
+	err := database.DB.Where("id = ?", userId).First(&user).Error
+
+	return user, err
 }
 
 func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
@@ -93,7 +97,7 @@ func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
 
 	uId := fmt.Sprintf("%v", userId)
 
-	err = GetUserById(user, uId)
+	user, err = GetUserById(uId)
 
 	if err != nil {
 		return user, err

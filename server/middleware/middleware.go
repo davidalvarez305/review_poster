@@ -13,7 +13,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	auth := headers["Authorization"]
 	path := c.Path()
 
-	if path == "/api/user/login" || path == "/api/user/register" {
+	if path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" {
 		return c.Next()
 	}
 
