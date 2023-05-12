@@ -65,9 +65,6 @@ export const Dictionary: React.FC<Props> = () => {
         setWords(res.data.data);
       }
     );
-    return () => {
-      cancelToken.cancel();
-    };
   }, [cancelToken, makeRequest, user.id]);
 
   return (

@@ -122,15 +122,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := actions.GetUserFromSession(c)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to get user from session.",
-		})
-	}
-
-	err = actions.UpdateUser(user, body)
+	user, err := actions.UpdateUser(body)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

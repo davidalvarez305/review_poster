@@ -37,7 +37,10 @@ func CreateUser(user models.User) error {
 	return database.DB.Save(&user).First(&user).Error
 }
 
-func UpdateUser(user models.User, body models.User) error {
+func UpdateUser(body models.User) (models.User, error) {
+	var user models.User
+
+	err := database.DB.Where("username = ?", body.Username).First(&user).Error
 
 	user.Username = body.Username
 	user.Email = body.Email
@@ -45,12 +48,15 @@ func UpdateUser(user models.User, body models.User) error {
 	token, err := generateToken()
 
 	if err != nil {
-		return err
+		return user, err
 	}
 
+	user.TokenID = token.ID
 	user.Token = &token
 
-	return database.DB.Save(&user).First(&user).Error
+	err = database.DB.Save(&user).First(&user).Error
+
+	return user, err
 }
 
 func GetUserById(userId string) (models.User, error) {
