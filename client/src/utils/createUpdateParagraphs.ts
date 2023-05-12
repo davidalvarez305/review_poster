@@ -1,10 +1,12 @@
-import { Paragraph } from "../types/general";
+import { Paragraph, Template, User } from "../types/general";
 
 export function createUpdateParagraphs(
   existingParagraphs: Paragraph[],
   inputParagraphs: string[],
   template_id: number,
-  user_id: number
+  user_id: number,
+  template: Template,
+  user: User
 ): Paragraph[] {
   let paragraphsToKeep: Paragraph[] = [];
 
@@ -16,12 +18,21 @@ export function createUpdateParagraphs(
           id: existingParagraph.id,
           template_id,
           user_id,
-          order: existingParagraph.order
+          order: existingParagraph.order,
+          template,
+          user,
         });
         break;
       }
     }
-    paragraphsToKeep.push({ name: paragraph, id: null, template_id, user_id });
+    paragraphsToKeep.push({
+      name: paragraph,
+      id: null,
+      template_id,
+      user_id,
+      template,
+      user,
+    });
   });
   return paragraphsToKeep;
 }

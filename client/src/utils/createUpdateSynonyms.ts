@@ -1,4 +1,4 @@
-import { Synonym } from "../types/general";
+import { Synonym, Word } from "../types/general";
 
 // This function will simply iterate over values from a modal and turn them into a Synonym object.
 // Whatever exists will have an id with a number type which will be treated as a "Update" (since the record already exists by virtue of having a primary key).
@@ -7,7 +7,8 @@ import { Synonym } from "../types/general";
 export function createUpdateSynonyms(
   existingSynonyms: Synonym[],
   inputSynonyms: string[],
-  word_id: number
+  word_id: number,
+  word: Word,
 ) {
   let synonymsToKeep: Synonym[] = [];
 
@@ -18,11 +19,12 @@ export function createUpdateSynonyms(
           synonym: existingSynonym.synonym,
           id: existingSynonym.id,
           word_id,
+          word
         });
         break;
       }
     }
-    synonymsToKeep.push({ synonym: syn, id: null, word_id });
+    synonymsToKeep.push({ synonym: syn, id: null, word_id, word });
   });
   return synonymsToKeep;
 }

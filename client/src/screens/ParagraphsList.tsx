@@ -131,7 +131,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
       template_id = templates[selectedTemplate].id;
       templateString = templates[selectedTemplate].name;
       method = "PUT";
-      body = createUpdateParagraphs(options, paragraphs, template_id, user.id);
+      body = createUpdateParagraphs(options, paragraphs, template_id, user.id, templates[selectedTemplate], user);
       route = USER_ROUTE + `/${user.id}/paragraph?template=${templateString}`;
     }
 

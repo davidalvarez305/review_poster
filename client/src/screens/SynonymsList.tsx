@@ -129,7 +129,7 @@ export const SynonymsList: React.FC = () => {
       word_id = words[selectedWord].id;
       wordString = words[selectedWord].name;
       method = "PUT";
-      body = createUpdateSynonyms(options, synonyms, word_id);
+      body = createUpdateSynonyms(options, synonyms, word_id, words[selectedWord]);
       route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`
     }
 

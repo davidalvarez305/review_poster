@@ -142,7 +142,8 @@ export const SentencesList: React.FC = () => {
         sentences,
         template_id,
         paragraph_id,
-        user.id
+        user.id,
+        paragraphs[selectedParagraph],
       );
       route =  USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraphString}`
     }
