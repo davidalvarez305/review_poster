@@ -75,20 +75,6 @@ export type UpdateSentence = {
   template_id: number;
 };
 
-export type Content = {
-  sentences: string;
-  template: string;
-  paragraph: string;
-  order: number;
-};
-
-export type FinalizedContent = {
-  sentences: string[];
-  template: string;
-  paragraph: string;
-  order: number;
-};
-
 export type DictionaryResponse = {
   name: string;
   tag: string;

@@ -10,10 +10,8 @@ import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
 import {
-  Content,
   Dictionary,
   DictionaryResponse,
-  FinalizedContent,
   Sentence,
   Synonym,
   Template,
@@ -33,7 +31,7 @@ const Generate: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedWord, setSelectedWord] = useState<number>();
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [content, setContent] = useState<FinalizedContent[]>([]);
+  const [sentences, setSentences] = useState<Sentence[]>([]);
   const [dictionary, setDictionary] = useState<Dictionary>({});
   const [generatedContent, setGeneratedContent] = useState<Content[]>([]);
   const [editModal, setEditModal] = useState(false);
@@ -82,8 +80,8 @@ const Generate: React.FC = () => {
           url: USER_ROUTE + `/${user.id}/content?template=${selectedTemplate}`,
         },
         (res) => {
-          const initialContent: Content[] = res.data.data;
-          setContent(transformContent(initialContent));
+          const initialContent: Sentence[] = res.data.data;
+          setSentences(transformContent(initialContent));
         }
       );
 
@@ -187,16 +185,16 @@ const Generate: React.FC = () => {
     ]
   );
 
-  const editSentence = (content: Content) => {
+  const editSentence = (sentence: Sentence) => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${content.paragraph}`
+        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${sentence.paragraph}`
       },
       (res) => {
         setEditingSentences(res.data.data);
       }
     );
-    setEditingSentencesParagraph(content.paragraph);
+    setEditingSentencesParagraph(sentence.paragraph);
     setEditModal(true);
   };
 
@@ -237,14 +235,13 @@ const Generate: React.FC = () => {
     }
   };
 
-  function selectContent(content: FinalizedContent[]): Content[] {
-    let data: Content[] = [];
-    for (let i = 0; i < content.length; i++) {
-      const sentences =
-        content[i].sentences[getRandomInt(content[i].sentences.length)];
+  function selectContent(sentences: Sentence[]) {
+    let data = [];
+    for (let i = 0; i < sentences.length; i++) {
+      const sentence = sentences[i].sentences[getRandomInt(sentences[i].sentences.length)];
       data.push({
         ...content[i],
-        sentences,
+        sentence,
       });
     }
     return data.sort((a, b) => a.order - b.order);
