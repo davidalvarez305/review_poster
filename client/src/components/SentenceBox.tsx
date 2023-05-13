@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Content, Dictionary } from "../types/general";
+import { Dictionary, SpunContent } from "../types/general";
 import { WordBox } from "./WordBox";
 
 interface Props {
   dict: Dictionary;
-  generatedContent: Content[];
-  onClickSentence: (content: Content) => void;
+  generatedContent: SpunContent[];
+  onClickSentence: (content: SpunContent) => void;
   onClickWord: (word: string) => void;
   seeTagged: boolean;
 }
@@ -17,13 +17,13 @@ const SentenceBox: React.FC<Props> = ({
   onClickWord,
   seeTagged,
 }) => {
-  const [content, setContent] = useState<Content[]>([]);
+  const [content, setContent] = useState<SpunContent[]>([]);
   const [hoveringWord, setHoveringWord] = useState(false);
 
   useEffect(() => {
-    const vals = generatedContent.map((sentence) => {
+    const vals = generatedContent.map((content) => {
       let values: string[] = [];
-      let words = sentence.sentences.split(/ /);
+      let words = content.sentence.split(/ /);
 
       if (words) {
         for (let n = 0; n < words.length; n++) {
@@ -34,21 +34,21 @@ const SentenceBox: React.FC<Props> = ({
           }
         }
       }
-      return { ...sentence, sentences: values.join(" ") };
+      return { ...content, sentence: values.join(" ") };
     });
     setContent(vals);
   }, [generatedContent, hoveringWord]);
 
   return (
     <>
-      {content.map((p) => {
-        const sentences = p.sentences.split(/[ .?!]/);
+      {content.map((spunContent) => {
+        const sentences = spunContent.sentence.split(/[ .?!]/);
         return (
           <div
             onClick={() => {
               // Only trigger sentence modal when words are not being clicked/hovered.
               if (!hoveringWord) {
-                onClickSentence(p);
+                onClickSentence(spunContent);
               }
             }}
             style={{
@@ -56,7 +56,7 @@ const SentenceBox: React.FC<Props> = ({
               fontSize: 18,
               marginTop: 20,
             }}
-            key={p.sentences}
+            key={spunContent.sentence}
           >
             {sentences.map((str, index) => (
               <span

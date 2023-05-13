@@ -84,3 +84,9 @@ export type DictionaryResponse = {
 export type Dictionary = {
   [key: string]: string[];
 };
+
+export type SpunContent = {
+  paragraph: string;
+  sentence: string;
+  order: number;
+}

@@ -1,5 +1,11 @@
 import { Box, Button, FormLabel, useToast } from "@chakra-ui/react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import EditModal from "../components/EditModal";
@@ -13,6 +19,7 @@ import {
   Dictionary,
   DictionaryResponse,
   Sentence,
+  SpunContent,
   Synonym,
   Template,
   Word,
@@ -21,7 +28,6 @@ import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { createUpdateSynonyms } from "../utils/createUpdateSynonyms";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
-import { transformContent } from "../utils/transformContent";
 import { transformDictionary } from "../utils/transformDictionary";
 
 const Generate: React.FC = () => {
@@ -33,7 +39,7 @@ const Generate: React.FC = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [sentences, setSentences] = useState<Sentence[]>([]);
   const [dictionary, setDictionary] = useState<Dictionary>({});
-  const [generatedContent, setGeneratedContent] = useState<Content[]>([]);
+  const [generatedContent, setGeneratedContent] = useState<SpunContent[]>([]);
   const [editModal, setEditModal] = useState(false);
   const [editingSentences, setEditingSentences] = useState<Sentence[]>([]);
   const [editingSentencesParagraph, setEditingSentencesParagraph] =
@@ -81,7 +87,7 @@ const Generate: React.FC = () => {
         },
         (res) => {
           const initialContent: Sentence[] = res.data.data;
-          setSentences(transformContent(initialContent));
+          setSentences(initialContent);
         }
       );
 
@@ -117,7 +123,9 @@ const Generate: React.FC = () => {
       });
       makeRequest(
         {
-          url: USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${editingSentencesParagraph}`,
+          url:
+            USER_ROUTE +
+            `/${user.id}/sentence/bulk?paragraph=${editingSentencesParagraph}`,
           method: "POST",
           data: body,
         },
@@ -141,15 +149,20 @@ const Generate: React.FC = () => {
       let body = synonyms.map((synonym) => {
         return { synonym, word_id };
       });
-      let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`
+      let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`;
 
       // Change request format if user selected a word.
       if (selectedWord) {
         word_id = words[selectedWord].id;
         wordString = words[selectedWord].name;
         method = "PUT";
-        body = createUpdateSynonyms(existingSynonyms, synonyms, word_id, words[selectedWord]);
-        route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`
+        body = createUpdateSynonyms(
+          existingSynonyms,
+          synonyms,
+          word_id,
+          words[selectedWord]
+        );
+        route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`;
       }
 
       makeRequest(
@@ -181,20 +194,25 @@ const Generate: React.FC = () => {
       selectedWord,
       toast,
       words,
-      user.id
+      user.id,
     ]
   );
 
   const editSentence = (sentence: Sentence) => {
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${sentence.paragraph}`
+        url:
+          USER_ROUTE + `/${user.id}/sentence?paragraph=${sentence.paragraph}`,
       },
       (res) => {
         setEditingSentences(res.data.data);
       }
     );
-    setEditingSentencesParagraph(sentence.paragraph);
+
+    if (sentence.paragraph) {
+      setEditingSentencesParagraph(sentence.paragraph.name);
+    }
+
     setEditModal(true);
   };
 
@@ -235,13 +253,32 @@ const Generate: React.FC = () => {
     }
   };
 
-  function selectContent(sentences: Sentence[]) {
-    let data = [];
+  function selectContent(sentences: Sentence[]): SpunContent[] {
+    let data: SpunContent[] = [];
+
+    let adjustedSentences: { [key: string]: string[] } = {};
+
     for (let i = 0; i < sentences.length; i++) {
-      const sentence = sentences[i].sentences[getRandomInt(sentences[i].sentences.length)];
+      if (!sentences[i].paragraph) continue;
+
+      const key = sentences[i].paragraph!.name;
+      if (adjustedSentences[key]) {
+        adjustedSentences[key] = [
+          ...adjustedSentences[key],
+          sentences[i].sentence,
+        ];
+      } else {
+        adjustedSentences[key] = [sentences[i].sentence];
+      }
+    }
+
+    for (const [key, value] of Object.entries(adjustedSentences)) {
+      const sentence = value[getRandomInt(value.length)];
+
       data.push({
-        ...content[i],
-        sentence,
+        paragraph: key,
+        sentence: sentence,
+        order: 0,
       });
     }
     return data.sort((a, b) => a.order - b.order);
@@ -304,7 +341,7 @@ const Generate: React.FC = () => {
         <Button
           variant={"outline"}
           colorScheme={"blue"}
-          onClick={() => setGeneratedContent(selectContent(content))}
+          onClick={() => setGeneratedContent(selectContent(sentences))}
         >
           Generate
         </Button>
@@ -337,7 +374,7 @@ const Generate: React.FC = () => {
         </Box>
       </Box>
     );
-  }, [content, selectedTemplate, templates]);
+  }, [sentences, selectedTemplate, templates]);
 
   // Modal for editing senteces
   const renderSentencesModal = useMemo(() => {
@@ -393,7 +430,11 @@ const Generate: React.FC = () => {
             }
           }}
           onClickSentence={(content) => {
-            editSentence(content);
+            editSentence(
+              sentences.filter(
+                (sentence) => sentence.sentence === content.sentence
+              )[0]
+            );
           }}
         />
       </Box>
