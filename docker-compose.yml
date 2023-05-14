@@ -8,6 +8,8 @@ services:
       - postgres
     env_file:
       - ./server/.env
+    volumes:
+    - data:/vol/server
     image: iamdavidmiguelalvarez/review_poster:server
     ports:
     - "4009:4009"
