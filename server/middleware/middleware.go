@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -13,8 +12,6 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	headers := c.GetReqHeaders()
 	auth := headers["Authorization"]
 	path := c.Path()
-
-	fmt.Printf("%+v\n", path)
 
 	if path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" {
 		return c.Next()
