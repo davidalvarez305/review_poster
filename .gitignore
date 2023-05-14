@@ -1,5 +1,4 @@
 *.env
-*.json
 *.conf
 *.sql
 deploy.sh
@@ -9,3 +8,5 @@ uwsgi_params
 replicate.sh
 download.sh
 test.sh
+output.json
+google.json
