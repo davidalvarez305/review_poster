@@ -32,7 +32,6 @@ func User(router fiber.Router) {
 
 	// Content related endpoints
 	user.Get("/:userId/content", handlers.GetContent)
-	user.Get("/:userId/dictionary", handlers.GetDictionary)
 
 	// Paragraph related endpoints
 	user.Get("/:userId/paragraph", handlers.GetParagraphs)

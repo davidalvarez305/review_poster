@@ -17,7 +17,6 @@ import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
 import {
   Dictionary,
-  DictionaryResponse,
   Sentence,
   SpunContent,
   Synonym,
@@ -28,7 +27,7 @@ import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { createUpdateSynonyms } from "../utils/createUpdateSynonyms";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
-import { transformDictionary } from "../utils/transformDictionary";
+import { createDictionaryFactory } from "../utils/createDictionaryFactory";
 
 const Generate: React.FC = () => {
   const { makeRequest, isLoading } = useFetch();
@@ -94,11 +93,11 @@ const Generate: React.FC = () => {
       // Pull dictionary
       makeRequest(
         {
-          url: USER_ROUTE + `/${user.id}/dictionary`,
+          url: USER_ROUTE + `/${user.id}/word`,
         },
         (res) => {
-          const initialDictionary: DictionaryResponse[] = res.data.data;
-          setDictionary(transformDictionary(initialDictionary));
+          const initialDictionary: Word[] = res.data.data;
+          setDictionary(createDictionaryFactory(initialDictionary));
         }
       );
 
@@ -199,21 +198,21 @@ const Generate: React.FC = () => {
   );
 
   const editSentence = (sentence: Sentence) => {
-    makeRequest(
-      {
-        url:
-          USER_ROUTE + `/${user.id}/sentence?paragraph=${sentence.paragraph}`,
-      },
-      (res) => {
-        setEditingSentences(res.data.data);
-      }
-    );
-
     if (sentence.paragraph) {
+      makeRequest(
+        {
+          url:
+            USER_ROUTE +
+            `/${user.id}/sentence?paragraph=${sentence.paragraph.name}`,
+        },
+        (res) => {
+          console.log(res.data.data);
+          setEditingSentences(res.data.data);
+        }
+      );
       setEditingSentencesParagraph(sentence.paragraph.name);
+      setEditModal(true);
     }
-
-    setEditModal(true);
   };
 
   const editWord = (word: string) => {
@@ -378,6 +377,7 @@ const Generate: React.FC = () => {
 
   // Modal for editing senteces
   const renderSentencesModal = useMemo(() => {
+    console.log("editingSentences: ", editingSentences);
     return (
       <EditModal
         selectComponent={navigateToParagraph()}

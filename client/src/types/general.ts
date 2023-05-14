@@ -75,12 +75,6 @@ export type UpdateSentence = {
   template_id: number;
 };
 
-export type DictionaryResponse = {
-  name: string;
-  tag: string;
-  synonyms: string;
-};
-
 export type Dictionary = {
   [key: string]: string[];
 };

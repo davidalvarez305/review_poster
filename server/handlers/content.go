@@ -32,23 +32,6 @@ func GetContent(c *fiber.Ctx) error {
 	})
 }
 
-func GetDictionary(c *fiber.Ctx) error {
-	var words []models.Word
-	userId := c.Params("userId")
-
-	err := database.DB.Where("user_id = ?", userId).Preload("Synonyms").Find(&words).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch words.",
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": words,
-	})
-}
-
 func GetDynamicContent(c *fiber.Ctx) error {
 	productName := c.Query("productName")
 	template := c.Query("template")

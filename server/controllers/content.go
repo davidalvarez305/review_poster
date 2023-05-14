@@ -9,6 +9,5 @@ func DynamicContent(router fiber.Router) {
 
 	content := router.Group("content")
 	content.Get("/", handlers.GetContent)
-	content.Get("/dictionary", handlers.GetDictionary)
 	content.Get("/dynamic", handlers.GetDynamicContent)
 }
