@@ -60,7 +60,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 
 	userId := c.Params("userId")
 
-	fmt.Println(fmt.Sprintf("%v", sessionUser.ID))
+	fmt.Printf("THE FIRST VALUE %s IS NOT EQUAL TO THE SECOND VALUE %s", fmt.Sprintf("%v", sessionUser.ID), userId)
 
 	if fmt.Sprintf("%v", sessionUser.ID) != userId {
 		return c.Status(403).JSON(fiber.Map{
