@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -50,6 +51,8 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 	}
 
 	sessionUserId, err := actions.GetUserIdFromSession(c)
+
+	fmt.Println(sessionUserId)
 
 	if err != nil {
 		return c.Status(403).JSON(fiber.Map{
