@@ -93,7 +93,7 @@ export const SentencesList: React.FC = () => {
         data: {
           id: editOption?.id,
           paragraph_id: editOption?.paragraph_id,
-          template_id: editOption?.template_id,
+          template_id: editOption?.paragraph.template_id,
           sentence,
         },
       },

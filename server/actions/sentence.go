@@ -8,7 +8,7 @@ import (
 func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Where("\"Paragraph\".name = ? AND \"Template\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
+	err := database.DB.Preload("Paragraph.Template").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("paragraph.name = ? AND template.user_id = ?", paragraph, userId).Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err
@@ -20,7 +20,7 @@ func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error
 func GetSentencesByTemplate(template string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Where("\"Template\".name = ?", template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
+	err := database.DB.Preload("Paragraph.Template").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ?", template).Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err

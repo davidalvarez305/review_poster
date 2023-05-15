@@ -19,7 +19,7 @@ import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
 import { Paragraph, Template } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import { createUpdateParagraphs } from "../utils/createUpdateParagraphs";
+import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
 import { UserContext } from "../context/UserContext";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
@@ -119,7 +119,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     let templateString = template;
     let method = "POST";
     let body = paragraphs.map((name) => {
-      return { name, template_id: options[0].template_id, user_id: user.id };
+      return { name, template_id: options[0].template_id };
     });
     let route = USER_ROUTE + `/${user.id}/paragraph/bulk?template=${templateString}`;
 
@@ -128,7 +128,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
       template_id = templates[selectedTemplate].id;
       templateString = templates[selectedTemplate].name;
       method = "PUT";
-      body = createUpdateParagraphs(options, paragraphs, template_id, user.id, templates[selectedTemplate], user);
+      body = createUpdateParagraphsFactory(options, paragraphs, template_id, templates[selectedTemplate]);
       route = USER_ROUTE + `/${user.id}/paragraph?template=${templateString}`;
     }
 

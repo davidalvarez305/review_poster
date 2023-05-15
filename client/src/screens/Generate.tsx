@@ -111,7 +111,7 @@ const Generate: React.FC = () => {
   const handleSubmit = useCallback(
     (values: { input: string }) => {
       const sentences = values.input.split("\n");
-      const template_id = editingSentences[0].template_id;
+      const template_id = editingSentences[0].paragraph!.template_id;
       const paragraph_id = editingSentences[0].paragraph_id;
       const body = sentences.map((sentence) => {
         return {
