@@ -68,6 +68,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
       }
     );
   }, [editModal, template, makeRequest, user.id]);
+
   const columns = ["id", "name", "order", "action"];
 
   function handleDelete(id: number) {
@@ -86,7 +87,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     const paragraph = values.input.split("\n")[0];
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/paragraph/`,
+        url: USER_ROUTE + `/${user.id}/paragraph`,
         method: "PUT",
         data: {
           id: editOption?.id,

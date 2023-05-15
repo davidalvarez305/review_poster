@@ -43,7 +43,9 @@ func CreateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("user_id = ?", userId).Find(&template).Error
+	var updatedTemplates []models.Template
+
+	err = database.DB.Where("user_id = ?", userId).Find(&updatedTemplates).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -52,7 +54,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": template,
+		"data": updatedTemplates,
 	})
 }
 
