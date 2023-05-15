@@ -61,18 +61,18 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	var paragraphs []models.Paragraph
+	var updatedSentences []models.Sentence
 
-	err = database.DB.Where("\"Template\".user_id = ?", userId).Joins("Template").Find(&paragraphs).Error
+	err = database.DB.Preload("Paragraph.Template.User").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id INNER JOIN \"user\" ON \"user\".id = template.user_id").Where("\"user\".id = ?", userId).Find(&updatedSentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch templates and paragraphs.",
+			"data": "Failed to fetch all sentences.",
 		})
 	}
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": paragraphs,
+		"data": updatedSentences,
 	})
 }
 

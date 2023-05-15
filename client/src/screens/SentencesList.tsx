@@ -21,7 +21,7 @@ import { Paragraph, Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
-import { createUpdateSentences } from "../utils/createUpdateSentences";
+import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFactory";
 import { UserContext } from "../context/UserContext";
 
 export const SentencesList: React.FC = () => {
@@ -93,11 +93,12 @@ export const SentencesList: React.FC = () => {
         data: {
           id: editOption?.id,
           paragraph_id: editOption?.paragraph_id,
-          template_id: editOption?.paragraph.template_id,
+          template_id: editOption?.paragraph!.template_id,
           sentence,
         },
       },
       (res) => {
+        const response: Sentence[] = res.data.data;
         toast({
           title: "Success!",
           description: "Sentence has been successfully submitted.",
@@ -107,7 +108,7 @@ export const SentencesList: React.FC = () => {
           variant: "left-accent",
         });
         setEditModal(false);
-        setOptions(res.data.data);
+        setOptions(response);
         setEditOption(null);
         setEditingSentence("");
       }
@@ -117,16 +118,13 @@ export const SentencesList: React.FC = () => {
   function handleSubmitBulk(values: { input: string }) {
     const sentences = values.input.split("\n");
 
-    let template_id = options[0].template_id;
     let paragraph_id = options[0].paragraph_id;
     let paragraphString = paragraph;
     let method = "POST";
     let body = sentences.map((sentence) => {
       return {
         paragraph_id,
-        template_id,
         sentence,
-        user_id: user.id,
       };
     });
     let route = USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${paragraphString}`
@@ -134,15 +132,12 @@ export const SentencesList: React.FC = () => {
     // Change request format if user selected a paragraph.
     if (selectedParagraph) {
       paragraph_id = paragraphs[selectedParagraph].id!;
-      template_id = paragraphs[selectedParagraph].template_id;
       paragraphString = paragraphs[selectedParagraph].name;
       method = "PUT";
-      body = createUpdateSentences(
+      body = createUpdateSentencesFactory(
         options,
         sentences,
-        template_id,
         paragraph_id,
-        user.id,
         paragraphs[selectedParagraph],
       );
       route =  USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraphString}`

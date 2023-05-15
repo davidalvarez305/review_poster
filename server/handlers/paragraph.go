@@ -30,13 +30,7 @@ func GetParagraphs(c *fiber.Ctx) error {
 	// Return all paragraphs without filter
 	var paragraphs []models.Paragraph
 
-	err := database.DB.Where("\"Template\".user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch paragraphs.",
-		})
-	}
+	err := database.DB.Preload("Template.User").Joins("INNER JOIN template ON template.user_id = user.id INNER JOIN user ON user.id = template.user_id").Where("\"user\".id = ?", userId).Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -60,7 +54,7 @@ func CreateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&paragraphs).Error
+	err = database.DB.Save(&paragraphs).Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -96,9 +90,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	var updatedParagraphs []models.Paragraph
-
-	err = database.DB.Where("\"Template\".name = ? AND paragraph.\"Template\".user_id = ?", template, userId).Joins("Template").Find(&updatedParagraphs).Error
+	updatedParagraphs, err := actions.GetParagraphsByTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

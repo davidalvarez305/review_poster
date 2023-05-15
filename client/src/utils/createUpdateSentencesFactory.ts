@@ -1,11 +1,9 @@
 import { Paragraph, Sentence } from "../types/general";
 
-export function createUpdateSentences(
+export function createUpdateSentencesFactory(
   existingSentences: Sentence[],
   inputSentences: string[],
-  template_id: number,
   paragraph_id: number,
-  user_id: number,
   paragraph: Paragraph
 ): Sentence[] {
   let sentencesToKeep: Sentence[] = [];
@@ -16,11 +14,8 @@ export function createUpdateSentences(
         sentencesToKeep.push({
           sentence: existingSentence.sentence,
           id: existingSentence.id,
-          template_id,
           paragraph_id,
-          user_id,
           paragraph,
-          template: paragraph.template,
         });
         break;
       }
@@ -28,11 +23,8 @@ export function createUpdateSentences(
     sentencesToKeep.push({
       sentence,
       id: null,
-      template_id,
       paragraph_id,
-      user_id,
       paragraph,
-      template: paragraph.template,
     });
   });
   return sentencesToKeep;

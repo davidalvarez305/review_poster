@@ -1,5 +1,5 @@
 import { Box, Button, useToast } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
@@ -13,6 +13,7 @@ import useLoginRequired from "../hooks/useLoginRequired";
 import { UserContext } from "../context/UserContext";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { USER_ROUTE } from "../constants";
+import { AxiosResponse } from "axios";
 
 interface Props {}
 
@@ -23,6 +24,46 @@ export const CreateSentence: React.FC<Props> = () => {
   const [templates, setTemplates] = useState<Array<Template>>([]);
   const toast = useToast();
   useLoginRequired();
+
+  const updateSentencesState = useCallback((res: AxiosResponse<any, any>) => {
+    const response: Sentence[] = res.data.data;
+    let paragraphs: Paragraph[] = [];
+
+    for (let i = 0; i < response.length; i++) {
+      const sentence = response[i];
+
+      if (!sentence.paragraph) continue;
+
+      if (
+        paragraphs.filter((p) => p.name === response[i].paragraph?.name)
+          .length === 0
+      ) {
+        paragraphs.push({
+          template_id: response[i].paragraph!.template_id,
+          name: response[i].paragraph!.name,
+          id: response[i].paragraph!.id,
+          template: response[i].paragraph!.template,
+        });
+      }
+    }
+
+    setParagraphs([...paragraphs]);
+
+    setTemplates(() => {
+      let templates: Template[] = [];
+      for (let i = 0; i < response.length; i++) {
+        if (!response[i].paragraph) continue;
+
+        templates.push({
+          name: response[i].paragraph!.template!.name,
+          id: response[i].paragraph!.template_id,
+          user_id: user.id,
+          user: user,
+        });
+      }
+      return templates;
+    });
+}, [user]);
 
   function handleSubmit(values: {
     paragraph: string;
@@ -57,7 +98,8 @@ export const CreateSentence: React.FC<Props> = () => {
         method: "POST",
         data: sentenceBody,
       },
-      () => {
+      (res) => {
+        updateSentencesState(res);
         toast({
           title: "Success!",
           description: "Sentences have been submitted",
@@ -75,47 +117,8 @@ export const CreateSentence: React.FC<Props> = () => {
       {
         url: USER_ROUTE + `/${user.id}/sentence`,
       },
-      (res) => {
-        const response: Sentence[] = res.data.data;
-        let paragraphs: Paragraph[] = [];
-
-        for (let i = 0; i < response.length; i++) {
-          const sentence = response[i];
-
-          if (!sentence.paragraph) continue;
-
-          if (
-            paragraphs.filter((p) => p.name === response[i].paragraph?.name)
-              .length === 0
-          ) {
-            paragraphs.push({
-              template_id: response[i].paragraph!.template_id,
-              name: response[i].paragraph!.name,
-              id: response[i].paragraph!.id,
-              template: response[i].paragraph!.template,
-            });
-          }
-        }
-
-        setParagraphs([...paragraphs]);
-
-        setTemplates(() => {
-          let templates: Template[] = [];
-          for (let i = 0; i < response.length; i++) {
-            if (!response[i].paragraph) continue;
-
-            templates.push({
-              name: response[i].paragraph!.template!.name,
-              id: response[i].paragraph!.template_id,
-              user_id: user.id,
-              user: user,
-            });
-          }
-          return templates;
-        });
-      }
-    );
-  }, [makeRequest, user]);
+      (res) => updateSentencesState(res));
+  }, [makeRequest, user, updateSentencesState]);
 
   return (
     <Layout>
