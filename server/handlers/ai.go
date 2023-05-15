@@ -18,7 +18,7 @@ func ParseTags(c *fiber.Ctx) error {
 		})
 	}
 
-	tagRegex := regexp.MustCompile(`^\[#\w+\]$`)
+	tagRegex := regexp.MustCompile(`^\(#\w+\)$`)
 
 	if len(tagRegex.FindAllString(tag, 3)) == 0 {
 		return c.Status(400).JSON(fiber.Map{

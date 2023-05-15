@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { centeredDiv } from "../utils/centeredDiv";
-import { Formik, Form } from "formik";
+import { Formik, Form, useFormikContext } from "formik";
 import useFetch from "../hooks/useFetch";
 import FormSelectComponent from "../components/FormSelectComponent";
 import { createTag } from "../utils/createTag";
@@ -13,7 +13,7 @@ import { UserContext } from "../context/UserContext";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { getId } from "../utils/getId";
 import { Word } from "../types/general";
-import { USER_ROUTE } from "../constants";
+import { API_ROUTE, USER_ROUTE } from "../constants";
 
 interface Props {}
 
@@ -23,6 +23,22 @@ export const Dictionary: React.FC<Props> = () => {
   const [words, setWords] = useState<Word[]>([]);
   const toast = useToast();
   useLoginRequired();
+
+  function handlePullFromChatGPT(values: {
+    word: string;
+    synonyms: string;
+    id: null;
+  }, setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void) {
+    const tag = createTag(values.word);
+    makeRequest(
+      {
+        url: API_ROUTE + `/ai/tags?tag=${encodeURIComponent(tag)}`,
+      },
+      async (res) => {
+        setFieldValue("synonyms", res.data.data.join("\n"));
+      }
+    );
+  }
 
   function handleSubmit(values: {
     word: string;
@@ -82,29 +98,46 @@ export const Dictionary: React.FC<Props> = () => {
           });
         }}
       >
-        <Form>
-          <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
-            <Box sx={{ ...centeredDiv, width: "25%", height: "20%" }}>
-              <FormSelectComponent
-                options={words.map((word) => word.name)}
-                name={"word"}
-              />
+        {({ values, setFieldValue }) => (
+          <Form>
+            <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
+              <Box sx={{ ...centeredDiv, width: "25%", height: "20%" }}>
+                <FormSelectComponent
+                  options={words.map((word) => word.name)}
+                  name={"word"}
+                />
+              </Box>
+              <Box>
+                <LargeInputBox label="Synonyms" name="synonyms" />
+              </Box>
+              <Box sx={{ ...centeredDiv, flexDirection: "row", gap: 5 }}>
+                <Button
+                  variant={"outline"}
+                  colorScheme={"teal"}
+                  size={"md"}
+                  type={"submit"}
+                  isLoading={isLoading}
+                  loadingText={"Submitting"}
+                >
+                  Submit
+                </Button>
+                {values.word.length > 0 && (
+                  <Button
+                    variant={"outline"}
+                    colorScheme={"red"}
+                    size={"md"}
+                    type={"button"}
+                    isLoading={isLoading}
+                    loadingText={"Pulling"}
+                    onClick={() => handlePullFromChatGPT(values, setFieldValue)}
+                  >
+                    Pull From ChatGPT
+                  </Button>
+                )}
+              </Box>
             </Box>
-            <Box>
-              <LargeInputBox label="Synonyms" name="synonyms" />
-            </Box>
-            <Button
-              variant={"outline"}
-              colorScheme={"teal"}
-              size={"md"}
-              type={"submit"}
-              isLoading={isLoading}
-              loadingText={"Submitting"}
-            >
-              Submit
-            </Button>
-          </Box>
-        </Form>
+          </Form>
+        )}
       </Formik>
       <BottomNavigation message={"Enter A Word"} path={"word"} />
       <RequestErrorMessage {...error} />

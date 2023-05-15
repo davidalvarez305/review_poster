@@ -63,14 +63,11 @@ func QueryOpenAI(promptMsg string) (types.OpenAIResponse, error) {
 func GenerateKeywordsWithOpenAI(categoryName string, seedKeywords []string) []string {
 	var generatedKeywords []string
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 5)
 
 	for _, seedKeyword := range seedKeywords {
 		wg.Add(1)
-		sem <- struct{}{}
 		go func(keyword string) {
 			defer func() {
-				<-sem
 				wg.Done()
 			}()
 			response, err := QueryOpenAI(fmt.Sprintf("Please give me a list of the top brands on Amazon.com for the %s category. Please do not enumarate the list, and list all entries lowercased, and separated by lines.", keyword))
@@ -94,7 +91,6 @@ func GenerateKeywordsWithOpenAI(categoryName string, seedKeywords []string) []st
 		}(seedKeyword)
 	}
 
-	close(sem)
 	wg.Wait()
 
 	return generatedKeywords
