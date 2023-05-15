@@ -8,7 +8,7 @@ import (
 func GetParagraphsByTemplate(template, userId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
+	err := database.DB.Where("\"Template\".name = ? AND \"Template\".user_id = ?", template, userId).Joins("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err
@@ -45,7 +45,7 @@ func DeleteBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragrap
 }
 
 // Take structs from client and creates them. Does not return any records.
-func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, userId string) error {
+func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph) error {
 	var paragraphs []models.Paragraph
 
 	for _, clientParagraph := range clientParagraphs {
@@ -61,7 +61,7 @@ func AddBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph, 
 	}
 
 	if len(paragraphs) > 0 {
-		err := database.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
+		err := database.DB.Save(&paragraphs).Error
 
 		if err != nil {
 			return err

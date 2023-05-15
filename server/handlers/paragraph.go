@@ -30,7 +30,7 @@ func GetParagraphs(c *fiber.Ctx) error {
 	// Return all paragraphs without filter
 	var paragraphs []models.Paragraph
 
-	err := database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
+	err := database.DB.Where("\"Template\".user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -52,8 +52,6 @@ func GetParagraphs(c *fiber.Ctx) error {
 func CreateParagraphs(c *fiber.Ctx) error {
 	var paragraphs []models.Paragraph
 
-	userId := c.Params("userId")
-
 	err := c.BodyParser(&paragraphs)
 
 	if err != nil {
@@ -62,7 +60,7 @@ func CreateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("user_id = ?", userId).Save(&paragraphs).Error
+	err = database.DB.Save(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -90,7 +88,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("id = ? AND user_id = ?", paragraphId, userId).Save(&paragraphs).Error
+	err = database.DB.Where("id = ?", paragraphId).Save(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -100,7 +98,7 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 
 	var updatedParagraphs []models.Paragraph
 
-	err = database.DB.Where("\"Template\".name = ? AND paragraph.user_id = ?", template, userId).Joins("Template").Find(&updatedParagraphs).Error
+	err = database.DB.Where("\"Template\".name = ? AND paragraph.\"Template\".user_id = ?", template, userId).Joins("Template").Find(&updatedParagraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -189,7 +187,7 @@ func BulkParagraphsUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.AddBulkParagraphs(paragraphsFromClient, existingParagraphs, userId)
+	err = actions.AddBulkParagraphs(paragraphsFromClient, existingParagraphs)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
