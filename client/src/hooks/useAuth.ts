@@ -21,7 +21,7 @@ export default function useAuth() {
 
   function Logout() {
     axios
-      .get(LOGOUT_ROUTE, {
+      .post(LOGOUT_ROUTE, {
         withCredentials: true,
       })
       .then((res) => {

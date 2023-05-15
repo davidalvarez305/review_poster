@@ -110,7 +110,7 @@ func GetUserFromSession(c *fiber.Ctx) (models.User, error) {
 
 func Login(user models.User, c *fiber.Ctx) error {
 	userPassword := user.Password
-	err := database.DB.Where("username = ?", user.Username).Preload("Token").First(&user).Error
+	err := database.DB.Where("username = ?", user.Username).First(&user).Error
 
 	if err != nil {
 		return errors.New("incorrect username")
