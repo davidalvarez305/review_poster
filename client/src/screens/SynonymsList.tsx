@@ -256,6 +256,7 @@ export const SynonymsList: React.FC = () => {
               editingItem={options.map((op) => op.synonym).join("\n")}
               isLoading={isLoading}
               handleSubmit={handleSubmitBulk}
+              selectedWord={selectedWord ? words[selectedWord!].name : undefined}
             />
           </Box>
         )}

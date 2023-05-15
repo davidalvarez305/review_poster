@@ -398,6 +398,7 @@ const Generate: React.FC = () => {
 
   // Modal for editing synonyms
   const renderSynonymsModal = useMemo(() => {
+    const word = selectedWord ? words[selectedWord].name : "";
     return (
       <EditModal
         selectComponent={SelectChangeWord()}
@@ -406,6 +407,7 @@ const Generate: React.FC = () => {
         handleSubmit={handleSynonyms}
         editingItem={editSynonyms.synonyms.join("\n")}
         isLoading={isLoading}
+        selectedWord={word}
       />
     );
   }, [
@@ -414,6 +416,8 @@ const Generate: React.FC = () => {
     isLoading,
     synonymModal,
     SelectChangeWord,
+    selectedWord,
+    words
   ]);
 
   return (

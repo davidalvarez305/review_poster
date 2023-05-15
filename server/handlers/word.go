@@ -30,7 +30,7 @@ func GetWords(c *fiber.Ctx) error {
 
 	var words []models.Word
 
-	err := database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
+	err := database.DB.Where("user_id = ?", userId).Preload("Synonyms").Preload("User").Find(&words).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

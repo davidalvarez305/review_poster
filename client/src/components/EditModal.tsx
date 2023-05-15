@@ -11,6 +11,9 @@ import {
 import { Form, Formik } from "formik";
 import React, { useRef } from "react";
 import ModalTextArea from "./ModalTextArea";
+import { API_ROUTE } from "../constants";
+import { createTag } from "../utils/createTag";
+import useFetch from "../hooks/useFetch";
 
 interface Props {
   handleSubmit: (values: { input: string }) => void;
@@ -19,6 +22,7 @@ interface Props {
   editingItem: string;
   isLoading: boolean;
   selectComponent?: React.ReactElement;
+  selectedWord?: string;
 }
 
 const EditModal: React.FC<Props> = ({
@@ -28,11 +32,33 @@ const EditModal: React.FC<Props> = ({
   editingItem,
   isLoading,
   selectComponent,
+  selectedWord
 }) => {
+  const { makeRequest, isLoading: isPulling } = useFetch();
   const finalRef: React.RefObject<any> = useRef(null);
+
+  function handlePullFromChatGPT(
+    setFieldValue: (
+      field: string,
+      value: any,
+      shouldValidate?: boolean | undefined
+    ) => void
+  ) {
+    const tagWord = selectedWord ? selectedWord : window.location.pathname.split("/word/")[1];
+    const tag = createTag(tagWord);
+    makeRequest(
+      {
+        url: API_ROUTE + `/ai/tags?tag=${encodeURIComponent(tag)}`,
+      },
+      async (res) => {
+        setFieldValue("input", res.data.data.join("\n"));
+      }
+    );
+  }
+
   return (
     <Formik initialValues={{ input: editingItem }} onSubmit={handleSubmit}>
-      {({ submitForm }) => (
+      {({ submitForm, setFieldValue }) => (
         <Form>
           <Modal
             size="3xl"
@@ -66,6 +92,19 @@ const EditModal: React.FC<Props> = ({
                 >
                   Close
                 </Button>
+                {selectComponent && <Button
+                  variant={"outline"}
+                  colorScheme={"red"}
+                  size={"md"}
+                  type={"button"}
+                  isLoading={isPulling}
+                  loadingText={"Pulling"}
+                  onClick={() =>
+                    handlePullFromChatGPT(setFieldValue)
+                  }
+                >
+                  Pull From ChatGPT
+                </Button>}
               </ModalFooter>
             </ModalContent>
           </Modal>
