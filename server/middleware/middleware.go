@@ -50,9 +50,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	sessionUserId, err := actions.GetUserIdFromSession(c)
-
-	fmt.Println(sessionUserId)
+	sessionUser, err := actions.GetUserFromSession(c)
 
 	if err != nil {
 		return c.Status(403).JSON(fiber.Map{
@@ -62,7 +60,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 
 	userId := c.Params("userId")
 
-	if sessionUserId != userId {
+	if fmt.Sprintf("%v", sessionUser.ID) != userId {
 		return c.Status(403).JSON(fiber.Map{
 			"data": "Not allowed to access these resources.",
 		})
