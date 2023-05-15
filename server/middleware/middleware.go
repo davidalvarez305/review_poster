@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/davidalvarez305/review_poster/server/actions"
@@ -58,11 +59,19 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		})
 	}
 
-	userId := c.Params("userId")
+	uId := c.Params("userId")
 
-	fmt.Printf("THE FIRST VALUE %s IS NOT EQUAL TO THE SECOND VALUE %s", fmt.Sprintf("%v", sessionUser.ID), userId)
+	userId, err := strconv.Atoi(uId)
 
-	if fmt.Sprintf("%v", sessionUser.ID) != userId {
+	if err != nil {
+		return c.Status(403).JSON(fiber.Map{
+			"data": "Could not convert ID from params to int.",
+		})
+	}
+
+	fmt.Printf("THE FIRST VALUE %s IS NOT EQUAL TO THE SECOND VALUE %s", fmt.Sprintf("%v", sessionUser.ID), uId)
+
+	if sessionUser.ID != userId {
 		return c.Status(403).JSON(fiber.Map{
 			"data": "Not allowed to access these resources.",
 		})
