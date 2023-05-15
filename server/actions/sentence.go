@@ -8,7 +8,7 @@ import (
 func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Where("\"Paragraph\".name = ? AND \"Paragraph\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
+	err := database.DB.Where("\"Paragraph\".name = ? AND \"Template\".user_id = ?", paragraph, userId).Joins("Paragraph").Joins("Template").Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err
@@ -57,7 +57,7 @@ func DeleteBulkSentences(clientSentences, existingSentences []models.Sentence) e
 }
 
 // Take structs from client and creates them. Does not return any records.
-func AddBulkSentences(clientSentences, existingSentences []models.Sentence, userId string) error {
+func AddBulkSentences(clientSentences, existingSentences []models.Sentence) error {
 	var sentences []models.Sentence
 
 	for _, clientSentence := range clientSentences {
@@ -73,7 +73,7 @@ func AddBulkSentences(clientSentences, existingSentences []models.Sentence, user
 	}
 
 	if len(sentences) > 0 {
-		err := database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Error
+		err := database.DB.Save(&sentences).Error
 
 		if err != nil {
 			return err

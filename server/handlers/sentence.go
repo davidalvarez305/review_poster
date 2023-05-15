@@ -53,7 +53,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("user_id = ?", userId).Save(&sentences).Where("user_id = ?", userId).Find(&sentences).Error
+	err = database.DB.Save(&sentences).Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -63,7 +63,7 @@ func CreateSentences(c *fiber.Ctx) error {
 
 	var paragraphs []models.Paragraph
 
-	err = database.DB.Where("user_id = ?", userId).Preload("Template").Find(&paragraphs).Error
+	err = database.DB.Where("\"Template\".user_id = ?", userId).Joins("Template").Find(&paragraphs).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -89,7 +89,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("user_id = ?", userId).Save(&sentencesFromClient).Error
+	err = database.DB.Save(&sentencesFromClient).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -183,7 +183,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = actions.AddBulkSentences(sentencesFromClient, existingSentences, userId)
+	err = actions.AddBulkSentences(sentencesFromClient, existingSentences)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
