@@ -25,14 +25,13 @@ func CreateUser(user models.User) error {
 		return err
 	}
 
-	token, err := generateToken()
+	_, err = generateToken(user.ID)
 
 	if err != nil {
 		return err
 	}
 
 	user.Password = string(hashedPassword)
-	user.Token = &token
 
 	return database.DB.Save(&user).First(&user).Error
 }
@@ -45,14 +44,11 @@ func UpdateUser(body models.User) (models.User, error) {
 	user.Username = body.Username
 	user.Email = body.Email
 
-	token, err := generateToken()
+	_, err = generateToken(user.ID)
 
 	if err != nil {
 		return user, err
 	}
-
-	user.TokenID = token.ID
-	user.Token = &token
 
 	err = database.DB.Save(&user).First(&user).Error
 
@@ -142,7 +138,7 @@ func Login(user models.User, c *fiber.Ctx) error {
 func RequestChangePasswordCode(user models.User) error {
 	var token models.Token
 
-	token, err := generateToken()
+	token, err := generateToken(user.ID)
 
 	if err != nil {
 		return err
@@ -162,13 +158,11 @@ func ChangePassword(user models.User, password string) (models.User, error) {
 
 	user.Password = string(hashedPassword)
 
-	token, err := generateToken()
+	_, err = generateToken(user.ID)
 
 	if err != nil {
 		return newUser, err
 	}
-
-	user.Token = &token
 
 	newUser = user
 

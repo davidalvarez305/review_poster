@@ -8,12 +8,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func generateToken() (models.Token, error) {
+func generateToken(userId int) (models.Token, error) {
 
 	// Initialize & Generate Token
 	token := models.Token{
 		UUID:      uuid.New().String(),
 		CreatedAt: time.Now().Unix(),
+		UserID:    userId,
 	}
 
 	err := database.DB.Save(&token).First(&token).Error
