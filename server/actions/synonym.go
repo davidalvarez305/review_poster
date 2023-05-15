@@ -9,7 +9,7 @@ import (
 func GetSynonymsByWord(word, userId string) ([]models.Synonym, error) {
 	var synonyms []models.Synonym
 
-	err := database.DB.Where("name = ? ", word).Joins("Word").Find(&synonyms).Error
+	err := database.DB.Where("name = ? AND \"Word\".user_id = ?", word, userId).Joins("Word").Find(&synonyms).Error
 
 	if err != nil {
 		return synonyms, err
