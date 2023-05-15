@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/davidalvarez305/review_poster/server/actions"
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/utils"
@@ -17,9 +18,7 @@ func GetContent(c *fiber.Ctx) error {
 		})
 	}
 
-	var sentences []models.Sentence
-
-	err := database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
+	sentences, err := actions.GetSentencesByTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -55,9 +54,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 	}
 
 	// Second get the sentences
-	var sentences []models.Sentence
-
-	err = database.DB.Where("\"Template\".user_id = ? AND \"Template\".name = ?", userId, template).Joins("Template").Preload("Paragraph").Find(&sentences).Error
+	sentences, err := actions.GetSentencesByTemplate(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

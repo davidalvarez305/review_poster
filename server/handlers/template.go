@@ -85,7 +85,7 @@ func UpdateTemplate(c *fiber.Ctx) error {
 	// If record is found, update. If not, DB will throw error.
 	template.Name = templateName
 
-	err = database.DB.Save(&template).First(&template).Error
+	err = database.DB.Save(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -93,8 +93,18 @@ func UpdateTemplate(c *fiber.Ctx) error {
 		})
 	}
 
+	var updatedTemplates []models.Template
+
+	err = database.DB.Where("user_id = ?", userId).Find(&updatedTemplates).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch templates.",
+		})
+	}
+
 	return c.Status(201).JSON(fiber.Map{
-		"data": template,
+		"data": updatedTemplates,
 	})
 }
 
