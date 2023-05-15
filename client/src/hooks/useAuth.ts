@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import { LOGOUT_ROUTE } from "../constants";
 import { User } from "../types/general";
-import useFetch from "./useFetch";
+import axios from "axios";
+
 export const emptyUser = {
   id: 0,
   username: "",
@@ -12,7 +13,6 @@ export const emptyUser = {
 };
 
 export default function useAuth() {
-  const { makeRequest } = useFetch();
   const [user, setUser] = useState<User>(emptyUser);
 
   const SetUser = useCallback((user: User) => {
@@ -20,17 +20,16 @@ export default function useAuth() {
   }, []);
 
   function Logout() {
-    makeRequest(
-      {
-        url: `${LOGOUT_ROUTE}`,
-        method: "POST",
-      },
-      (res) => {
+    axios
+      .get(LOGOUT_ROUTE, {
+        withCredentials: true,
+      })
+      .then((res) => {
         if (res.data.data === "Logged out!") {
           setUser(emptyUser);
         }
-      }
-    );
+      })
+      .catch(console.error);
   }
 
   return { SetUser, Logout, user };
