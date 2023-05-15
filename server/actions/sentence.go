@@ -17,10 +17,10 @@ func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error
 	return sentences, nil
 }
 
-func GetSentencesByTemplate(template string) ([]models.Sentence, error) {
+func GetSentencesByTemplate(template, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Preload("Paragraph.Template").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ?", template).Find(&sentences).Error
+	err := database.DB.Preload("Paragraph.Template.User").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id INNER JOIN \"user\" ON \"user\".id = template.user_id").Where("\"user\".id = ? AND template.name = ?", userId, template).Find(&sentences).Error
 
 	if err != nil {
 		return sentences, err

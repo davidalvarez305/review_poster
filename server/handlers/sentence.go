@@ -28,7 +28,7 @@ func GetSentences(c *fiber.Ctx) error {
 
 	var sentences []models.Sentence
 
-	err := database.DB.Preload("Paragraph.Template").Joins("JOIN template ON template.user_id = ?", userId).Find(&sentences).Error
+	err := database.DB.Preload("Paragraph.Template.User").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id INNER JOIN \"user\" ON \"user\".id = template.user_id").Where("\"user\".id = ?", userId).Find(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

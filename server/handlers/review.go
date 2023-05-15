@@ -10,6 +10,7 @@ import (
 
 func CreatePosts(c *fiber.Ctx) error {
 	var body types.CreateReviewPostsInput
+	userId := c.Params("userId")
 
 	err := c.BodyParser(&body)
 
@@ -35,7 +36,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	sentences, err := actions.GetSentencesByTemplate(body.Template)
+	sentences, err := actions.GetSentencesByTemplate(body.Template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
