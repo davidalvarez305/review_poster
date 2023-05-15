@@ -26,9 +26,9 @@ func generateToken(userId int) (models.Token, error) {
 	return token, nil
 }
 
-func GetToken(uuid string, userId int) (models.Token, error) {
+func GetToken(uuid string) (models.Token, error) {
 	var token models.Token
-	err := database.DB.Where("uuid = ? AND user_id = ?", uuid, userId).First(&token).Error
+	err := database.DB.Where("uuid = ?", uuid).First(&token).Error
 
 	if err != nil {
 		return token, err

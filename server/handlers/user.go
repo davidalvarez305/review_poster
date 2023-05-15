@@ -208,7 +208,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 
 	// Retrieve Token from DB
-	token, err := actions.GetToken(code, user.ID)
+	token, err := actions.GetToken(code)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
