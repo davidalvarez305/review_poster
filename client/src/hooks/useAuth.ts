@@ -7,7 +7,8 @@ export const emptyUser = {
   username: "",
   password: "",
   email: "",
-  token: null
+  token: null,
+  auth_header_string: "",
 };
 
 export default function useAuth() {

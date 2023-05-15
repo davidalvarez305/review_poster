@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router";
@@ -10,7 +10,6 @@ import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
 import { User as UserType } from "../types/general";
-import { FiRefreshCcw } from "react-icons/fi";
 
 const User: React.FC = () => {
   const { user, SetUser, Logout } = useContext(UserContext);
@@ -66,15 +65,6 @@ const User: React.FC = () => {
                     name={`${u}`}
                     width={250}
                   />
-                  {u === "token" ? (
-                    <IconButton
-                      icon={<FiRefreshCcw />}
-                      aria-label={"refresh"}
-                      style={{ marginTop: 30, marginLeft: 10 }}
-                      onClick={() => handleRequest(values)}
-                      isLoading={isLoading}
-                    />
-                  ) : undefined}
                 </div>
               ))}
               <Button

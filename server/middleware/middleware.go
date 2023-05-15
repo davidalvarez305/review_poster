@@ -13,11 +13,11 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	auth := headers["Authorization"]
 	path := c.Path()
 
-	if path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" {
+	if path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" || c.Method() == "GET" {
 		return c.Next()
 	}
 
-	if auth != "Bearer "+os.Getenv("AUTH_HEADER_STRING") {
+	if c.Method() != "GET" && auth != "Bearer "+os.Getenv("AUTH_HEADER_STRING") {
 		return c.Status(401).JSON(fiber.Map{
 			"data": "Unauthorized request.",
 		})

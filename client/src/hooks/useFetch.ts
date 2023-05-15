@@ -1,10 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { UserContext } from "../context/UserContext";
 
 export default function useFetch() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ message: "" });
   const cancelToken = useMemo(() => axios.CancelToken.source(), []);
+  const { user } = useContext(UserContext);
 
   const makeRequest = useCallback(
     async (
@@ -18,7 +20,10 @@ export default function useFetch() {
         url: config.url,
         cancelToken: cancelToken.token,
         method: config.method ? config.method : undefined,
-        headers: config.headers ? config.headers : undefined,
+        headers: {
+          ...config.headers,
+          Authorization: "Bearer " + user.auth_header_string,
+        },
         responseType: config.responseType ? config.responseType : undefined,
         withCredentials: true,
         data: config.data ? config.data : null,
@@ -39,7 +44,7 @@ export default function useFetch() {
           setIsLoading(false);
         });
     },
-    [cancelToken]
+    [cancelToken, user.auth_header_string]
   );
 
   const errorCallback = (callbackMessage: string) => {

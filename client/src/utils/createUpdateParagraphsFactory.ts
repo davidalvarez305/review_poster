@@ -1,4 +1,4 @@
-import { Paragraph, Template, User } from "../types/general";
+import { Paragraph, Template } from "../types/general";
 
 export function createUpdateParagraphsFactory(
   existingParagraphs: Paragraph[],

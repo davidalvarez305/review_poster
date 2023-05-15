@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/davidalvarez305/review_poster/server/actions"
@@ -48,6 +49,8 @@ func GetUser(c *fiber.Ctx) error {
 			"data": errors.New("no user found"),
 		})
 	}
+
+	user.AuthHeaderString = os.Getenv("AUTH_HEADER_STRING")
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": user,

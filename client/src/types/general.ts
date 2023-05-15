@@ -11,6 +11,7 @@ export type User = {
   username: string;
   password: string;
   email: string;
+  auth_header_string: string;
 };
 
 export type Template = {
