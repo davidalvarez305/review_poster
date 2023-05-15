@@ -89,7 +89,7 @@ export const SynonymsList: React.FC = () => {
     });
     makeRequest(
       {
-        url: USER_ROUTE + `/${user.id}/synonym/${editOption?.id}?word=${word}`,
+        url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
         method: "PUT",
         data: body,
       },

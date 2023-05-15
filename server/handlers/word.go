@@ -15,7 +15,7 @@ func GetWords(c *fiber.Ctx) error {
 	if len(wordName) > 0 {
 		var word models.Word
 
-		err := database.DB.Where("name = ? AND user_id = ?", wordName, userId).Find(&word).Error
+		err := database.DB.Where("name = ? AND user_id = ?", wordName, userId).First(&word).Error
 
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{
@@ -30,7 +30,7 @@ func GetWords(c *fiber.Ctx) error {
 
 	var words []models.Word
 
-	err := database.DB.Where("user_id = ?", userId).Preload("Synonyms").Preload("User").Find(&words).Error
+	err := database.DB.Where("user_id = ?", userId).Preload("User").Find(&words).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
