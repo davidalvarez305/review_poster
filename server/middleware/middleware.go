@@ -60,6 +60,8 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 
 	userId := c.Params("userId")
 
+	fmt.Println(fmt.Sprintf("%v", sessionUser.ID))
+
 	if fmt.Sprintf("%v", sessionUser.ID) != userId {
 		return c.Status(403).JSON(fiber.Map{
 			"data": "Not allowed to access these resources.",
