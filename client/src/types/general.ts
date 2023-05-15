@@ -2,6 +2,8 @@ export type Token = {
   id: number;
   uuid: string;
   created_at: number;
+  user: User | null;
+  user_id: number;
 };
 
 export type User = {
@@ -9,7 +11,6 @@ export type User = {
   username: string;
   password: string;
   email: string;
-  token: Token | null;
 };
 
 export type Template = {
@@ -39,10 +40,7 @@ export type Sentence = {
   id: number | null;
   sentence: string;
   paragraph_id: number;
-  template_id: number;
-  user_id: number;
   paragraph: Paragraph | null;
-  template: Template | null;
 };
 
 export type Paragraph = {
@@ -50,9 +48,7 @@ export type Paragraph = {
   name: string;
   order?: number;
   template_id: number;
-  user_id: number;
   template: Template | null;
-  user: User | null;
 };
 
 export type UpdateParagraph = {

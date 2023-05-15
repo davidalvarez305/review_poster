@@ -78,33 +78,41 @@ export const CreateSentence: React.FC<Props> = () => {
       (res) => {
         const response: Sentence[] = res.data.data;
         let paragraphs: Paragraph[] = [];
-        
+
         for (let i = 0; i < response.length; i++) {
-          if (paragraphs.filter(p => p.name === response[i].paragraph?.name).length === 0) {
+          const sentence = response[i];
+
+          if (!sentence.paragraph) continue;
+
+          if (
+            paragraphs.filter((p) => p.name === response[i].paragraph?.name)
+              .length === 0
+          ) {
             paragraphs.push({
-              user_id: user.id,
-              template_id: response[i].template_id,
+              template_id: response[i].paragraph!.template_id,
               name: response[i].paragraph!.name,
-              id: response[i].paragraph_id,
-              template: response[i].template,
-              user: user,
+              id: response[i].paragraph!.id,
+              template: response[i].paragraph!.template,
             });
           }
         }
 
         setParagraphs([...paragraphs]);
 
-        setTemplates(() =>
-          response.map((r) => {
-            return {
-              name: r.template!.name,
-              id: r.template_id,
+        setTemplates(() => {
+          let templates: Template[] = [];
+          for (let i = 0; i < response.length; i++) {
+            if (!response[i].paragraph) continue;
+
+            templates.push({
+              name: response[i].paragraph!.template!.name,
+              id: response[i].paragraph!.template_id,
               user_id: user.id,
-              template: r.template,
               user: user,
-            };
-          })
-        );
+            });
+          }
+          return templates;
+        });
       }
     );
   }, [makeRequest, user]);
