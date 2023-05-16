@@ -24,7 +24,7 @@ import {
   Word,
 } from "../types/general";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
-import { createUpdateSynonyms } from "../utils/createUpdateSynonyms";
+import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
 import { createDictionaryFactory } from "../utils/createDictionaryFactory";
@@ -155,11 +155,10 @@ const Generate: React.FC = () => {
         word_id = words[selectedWord].id;
         wordString = words[selectedWord].name;
         method = "PUT";
-        body = createUpdateSynonyms(
+        body = createUpdateSynonymsFactory(
           existingSynonyms,
           synonyms,
-          word_id,
-          words[selectedWord]
+          word_id
         );
         route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`;
       }

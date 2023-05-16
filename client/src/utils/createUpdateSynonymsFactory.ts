@@ -4,11 +4,10 @@ import { Synonym, Word } from "../types/general";
 // Whatever exists will have an id with a number type which will be treated as a "Update" (since the record already exists by virtue of having a primary key).
 // Whatever doesn't exist will have a null id and will be created as a new record in the DB.
 
-export function createUpdateSynonyms(
+export function createUpdateSynonymsFactory(
   existingSynonyms: Synonym[],
   inputSynonyms: string[],
   word_id: number,
-  word: Word,
 ) {
   let synonymsToKeep: Synonym[] = [];
 
@@ -19,12 +18,12 @@ export function createUpdateSynonyms(
           synonym: existingSynonym.synonym,
           id: existingSynonym.id,
           word_id,
-          word
+          word: null
         });
         break;
       }
     }
-    synonymsToKeep.push({ synonym: syn, id: null, word_id, word });
+    synonymsToKeep.push({ synonym: syn, id: null, word_id, word: null });
   });
   return synonymsToKeep;
 }

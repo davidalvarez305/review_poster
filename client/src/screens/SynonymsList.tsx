@@ -1,8 +1,8 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Synonym, Word } from "../types/general";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Word } from "../types/general";
+import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
 import {
@@ -14,28 +14,33 @@ import {
   Th,
   Thead,
   Tr,
-  useToast,
 } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
-import { createUpdateSynonyms } from "../utils/createUpdateSynonyms";
+import useSynonymsController from "../hooks/useSynonymsController";
 import { UserContext } from "../context/UserContext";
 
 export const SynonymsList: React.FC = () => {
   useLoginRequired();
-  const { user } = useContext(UserContext);
-  const location = useLocation();
-  const word = location.pathname.split("/word/")[1];
-  const { makeRequest, isLoading, error } = useFetch();
-  const toast = useToast();
-  const navigate = useNavigate();
 
-  const [options, setOptions] = useState<Synonym[]>([]);
+  const {
+    updateSynonyms,
+    synonyms,
+    isLoading,
+    error,
+    setEditSingleSynonym,
+    bulkUpdateSynonyms,
+    deleteSynonym,
+    word,
+  } = useSynonymsController();
+
+  const { makeRequest } = useFetch();
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
   const [editModal, setEditModal] = useState(false);
-  const [editOption, setEditOption] = useState<Synonym | null>();
   const [editingSynonym, setEditingSynonym] = useState("");
   const [bulkModal, setBulkModal] = useState(false);
   const [words, setWords] = useState<Word[]>([]);
@@ -57,102 +62,21 @@ export const SynonymsList: React.FC = () => {
     }
   }, [bulkModal, makeRequest, user.id]);
 
-  useEffect(() => {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
-      },
-      (res) => {
-        setOptions(res.data.data);
-      }
-    );
-  }, [editModal, word, makeRequest, user.id]);
-
   const columns = ["id", "synonym", "action"];
 
-  function handleDelete(id: number) {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/synonym?word=${word}&synonyms=${[id]}`,
-        method: "DELETE",
-      },
-      (res) => {
-        setOptions(res.data.data);
-      }
-    );
-  }
-
-  function handleSubmit(values: { input: string }) {
-    const synonyms = values.input.split("\n");
-    const body = synonyms.map((synonym) => {
-      return { id: editOption?.id, word_id: editOption?.word_id, synonym };
-    });
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
-        method: "PUT",
-        data: body,
-      },
-      (res) => {
-        toast({
-          title: "Success!",
-          description: "Synonym has been successfully submitted.",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setOptions(res.data.data);
-        setEditOption(null);
-        setEditingSynonym("");
-      }
-    );
-    setEditModal(false);
-  }
-
   function handleSubmitBulk(values: { input: string }) {
-    const synonyms = values.input.split("\n");
-
-    let word_id = options[0].word_id;
-    let wordString = word;
-    let method = "POST";
-    let body = synonyms.map((synonym) => {
-      return { synonym, word_id };
-    });
-    let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`
-
     // Change request format if user selected a word.
     if (selectedWord) {
-      word_id = words[selectedWord].id;
-      wordString = words[selectedWord].name;
-      method = "PUT";
-      body = createUpdateSynonyms(options, synonyms, word_id, words[selectedWord]);
-      route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`
+      updateSynonyms({ ...values });
+    } else {
+      bulkUpdateSynonyms({ ...values });
     }
 
-    makeRequest(
-      {
-        url: route,
-        method: method,
-        data: body,
-      },
-      (res) => {
-        toast({
-          title: "Success!",
-          description: "Synonyms have been successfully submitted.",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setEditModal(false);
-        setOptions(res.data.data);
-        setBulkModal(false);
-        if (selectedWord) {
-          navigate("/word/" + wordString);
-        }
-      }
-    );
+    setEditModal(false);
+    setBulkModal(false);
+    if (selectedWord) {
+      navigate("/word/" + word);
+    }
   }
 
   const SelectChangeWord = useCallback(() => {
@@ -219,18 +143,18 @@ export const SynonymsList: React.FC = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {options.map((_, i) => (
+              {synonyms.map((_, i) => (
                 <React.Fragment key={i}>
                   <TableRow
                     columns={columns}
                     index={i}
-                    items={options}
+                    items={synonyms}
                     onClickEdit={() => {
                       setEditModal(true);
-                      setEditingSynonym(options[i].synonym);
-                      setEditOption(options[i]);
+                      setEditingSynonym(synonyms[i].synonym);
+                      setEditSingleSynonym(synonyms[i]);
                     }}
-                    onClickDelete={() => handleDelete(options[i].id!)}
+                    onClickDelete={() => deleteSynonym(synonyms[i].id!)}
                   />
                 </React.Fragment>
               ))}
@@ -242,7 +166,11 @@ export const SynonymsList: React.FC = () => {
           <EditModal
             editModal={editModal}
             setEditModal={setEditModal}
-            handleSubmit={handleSubmit}
+            handleSubmit={(values) => {
+              updateSynonyms(values);
+              setEditingSynonym("");
+              setEditModal(false);
+            }}
             editingItem={editingSynonym}
             isLoading={isLoading}
           />
@@ -253,10 +181,14 @@ export const SynonymsList: React.FC = () => {
               selectComponent={SelectChangeWord()}
               setEditModal={setBulkModal}
               editModal={bulkModal}
-              editingItem={options.map((op) => op.synonym).join("\n")}
+              editingItem={synonyms.map((op) => op.synonym).join("\n")}
               isLoading={isLoading}
-              handleSubmit={handleSubmitBulk}
-              selectedWord={selectedWord ? words[selectedWord!].name : undefined}
+              handleSubmit={(values) => {
+                handleSubmitBulk(values);
+              }}
+              selectedWord={
+                selectedWord ? words[selectedWord!].name : undefined
+              }
             />
           </Box>
         )}
