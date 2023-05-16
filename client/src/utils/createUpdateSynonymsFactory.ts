@@ -1,4 +1,4 @@
-import { Synonym, Word } from "../types/general";
+import { Synonym } from "../types/general";
 
 // This function will simply iterate over values from a modal and turn them into a Synonym object.
 // Whatever exists will have an id with a number type which will be treated as a "Update" (since the record already exists by virtue of having a primary key).
