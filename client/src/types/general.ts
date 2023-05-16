@@ -80,4 +80,18 @@ export type SpunContent = {
   paragraph: string;
   sentence: string;
   order: number;
-}
+};
+
+export type CreateWordInput = {
+  id: number | null;
+  word: string;
+  tag: string;
+  user_id: any;
+  synonyms: string[];
+};
+
+export type WordFormInput = {
+  word: string;
+  synonyms: string;
+  id: number | null;
+};

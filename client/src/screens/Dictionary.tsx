@@ -1,35 +1,38 @@
-import { Box, Button, useToast } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import { Box, Button } from "@chakra-ui/react";
+import React from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
 import useFetch from "../hooks/useFetch";
 import FormSelectComponent from "../components/FormSelectComponent";
-import { createTag } from "../utils/createTag";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
-import { UserContext } from "../context/UserContext";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import { getId } from "../utils/getId";
-import { Word } from "../types/general";
-import { API_ROUTE, USER_ROUTE } from "../constants";
+import { API_ROUTE } from "../constants";
+import useWordsController from "../hooks/useWordsController";
+import createTagFactory from "../utils/createTagFactory";
 
 interface Props {}
 
 export const Dictionary: React.FC<Props> = () => {
-  const { user } = useContext(UserContext);
-  const { isLoading, makeRequest, error } = useFetch();
-  const [words, setWords] = useState<Word[]>([]);
-  const toast = useToast();
+  const { createWords, words, isLoading, error } = useWordsController();
+  const { makeRequest, isLoading: Loading } = useFetch();
   useLoginRequired();
 
-  function handlePullFromChatGPT(values: {
-    word: string;
-    synonyms: string;
-    id: null;
-  }, setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void) {
-    const tag = createTag(values.word);
+  function handlePullFromChatGPT(
+    values: {
+      word: string;
+      synonyms: string;
+      id: null;
+    },
+    setFieldValue: (
+      field: string,
+      value: any,
+      shouldValidate?: boolean | undefined
+    ) => void
+  ) {
+    const tag = createTagFactory(values.word);
     makeRequest(
       {
         url: API_ROUTE + `/ai/tags?tag=${encodeURIComponent(tag)}`,
@@ -40,55 +43,12 @@ export const Dictionary: React.FC<Props> = () => {
     );
   }
 
-  function handleSubmit(values: {
-    word: string;
-    synonyms: string;
-    id: number | null;
-  }) {
-    const wordStruct = {
-      id: getId(values.word, words, "name"),
-      word: values.word,
-      tag: createTag(values.word),
-      user_id: user.id,
-      synonyms: values.synonyms.split("\n"),
-    };
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/word`,
-        method: "POST",
-        data: wordStruct,
-      },
-      async (res) => {
-        toast({
-          title: "Success!",
-          description: "Word has been submitted",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setWords(res.data.data);
-      }
-    );
-  }
-
-  useEffect(() => {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/word`,
-      },
-      (res) => {
-        setWords(res.data.data);
-      }
-    );
-  }, [makeRequest, user.id]);
-
   return (
     <Layout>
       <Formik
         initialValues={{ word: "", synonyms: "", id: null }}
         onSubmit={(values, actions) => {
-          handleSubmit(values);
+          createWords(values);
           actions.resetForm({
             values: {
               word: "",
@@ -127,7 +87,7 @@ export const Dictionary: React.FC<Props> = () => {
                     colorScheme={"red"}
                     size={"md"}
                     type={"button"}
-                    isLoading={isLoading}
+                    isLoading={Loading}
                     loadingText={"Pulling"}
                     onClick={() => handlePullFromChatGPT(values, setFieldValue)}
                   >

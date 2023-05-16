@@ -12,7 +12,7 @@ import { Form, Formik } from "formik";
 import React, { useRef } from "react";
 import ModalTextArea from "./ModalTextArea";
 import { API_ROUTE } from "../constants";
-import { createTag } from "../utils/createTag";
+import createTagFactory from "../utils/createTagFactory";
 import useFetch from "../hooks/useFetch";
 
 interface Props {
@@ -45,7 +45,7 @@ const EditModal: React.FC<Props> = ({
     ) => void
   ) {
     const tagWord = selectedWord ? selectedWord : window.location.pathname.split("/word/")[1];
-    const tag = createTag(tagWord);
+    const tag = createTagFactory(tagWord);
     makeRequest(
       {
         url: API_ROUTE + `/ai/tags?tag=${encodeURIComponent(tag)}`,
