@@ -1,4 +1,4 @@
-import { Box, Button, useToast } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
@@ -6,7 +6,6 @@ import { Formik, Form } from "formik";
 import useFetch from "../hooks/useFetch";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
-import { getId } from "../utils/getId";
 import { Template } from "../types/general";
 import FormSelectComponent from "../components/FormSelectComponent";
 import useLoginRequired from "../hooks/useLoginRequired";
@@ -14,53 +13,20 @@ import { UserContext } from "../context/UserContext";
 import { SaveButton } from "../components/SaveButton";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { USER_ROUTE } from "../constants";
+import useParagraphsController from "../hooks/useParagraphsController";
 
 interface Props {}
 
 export const CreateParagraph: React.FC<Props> = () => {
   const { user } = useContext(UserContext);
-  const { isLoading, makeRequest, error } = useFetch();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const toast = useToast();
+  const { makeRequest } = useFetch();
+  const {
+    createParagraphs,
+    isLoading,
+    error,
+  } = useParagraphsController();
   useLoginRequired();
-
-  function handleSubmit(values: { paragraphs: string; template: string }) {
-    const template_id = getId(values.template, templates, "name");
-
-    if (!template_id) {
-      toast({
-        title: "Heads Up!",
-        description: "Save the template before submitting paragraphs.",
-        status: "warning",
-        isClosable: true,
-        duration: 5000,
-        variant: "left-accent",
-      });
-      return;
-    }
-
-    const paragraphBody = values.paragraphs.split("\n").map((i) => {
-      return { name: i, order: null, template_id, user_id: user.id };
-    });
-  
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/paragraph`,
-        method: "POST",
-        data: paragraphBody,
-      },
-      () => {
-        toast({
-          title: "Success!",
-          description: "Paragraphs have been submitted",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-      }
-    );
-  }
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   function handleSaveTemplate(values: {
     paragraphs: string;
@@ -79,14 +45,6 @@ export const CreateParagraph: React.FC<Props> = () => {
         },
       },
       (res) => {
-        toast({
-          title: "Success!",
-          description: "Template has been submitted",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
         setTemplates(res.data.data);
       }
     );
@@ -108,15 +66,14 @@ export const CreateParagraph: React.FC<Props> = () => {
       <Formik
         initialValues={{ paragraphs: "", template: "" }}
         onSubmit={(values, actions) => {
-          handleSubmit(values);
+          createParagraphs(values, templates);
           actions.resetForm({
             values: {
               paragraphs: "",
               template: "",
             },
           });
-        }}
-      >
+        }}>
         {({ values }) => (
           <Form>
             <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
@@ -127,8 +84,7 @@ export const CreateParagraph: React.FC<Props> = () => {
                   alignItems: "center",
                   flexDirection: "row",
                   gap: 5,
-                }}
-              >
+                }}>
                 <FormSelectComponent
                   options={templates.map((t) => t.name)}
                   name={"template"}
@@ -155,8 +111,7 @@ export const CreateParagraph: React.FC<Props> = () => {
                 size={"md"}
                 type={"submit"}
                 isLoading={isLoading}
-                loadingText={"Submitting"}
-              >
+                loadingText={"Submitting"}>
                 Submit
               </Button>
             </Box>
