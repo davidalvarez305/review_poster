@@ -22,9 +22,7 @@ import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import useParagraphsController from "../hooks/useParagraphsController";
 
-interface ParagraphsListProps {}
-
-export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
+export const ParagraphsList: React.FC = () => {
   useLoginRequired();
   const { makeRequest } = useFetch();
   const { user } = useContext(UserContext);
