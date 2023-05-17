@@ -10,7 +10,10 @@ import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFa
 
 export default function useParagraphsController() {
   const location = useLocation();
-  const template = useMemo(() => location.pathname.split("/template/")[1], [location.pathname]);
+  const template = useMemo(
+    () => location.pathname.split("/template/")[1],
+    [location.pathname]
+  );
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
@@ -34,7 +37,7 @@ export default function useParagraphsController() {
           data: {
             ...editSingleParagraph,
             name: paragraph,
-            template_id
+            template_id,
           },
         },
         (res) => setParagraphs(res.data.data)
@@ -45,7 +48,11 @@ export default function useParagraphsController() {
 
   const bulkUpdateParagraphs = useCallback(
     (values: { input: string }) => {
-      let data = createUpdateParagraphsFactory(paragraphs, values.input.split("\n"), paragraphs[0].template_id);
+      let data = createUpdateParagraphsFactory(
+        paragraphs,
+        values.input.split("\n"),
+        paragraphs[0].template_id
+      );
       makeRequest(
         {
           ...FETCH_PARAMS,
@@ -65,19 +72,16 @@ export default function useParagraphsController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
-  const getParagraphsByTemplate = useCallback(
-    (template: string) => {
-      makeRequest(
-        {
-          ...FETCH_PARAMS,
-          method: "GET",
-          url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
-        },
-        (res) => setParagraphs(res.data.data)
-      );
-    },
-    [makeRequest, FETCH_PARAMS, user.id]
-  );
+  const getParagraphsByTemplate = useCallback(() => {
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
+      },
+      (res) => setParagraphs(res.data.data)
+    );
+  }, [makeRequest, FETCH_PARAMS, user.id, template]);
 
   const createParagraphs = useCallback(
     (opts: { paragraphs: string; template: string }, templates: Template[]) => {
@@ -118,8 +122,12 @@ export default function useParagraphsController() {
   );
 
   useEffect(() => {
-    getParagraphs();
-  }, [getParagraphs]);
+    if (template.length > 0) {
+      getParagraphs();
+    } else {
+      getParagraphsByTemplate();
+    }
+  }, [getParagraphs, getParagraphsByTemplate, template]);
 
   return {
     updateParagraphs,
