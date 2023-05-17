@@ -71,7 +71,7 @@ export default function useSynonymsController() {
   const bulkUpdateSynonyms = useCallback(
     (values: { input: string }) => {
       let body = values.input.split("\n").map((synonym) => {
-        return { synonym, word_id: word_id };
+        return { synonym, word_id: synonyms[0].id };
       });
       makeRequest(
         {
@@ -83,7 +83,7 @@ export default function useSynonymsController() {
         (res) => setSynonyms(res.data.data)
       );
     },
-    [FETCH_PARAMS, makeRequest, synonyms, user.id]
+    [FETCH_PARAMS, makeRequest, user.id, word, synonyms]
   );
 
   useEffect(() => {

@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { useLocation } from "react-router-dom";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
 import {
@@ -13,13 +12,11 @@ import {
   Th,
   Thead,
   Tr,
-  useToast,
 } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
-import { Paragraph, Template } from "../types/general";
+import { Template } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
 import { UserContext } from "../context/UserContext";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
@@ -35,6 +32,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
     updateParagraphs,
     bulkUpdateParagraphs,
     deleteParagraph,
+    setEditSingleParagraph,
     paragraphs,
     isLoading,
     error,
@@ -64,60 +62,17 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
 
   const columns = ["id", "name", "order", "action"];
 
-  function handleSubmit(values: { input: string }) {
-    updateParagraphs(values);
-
-    setEditModal(false);
-    setEditOption(null);
-    setEditingParagraph("");
-  }
-
   function handleSubmitBulk(values: { input: string }) {
-    const paragraphs = values.input.split("\n");
-
-    let template_id = options[0].template_id;
-    let templateString = template;
-    let method = "POST";
-    let body = paragraphs.map((name) => {
-      return { name, template_id: options[0].template_id };
-    });
-    let route =
-      USER_ROUTE + `/${user.id}/paragraph/bulk?template=${templateString}`;
-
-    // Change request format if user selected a template.
     if (selectedTemplate) {
-      template_id = templates[selectedTemplate].id;
-      templateString = templates[selectedTemplate].name;
-      body = createUpdateParagraphsFactory(
-        options,
-        paragraphs,
-        template_id,
-        templates[selectedTemplate]
+      updateParagraphs(
+        { ...values },
+        templates[selectedTemplate].id,
+        templates[selectedTemplate].name
       );
-      route = USER_ROUTE + `/${user.id}/paragraph?template=${templateString}`;
-
-      updateParagraphs({ ...values }, template_id, template: templateString);
+    } else {
+      bulkUpdateParagraphs({ ...values });
     }
-
-    makeRequest(
-      {
-        url: route,
-        method: method,
-        data: body,
-      },
-      (res) => {
-        toast({
-          title: "Success!",
-          description: "Paragraphs have been successfully submitted.",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setBulkModal(false);
-        setOptions(res.data.data);
-      }
-    );
+    setBulkModal(false);
   }
 
   const SelectChangeTemplate = useCallback(() => {
@@ -186,7 +141,7 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
                   onClickEdit={() => {
                     setEditModal(true);
                     setEditingParagraph(paragraphs[i].name);
-                    setEditOption(paragraphs[i]);
+                    setEditSingleParagraph(paragraphs[i]);
                   }}
                   onClickDelete={() => deleteParagraph(paragraphs[i].id!)}
                 />
@@ -200,10 +155,10 @@ export const ParagraphsList: React.FC<ParagraphsListProps> = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              updateParagraphs(values);
+              updateParagraphs(values, templates[0].id, templates[0].name);
 
               setEditModal(false);
-              setEditOption(null);
+              setEditSingleParagraph(null);
               setEditingParagraph("");
             }}
             editingItem={editingParagraph}
