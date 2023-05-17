@@ -1,10 +1,9 @@
-import { Paragraph, Template } from "../types/general";
+import { Paragraph } from "../types/general";
 
 export function createUpdateParagraphsFactory(
   existingParagraphs: Paragraph[],
   inputParagraphs: string[],
   template_id: number,
-  template: Template,
 ): Paragraph[] {
   let paragraphsToKeep: Paragraph[] = [];
 
@@ -16,7 +15,7 @@ export function createUpdateParagraphsFactory(
           id: existingParagraph.id,
           template_id,
           order: existingParagraph.order,
-          template,
+          template: null,
         });
         break;
       }
@@ -25,7 +24,7 @@ export function createUpdateParagraphsFactory(
       name: paragraph,
       id: null,
       template_id,
-      template,
+      template: null,
     });
   });
   return paragraphsToKeep;

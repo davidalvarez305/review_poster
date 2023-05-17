@@ -26,11 +26,11 @@ export default function useSynonymsController() {
   }, [user.id, word]);
 
   const updateSynonyms = useCallback(
-    (opts: { input: string }) => {
+    (opts: { input: string }, word_id: number, word: string) => {
       const synonymsToUpdate = createUpdateSynonymsFactory(
         synonyms,
         opts.input.split("\n"),
-        synonyms[0].word_id
+        word_id
       );
       makeRequest(
         {
@@ -45,7 +45,7 @@ export default function useSynonymsController() {
         }
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, word, synonyms]
+    [makeRequest, FETCH_PARAMS, user.id, synonyms]
   );
 
   const getSynonyms = useCallback(() => {
@@ -71,7 +71,7 @@ export default function useSynonymsController() {
   const bulkUpdateSynonyms = useCallback(
     (values: { input: string }) => {
       let body = values.input.split("\n").map((synonym) => {
-        return { synonym, word_id: synonyms[0].word_id };
+        return { synonym, word_id: word_id };
       });
       makeRequest(
         {
@@ -83,7 +83,7 @@ export default function useSynonymsController() {
         (res) => setSynonyms(res.data.data)
       );
     },
-    [FETCH_PARAMS, makeRequest, synonyms, user.id, word]
+    [FETCH_PARAMS, makeRequest, synonyms, user.id]
   );
 
   useEffect(() => {

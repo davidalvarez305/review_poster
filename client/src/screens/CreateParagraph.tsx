@@ -13,11 +13,7 @@ import useParagraphsController from "../hooks/useParagraphsController";
 import useTemplatesController from "../hooks/useTemplatesController";
 
 export const CreateParagraph: React.FC = () => {
-  const {
-    createParagraphs,
-    isLoading,
-    error,
-  } = useParagraphsController();
+  const { createParagraphs, isLoading, error } = useParagraphsController();
   const { templates, createTemplates } = useTemplatesController();
   useLoginRequired();
 
@@ -33,7 +29,8 @@ export const CreateParagraph: React.FC = () => {
               template: "",
             },
           });
-        }}>
+        }}
+      >
         {({ values }) => (
           <Form>
             <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
@@ -44,7 +41,8 @@ export const CreateParagraph: React.FC = () => {
                   alignItems: "center",
                   flexDirection: "row",
                   gap: 5,
-                }}>
+                }}
+              >
                 <FormSelectComponent
                   options={templates.map((t) => t.name)}
                   name={"template"}
@@ -71,7 +69,8 @@ export const CreateParagraph: React.FC = () => {
                 size={"md"}
                 type={"submit"}
                 isLoading={isLoading}
-                loadingText={"Submitting"}>
+                loadingText={"Submitting"}
+              >
                 Submit
               </Button>
             </Box>
