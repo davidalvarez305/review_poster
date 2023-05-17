@@ -8,10 +8,9 @@ import { getId } from "../utils/getId";
 import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
 
 export default function useParagraphsController() {
-  const template = useMemo(
-    () => new URLSearchParams(window.location.search).get("template"),
-    []
-  );
+  const template = useMemo((): string | undefined => {
+    return window.location.pathname.split("/template/")[1]
+  }, []);
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();

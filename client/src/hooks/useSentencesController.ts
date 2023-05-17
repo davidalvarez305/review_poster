@@ -13,10 +13,9 @@ export default function useSentencesController() {
     null
   );
   const { isLoading, makeRequest, error } = useFetch();
-  const paragraph = useMemo(
-    () => new URLSearchParams(window.location.search).get("location"),
-    []
-  );
+  const paragraph = useMemo((): string | undefined => {
+    return window.location.pathname.split("/paragraph/")[1]
+  }, []);
   const FETCH_PARAMS = useMemo(() => {
     return {
       url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,

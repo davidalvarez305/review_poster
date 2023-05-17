@@ -12,10 +12,9 @@ export default function useSynonymsController() {
     null
   );
   const { isLoading, makeRequest, error } = useFetch();
-  const word = useMemo(
-    () => new URLSearchParams(window.location.search).get("word"),
-    []
-  );
+  const word = useMemo((): string | undefined => {
+    return window.location.pathname.split("/word/")[1]
+  }, []);
   const FETCH_PARAMS = useMemo(() => {
     return {
       url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
