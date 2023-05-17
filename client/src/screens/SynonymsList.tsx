@@ -66,7 +66,11 @@ export const SynonymsList: React.FC = () => {
 
   function handleSubmitBulk(values: { input: string }) {
     if (selectedWord) {
-      updateSynonyms({ ...values }, words[selectedWord!].id, words[selectedWord!].name);
+      updateSynonyms(
+        { ...values },
+        words[selectedWord!].id,
+        words[selectedWord!].name
+      );
     } else {
       bulkUpdateSynonyms({ ...values });
     }
@@ -166,9 +170,11 @@ export const SynonymsList: React.FC = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              updateSynonyms(values, synonyms[0].id!, word);
-              setEditingSynonym("");
-              setEditModal(false);
+              if (word) {
+                updateSynonyms(values, synonyms[0].id!, word);
+                setEditingSynonym("");
+                setEditModal(false);
+              }
             }}
             editingItem={editingSynonym}
             isLoading={isLoading}

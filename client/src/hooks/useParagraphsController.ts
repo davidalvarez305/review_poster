@@ -5,14 +5,12 @@ import { Paragraph, Template } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createParagraphsFactory from "../utils/createParagraphsFactory";
 import { getId } from "../utils/getId";
-import { useLocation } from "react-router-dom";
 import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
 
 export default function useParagraphsController() {
-  const location = useLocation();
   const template = useMemo(
-    () => location.pathname.split("/template/")[1],
-    [location.pathname]
+    () => new URLSearchParams(window.location.search).get("template"),
+    []
   );
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
@@ -122,10 +120,10 @@ export default function useParagraphsController() {
   );
 
   useEffect(() => {
-    if (template.length > 0) {
-      getParagraphs();
-    } else {
+    if (template) {
       getParagraphsByTemplate();
+    } else {
+      getParagraphs();
     }
   }, [getParagraphs, getParagraphsByTemplate, template]);
 

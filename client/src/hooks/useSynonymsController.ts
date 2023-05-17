@@ -3,7 +3,6 @@ import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Synonym } from "../types/general";
 import { UserContext } from "../context/UserContext";
-import { useLocation } from "react-router-dom";
 import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
 
 export default function useSynonymsController() {
@@ -13,10 +12,9 @@ export default function useSynonymsController() {
     null
   );
   const { isLoading, makeRequest, error } = useFetch();
-  const location = useLocation();
   const word = useMemo(
-    () => location.pathname.split("/word/")[1],
-    [location.pathname]
+    () => new URLSearchParams(window.location.search).get("word"),
+    []
   );
   const FETCH_PARAMS = useMemo(() => {
     return {
@@ -54,6 +52,17 @@ export default function useSynonymsController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
+  const getSynonymsByWord = useCallback(() => {
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
+      },
+      (res) => setSynonyms(res.data.data)
+    );
+  }, [makeRequest, FETCH_PARAMS, word, user.id]);
+
   const deleteSynonym = useCallback(
     (id: number) => {
       makeRequest(
@@ -87,8 +96,12 @@ export default function useSynonymsController() {
   );
 
   useEffect(() => {
-    getSynonyms();
-  }, [getSynonyms]);
+    if (word) {
+      getSynonymsByWord();
+    } else {
+      getSynonyms();
+    }
+  }, [getSynonyms, getSynonymsByWord, word]);
 
   return {
     updateSynonyms,

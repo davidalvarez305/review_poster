@@ -3,7 +3,6 @@ import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Paragraph, Sentence, Template } from "../types/general";
 import { UserContext } from "../context/UserContext";
-import { useLocation } from "react-router-dom";
 import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFactory";
 import { getId } from "../utils/getId";
 
@@ -14,10 +13,9 @@ export default function useSentencesController() {
     null
   );
   const { isLoading, makeRequest, error } = useFetch();
-  const location = useLocation();
   const paragraph = useMemo(
-    () => location.pathname.split("/paragraph/")[1],
-    [location.pathname]
+    () => new URLSearchParams(window.location.search).get("location"),
+    []
   );
   const FETCH_PARAMS = useMemo(() => {
     return {
@@ -56,8 +54,13 @@ export default function useSentencesController() {
   }, [makeRequest, FETCH_PARAMS]);
 
   const getSentencesByParagraph = useCallback(() => {
-    makeRequest({ ...FETCH_PARAMS, method: "GET", url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}` }, (res) =>
-      setSentences(res.data.data)
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
+      },
+      (res) => setSentences(res.data.data)
     );
   }, [makeRequest, FETCH_PARAMS, paragraph, user.id]);
 
@@ -152,12 +155,12 @@ export default function useSentencesController() {
   );
 
   useEffect(() => {
-    if (paragraph.length > 0)  {
-      getSentences();
-    } else {
+    if (paragraph) {
       getSentencesByParagraph();
+    } else {
+      getSentences();
     }
-  }, [getSentences, getSentencesByParagraph, paragraph.length]);
+  }, [getSentences, getSentencesByParagraph, paragraph]);
 
   return {
     updateSentences,
