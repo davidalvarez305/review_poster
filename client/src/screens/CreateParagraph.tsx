@@ -1,65 +1,25 @@
 import { Box, Button } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
-import useFetch from "../hooks/useFetch";
 import Layout from "../layout/Layout";
 import { BottomNavigation } from "../components/BottomNavigation";
-import { Template } from "../types/general";
 import FormSelectComponent from "../components/FormSelectComponent";
 import useLoginRequired from "../hooks/useLoginRequired";
-import { UserContext } from "../context/UserContext";
 import { SaveButton } from "../components/SaveButton";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import { USER_ROUTE } from "../constants";
 import useParagraphsController from "../hooks/useParagraphsController";
+import useTemplatesController from "../hooks/useTemplatesController";
 
-interface Props {}
-
-export const CreateParagraph: React.FC<Props> = () => {
-  const { user } = useContext(UserContext);
-  const { makeRequest } = useFetch();
+export const CreateParagraph: React.FC = () => {
   const {
     createParagraphs,
     isLoading,
     error,
   } = useParagraphsController();
+  const { templates, createTemplates } = useTemplatesController();
   useLoginRequired();
-  const [templates, setTemplates] = useState<Template[]>([]);
-
-  function handleSaveTemplate(values: {
-    paragraphs: string;
-    template: string;
-  }) {
-    if (values.template === "") {
-      return;
-    }
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/template`,
-        method: "POST",
-        data: {
-          name: values.template,
-          user_id: user.id,
-        },
-      },
-      (res) => {
-        setTemplates(res.data.data);
-      }
-    );
-  }
-
-  useEffect(() => {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/template`,
-      },
-      (res) => {
-        setTemplates(res.data.data);
-      }
-    );
-  }, [makeRequest, user.id]);
 
   return (
     <Layout>
@@ -92,7 +52,7 @@ export const CreateParagraph: React.FC<Props> = () => {
                 <SaveButton
                   aria-label={"save"}
                   onClick={() => {
-                    handleSaveTemplate(values);
+                    createTemplates(values);
                   }}
                   isLoading={isLoading}
                 />

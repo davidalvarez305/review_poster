@@ -26,9 +26,11 @@ export default function useParagraphsController() {
   const updateParagraphs = useCallback(
     (opts: WordFormInput) => {
       const paragraphsToCreate = createParagraphsFactory(
-        opts,
+        {
+          opts,
         user.id,
         paragraphs
+        }
       );
       makeRequest(
         { ...FETCH_PARAMS, method: "PUT", data: paragraphsToCreate },
