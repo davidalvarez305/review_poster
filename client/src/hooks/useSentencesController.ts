@@ -55,6 +55,12 @@ export default function useSentencesController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
+  const getSentencesByParagraph = useCallback(() => {
+    makeRequest({ ...FETCH_PARAMS, method: "GET", url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}` }, (res) =>
+      setSentences(res.data.data)
+    );
+  }, [makeRequest, FETCH_PARAMS, paragraph, user.id]);
+
   const deleteSentence = useCallback(
     (id: number) => {
       makeRequest(
@@ -62,7 +68,7 @@ export default function useSentencesController() {
           ...FETCH_PARAMS,
           url:
             USER_ROUTE +
-            `/${user.id}/sentence?paragraph=${paragraph}&sentences=${[id]}`,
+            `/${user.id}/sentence?sentences=${[id]}&paragraph=${paragraph}`,
           method: "DELETE",
         },
         (res) => setSentences(res.data.data)
@@ -87,6 +93,29 @@ export default function useSentencesController() {
       );
     },
     [FETCH_PARAMS, makeRequest, user.id, paragraph, sentences]
+  );
+
+  const updateSentence = useCallback(
+    (opts: { input: string }) => {
+      const sentence = opts.input.split("\n")[0];
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/sentence/${editSingleSentence?.id}`,
+          method: "PUT",
+          data: {
+            ...editSingleSentence,
+            sentence,
+          },
+        },
+        (res) => {
+          const response: Sentence[] = res.data.data;
+          setSentences(response);
+          setEditSingleSentence(null);
+        }
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id, editSingleSentence]
   );
 
   const createSentences = useCallback(
@@ -123,8 +152,12 @@ export default function useSentencesController() {
   );
 
   useEffect(() => {
-    getSentences();
-  }, [getSentences]);
+    if (paragraph.length > 0)  {
+      getSentences();
+    } else {
+      getSentencesByParagraph();
+    }
+  }, [getSentences, getSentencesByParagraph, paragraph.length]);
 
   return {
     updateSentences,
@@ -138,6 +171,7 @@ export default function useSentencesController() {
     deleteSentence,
     bulkUpdateSentences,
     paragraph,
-    createSentences
+    createSentences,
+    updateSentence,
   };
 }

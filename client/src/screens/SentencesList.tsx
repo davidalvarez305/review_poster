@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import {
   Box,
@@ -10,33 +10,37 @@ import {
   Th,
   Thead,
   Tr,
-  useToast,
 } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import EditModal from "../components/EditModal";
 import TableRow from "../components/TableRow";
 import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Paragraph, Sentence } from "../types/general";
+import { Paragraph } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
-import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFactory";
 import { UserContext } from "../context/UserContext";
+import useSentencesController from "../hooks/useSentencesController";
 
 export const SentencesList: React.FC = () => {
   useLoginRequired();
-  const location = useLocation();
-  const paragraph = location.pathname.split("/paragraph/")[1];
-  const { makeRequest, isLoading, error } = useFetch();
+  const { makeRequest } = useFetch();
   const navigate = useNavigate();
-  const toast = useToast();
   const { user } = useContext(UserContext);
+  const {
+    updateSentences,
+    isLoading,
+    error,
+    setEditSingleSentence,
+    deleteSentence,
+    bulkUpdateSentences,
+    updateSentence,
+    sentences
+  } = useSentencesController();
 
   const [bulkModal, setBulkModal] = useState(false);
-  const [options, setOptions] = useState<Sentence[]>([]);
   const [editModal, setEditModal] = useState(false);
-  const [editOption, setEditOption] = useState<Sentence | null>();
   const [editingSentence, setEditingSentence] = useState("");
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState<number | null>(
@@ -59,112 +63,16 @@ export const SentencesList: React.FC = () => {
     }
   }, [bulkModal, makeRequest, user.id]);
 
-  useEffect(() => {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
-      },
-      (res) => {
-        setOptions(res.data.data);
-      }
-    );
-  }, [editModal, paragraph, makeRequest, user.id]);
-
   const headers = ["id", "sentence", "action"];
 
-  function handleDelete(id: number) {
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/sentence?sentences=${[id]}&paragraph=${paragraph}`,
-        method: "DELETE",
-      },
-      (res) => {
-        setOptions(res.data.data);
-      }
-    );
-  }
-
-  function handleSubmit(values: { input: string }) {
-    const sentence = values.input.split("\n")[0];
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/sentence/${editOption?.id}`,
-        method: "PUT",
-        data: {
-          id: editOption?.id,
-          paragraph_id: editOption?.paragraph_id,
-          template_id: editOption?.paragraph!.template_id,
-          sentence,
-        },
-      },
-      (res) => {
-        const response: Sentence[] = res.data.data;
-        toast({
-          title: "Success!",
-          description: "Sentence has been successfully submitted.",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setEditModal(false);
-        setOptions(response);
-        setEditOption(null);
-        setEditingSentence("");
-      }
-    );
-  }
-
   function handleSubmitBulk(values: { input: string }) {
-    const sentences = values.input.split("\n");
+    bulkUpdateSentences({ ...values });
 
-    let paragraph_id = options[0].paragraph_id;
-    let paragraphString = paragraph;
-    let method = "POST";
-    let body = sentences.map((sentence) => {
-      return {
-        paragraph_id,
-        sentence,
-      };
-    });
-    let route = USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${paragraphString}`
-
-    // Change request format if user selected a paragraph.
     if (selectedParagraph) {
-      paragraph_id = paragraphs[selectedParagraph].id!;
-      paragraphString = paragraphs[selectedParagraph].name;
-      method = "PUT";
-      body = createUpdateSentencesFactory(
-        options,
-        sentences,
-        paragraph_id,
-        paragraphs[selectedParagraph],
-      );
-      route =  USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraphString}`
+      updateSentences({ ...values }, paragraphs[selectedParagraph].id!, paragraphs[selectedParagraph].name);
+      navigate("/paragraph/" + paragraphs[selectedParagraph].name);
+      setBulkModal(false);
     }
-
-    makeRequest(
-      {
-        url: route,
-        method: method,
-        data: body,
-      },
-      (res) => {
-        toast({
-          title: "Success!",
-          description: "Sentences have been successfully submitted.",
-          status: "success",
-          isClosable: true,
-          duration: 5000,
-          variant: "left-accent",
-        });
-        setBulkModal(false);
-        setOptions(res.data.data);
-        if (selectedParagraph) {
-          navigate("/paragraph/" + paragraphString);
-        }
-      }
-    );
   }
 
   const SelectChangeParagraph = useCallback(() => {
@@ -206,7 +114,7 @@ export const SentencesList: React.FC = () => {
           Bulk
         </Button>
       </Box>
-      {options.length > 0 && (
+      {sentences.length > 0 && (
         <Box
           sx={{
             width: "80%",
@@ -225,17 +133,17 @@ export const SentencesList: React.FC = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {options.map((_, i) => (
+              {sentences.map((_, i) => (
                 <React.Fragment key={i}>
                   <TableRow
                     columns={headers}
                     index={i}
-                    items={options}
-                    onClickDelete={() => handleDelete(options[i].id!)}
+                    items={sentences}
+                    onClickDelete={() => deleteSentence(sentences[i].id!)}
                     onClickEdit={() => {
                       setEditModal(true);
-                      setEditingSentence(options[i].sentence);
-                      setEditOption(options[i]);
+                      setEditingSentence(sentences[i].sentence);
+                      setEditSingleSentence(sentences[i]);
                     }}
                   />
                 </React.Fragment>
@@ -247,7 +155,12 @@ export const SentencesList: React.FC = () => {
             <EditModal
               editModal={editModal}
               setEditModal={setEditModal}
-              handleSubmit={handleSubmit}
+              handleSubmit={(values) => {
+                updateSentence({ ...values });
+
+                setEditModal(false);
+                setEditingSentence("");
+              }}
               editingItem={editingSentence}
               isLoading={isLoading}
             />
@@ -258,7 +171,7 @@ export const SentencesList: React.FC = () => {
                 selectComponent={SelectChangeParagraph()}
                 setEditModal={setBulkModal}
                 editModal={bulkModal}
-                editingItem={options.map((op) => op.sentence).join("\n")}
+                editingItem={sentences.map((op) => op.sentence).join("\n")}
                 isLoading={isLoading}
                 handleSubmit={handleSubmitBulk}
               />
