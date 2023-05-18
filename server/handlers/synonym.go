@@ -80,7 +80,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 }
 
 func UpdateSynonym(c *fiber.Ctx) error {
-	var synonym models.Synonym
+	var clientSynonym models.Synonym
 	word := c.Query("word")
 
 	if len(word) == 0 {
@@ -89,7 +89,7 @@ func UpdateSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err := c.BodyParser(&synonym)
+	err := c.BodyParser(&clientSynonym)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -105,7 +105,17 @@ func UpdateSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&synonym).Error
+	var existingSynonym models.Synonym
+
+	err = database.DB.Joins("JOIN word ON word.id = synonym.word_id").Where("id = ? AND word.user_id = ?", clientSynonym.ID, userId).Find(&existingSynonym).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Synonym does not exist in database.",
+		})
+	}
+
+	err = database.DB.Save(&clientSynonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

@@ -71,15 +71,12 @@ export const SynonymsList: React.FC = () => {
         words[selectedWord!].id,
         words[selectedWord!].name
       );
+      navigate("/word/" + word);
     } else {
       bulkUpdateSynonyms({ ...values });
     }
 
-    setEditModal(false);
     setBulkModal(false);
-    if (selectedWord) {
-      navigate("/word/" + word);
-    }
   }
 
   const SelectChangeWord = useCallback(() => {

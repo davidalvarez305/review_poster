@@ -16,7 +16,7 @@ import EditModal from "../components/EditModal";
 import TableRow from "../components/TableRow";
 import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Paragraph } from "../types/general";
+import { Paragraph, Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
@@ -32,7 +32,6 @@ export const SentencesList: React.FC = () => {
     updateSentences,
     isLoading,
     error,
-    setEditSingleSentence,
     deleteSentence,
     bulkUpdateSentences,
     updateSentence,
@@ -41,7 +40,7 @@ export const SentencesList: React.FC = () => {
 
   const [bulkModal, setBulkModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [editingSentence, setEditingSentence] = useState("");
+  const [editingSentence, setEditingSentence] = useState<Sentence | null>(null);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState<number | null>(
     null
@@ -66,13 +65,14 @@ export const SentencesList: React.FC = () => {
   const headers = ["id", "sentence", "action"];
 
   function handleSubmitBulk(values: { input: string }) {
-    bulkUpdateSentences({ ...values });
-
     if (selectedParagraph) {
       updateSentences({ ...values }, paragraphs[selectedParagraph].id!, paragraphs[selectedParagraph].name);
       navigate("/paragraph/" + paragraphs[selectedParagraph].name);
-      setBulkModal(false);
+    } else {
+      bulkUpdateSentences({ ...values });
     }
+
+    setBulkModal(false);
   }
 
   const SelectChangeParagraph = useCallback(() => {
@@ -142,8 +142,7 @@ export const SentencesList: React.FC = () => {
                     onClickDelete={() => deleteSentence(sentences[i].id!)}
                     onClickEdit={() => {
                       setEditModal(true);
-                      setEditingSentence(sentences[i].sentence);
-                      setEditSingleSentence(sentences[i]);
+                      setEditingSentence(sentences[i]);
                     }}
                   />
                 </React.Fragment>
@@ -156,12 +155,14 @@ export const SentencesList: React.FC = () => {
               editModal={editModal}
               setEditModal={setEditModal}
               handleSubmit={(values) => {
-                updateSentence({ ...values });
+               if (editingSentence) {
+                  updateSentence({ ...editingSentence, sentence: values.input });
 
-                setEditModal(false);
-                setEditingSentence("");
+                  setEditModal(false);
+                  setEditingSentence(null);
+               }
               }}
-              editingItem={editingSentence}
+              editingItem={editingSentence?.sentence || ""}
               isLoading={isLoading}
             />
           )}

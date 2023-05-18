@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
-import { Paragraph, Sentence, Template } from "../types/general";
+import { Sentence } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFactory";
-import { getId } from "../utils/getId";
 
 export default function useSentencesController() {
   const { user } = useContext(UserContext);
@@ -46,6 +45,24 @@ export default function useSentencesController() {
     [makeRequest, FETCH_PARAMS, user.id, sentences]
   );
 
+  const updateSentence = useCallback(
+    (sentence: Sentence) => {
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/sentence/${sentence.id}?paragraph=${paragraph}`,
+          method: "PUT",
+          data: sentence,
+        },
+        (res) => {
+          setSentences(res.data.data);
+          setEditSingleSentence(null);
+        }
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id, paragraph]
+  );
+
   const getSentences = useCallback(() => {
     makeRequest({ ...FETCH_PARAMS, method: "GET" }, (res) =>
       setSentences(res.data.data)
@@ -82,7 +99,7 @@ export default function useSentencesController() {
   const bulkUpdateSentences = useCallback(
     (values: { input: string }) => {
       let body = values.input.split("\n").map((sentence) => {
-        return { sentence, paragraph_id: sentences[0].id };
+        return { sentence, paragraph_id: sentences[0].paragraph_id };
       });
       makeRequest(
         {
@@ -95,29 +112,6 @@ export default function useSentencesController() {
       );
     },
     [FETCH_PARAMS, makeRequest, user.id, paragraph, sentences]
-  );
-
-  const updateSentence = useCallback(
-    (opts: { input: string }) => {
-      const sentence = opts.input.split("\n")[0];
-      makeRequest(
-        {
-          ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/sentence/${editSingleSentence?.id}`,
-          method: "PUT",
-          data: {
-            ...editSingleSentence,
-            sentence,
-          },
-        },
-        (res) => {
-          const response: Sentence[] = res.data.data;
-          setSentences(response);
-          setEditSingleSentence(null);
-        }
-      );
-    },
-    [makeRequest, FETCH_PARAMS, user.id, editSingleSentence]
   );
 
   const createSentences = useCallback(
@@ -164,8 +158,6 @@ export default function useSentencesController() {
     sentences,
     isLoading,
     error,
-    setEditSingleSentence,
-    editSingleSentence,
     deleteSentence,
     bulkUpdateSentences,
     paragraph,

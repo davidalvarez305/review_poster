@@ -43,7 +43,8 @@ func User(router fiber.Router) {
 	// Sentence related endpoints
 	user.Get("/:userId/sentence", handlers.GetSentences)
 	user.Post("/:userId/sentence", handlers.CreateSentences)
-	user.Put("/:userId/sentence/:sentenceId", handlers.UpdateSentences)
+	user.Put("/:userId/sentence", handlers.UpdateSentences)
+	user.Put("/:userId/sentence/:sentenceId", handlers.UpdateSentence)
 	user.Delete("/:userId/sentence/:sentenceId", handlers.DeleteSentence)
 	user.Post("/:userId/sentence/bulk", handlers.BulkSentencesUpdate)
 

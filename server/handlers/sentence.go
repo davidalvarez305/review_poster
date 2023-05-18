@@ -99,6 +99,63 @@ func UpdateSentences(c *fiber.Ctx) error {
 	})
 }
 
+func UpdateSentence(c *fiber.Ctx) error {
+	var clientSentence models.Sentence
+	paragraph := c.Query("paragraph")
+
+	if len(paragraph) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No paragraph in query.",
+		})
+	}
+
+	err := c.BodyParser(&clientSentence)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse body.",
+		})
+	}
+
+	userId, err := actions.GetUserIdFromSession(c)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch user ID from session.",
+		})
+	}
+
+	var existingSentence models.Sentence
+
+	err = database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("sentence.id = ? AND template.user_id = ?", clientSentence.ID, userId).Find(&existingSentence).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Sentence does not exist in database.",
+		})
+	}
+
+	err = database.DB.Save(&clientSentence).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to save sentences.",
+		})
+	}
+
+	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch sentences by paragraph.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": updatedSentences,
+	})
+}
+
 func DeleteSentence(c *fiber.Ctx) error {
 	s := c.Query("sentences")
 	paragraph := c.Query("paragraph")
