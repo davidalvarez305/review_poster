@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
-import { Paragraph, Template } from "../types/general";
+import { Paragraph } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createParagraphsFactory from "../utils/createParagraphsFactory";
 import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
@@ -13,8 +13,6 @@ export default function useParagraphsController() {
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
-  const [editSingleParagraph, setEditSingleParagraph] =
-    useState<Paragraph | null>(null);
   const FETCH_PARAMS = useMemo(() => {
     return {
       url: USER_ROUTE + `/${user.id}/paragraph`,
@@ -24,22 +22,18 @@ export default function useParagraphsController() {
 
   const updateParagraphs = useCallback(
     (opts: { input: string }, template_id: number, template: string) => {
-      const paragraph = opts.input.split("\n")[0];
+      const paragraphsToUpdate = createUpdateParagraphsFactory(paragraphs, opts.input.split("\n"), template_id);
       makeRequest(
         {
           ...FETCH_PARAMS,
           url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
           method: "PUT",
-          data: {
-            ...editSingleParagraph,
-            name: paragraph,
-            template_id,
-          },
+          data: paragraphsToUpdate,
         },
         (res) => setParagraphs(res.data.data)
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, editSingleParagraph]
+    [makeRequest, FETCH_PARAMS, user.id, paragraphs]
   );
 
   const updateParagraph = useCallback(
@@ -146,7 +140,6 @@ export default function useParagraphsController() {
     deleteParagraph,
     getParagraphsByTemplate,
     bulkUpdateParagraphs,
-    setEditSingleParagraph,
     paragraphs,
     isLoading,
     updateParagraph,

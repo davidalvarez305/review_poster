@@ -173,6 +173,7 @@ func UpdateParagraph(c *fiber.Ctx) error {
 func DeleteParagraph(c *fiber.Ctx) error {
 	paragraphsToDelete := c.Query("paragraphs")
 	template := c.Query("template")
+	userId := c.Params("userId")
 
 	if len(template) == 0 || len(paragraphsToDelete) == 0 {
 		return c.Status(400).JSON(fiber.Map{
@@ -188,8 +189,6 @@ func DeleteParagraph(c *fiber.Ctx) error {
 		})
 	}
 
-	var paragraphs []models.Paragraph
-
 	err = database.DB.Delete(&models.Paragraph{}, ids).Error
 
 	if err != nil {
@@ -198,16 +197,10 @@ func DeleteParagraph(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Where("template_id = ?", template).Find(&paragraphs).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch paragraphs after deletion.",
-		})
-	}
+	updatedParagraphs, err := actions.GetParagraphsByTemplate(template, userId)
 
 	return c.Status(201).JSON(fiber.Map{
-		"data": paragraphs,
+		"data": updatedParagraphs,
 	})
 }
 

@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
-import { Template } from "../types/general";
+import { Paragraph, Template } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { UserContext } from "../context/UserContext";
 import ReactSelect from "react-select";
@@ -30,14 +30,16 @@ export const ParagraphsList: React.FC = () => {
     updateParagraphs,
     bulkUpdateParagraphs,
     deleteParagraph,
-    setEditSingleParagraph,
+    updateParagraph,
     paragraphs,
     isLoading,
     error,
   } = useParagraphsController();
 
   const [editModal, setEditModal] = useState(false);
-  const [editingParagraph, setEditingParagraph] = useState("");
+  const [editingParagraph, setEditingParagraph] = useState<Paragraph | null>(
+    null
+  );
   const [bulkModal, setBulkModal] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
@@ -138,8 +140,7 @@ export const ParagraphsList: React.FC = () => {
                   items={paragraphs}
                   onClickEdit={() => {
                     setEditModal(true);
-                    setEditingParagraph(paragraphs[i].name);
-                    setEditSingleParagraph(paragraphs[i]);
+                    setEditingParagraph(paragraphs[i]);
                   }}
                   onClickDelete={() => deleteParagraph(paragraphs[i].id!)}
                 />
@@ -153,13 +154,18 @@ export const ParagraphsList: React.FC = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              updateParagraphs(values, templates[0].id, templates[0].name);
+              if (editingParagraph) {
+                updateParagraph({
+                  ...editingParagraph,
+                  name: values.input,
+                  template: null,
+                });
 
-              setEditModal(false);
-              setEditSingleParagraph(null);
-              setEditingParagraph("");
+                setEditModal(false);
+                setEditingParagraph(null);
+              }
             }}
-            editingItem={editingParagraph}
+            editingItem={editingParagraph?.name || ""}
             isLoading={isLoading}
           />
         )}
