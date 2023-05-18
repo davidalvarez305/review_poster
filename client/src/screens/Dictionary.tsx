@@ -12,6 +12,7 @@ import RequestErrorMessage from "../components/RequestErrorMessage";
 import { API_ROUTE } from "../constants";
 import useWordsController from "../hooks/useWordsController";
 import createTagFactory from "../utils/createTagFactory";
+import { WordFormInput } from "../types/general";
 
 interface Props {}
 
@@ -21,11 +22,7 @@ export const Dictionary: React.FC<Props> = () => {
   useLoginRequired();
 
   function handlePullFromChatGPT(
-    values: {
-      word: string;
-      synonyms: string;
-      id: null;
-    },
+    values: WordFormInput,
     setFieldValue: (
       field: string,
       value: any,
@@ -53,7 +50,7 @@ export const Dictionary: React.FC<Props> = () => {
             values: {
               word: "",
               synonyms: "",
-              id: null,
+              id: null
             },
           });
         }}
@@ -63,7 +60,7 @@ export const Dictionary: React.FC<Props> = () => {
             <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
               <Box sx={{ ...centeredDiv, width: "25%", height: "20%" }}>
                 <FormSelectComponent
-                  options={words.map((word) => word.name)}
+                  options={words}
                   name={"word"}
                 />
               </Box>
