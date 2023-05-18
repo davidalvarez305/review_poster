@@ -113,6 +113,63 @@ func UpdateParagraphs(c *fiber.Ctx) error {
 	})
 }
 
+func UpdateParagraph(c *fiber.Ctx) error {
+	var clientParagraph models.Paragraph
+	template := c.Query("template")
+
+	if len(template) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No template in query.",
+		})
+	}
+
+	err := c.BodyParser(&clientParagraph)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse body.",
+		})
+	}
+
+	userId, err := actions.GetUserIdFromSession(c)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch user ID from session.",
+		})
+	}
+
+	var existingParagraph models.Paragraph
+
+	err = database.DB.Joins("JOIN template ON template.id = paragraph.template_id").Where("paragraph.id = ? AND template.user_id = ?", clientParagraph.ID, userId).Find(&existingParagraph).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "paragraph does not exist in database.",
+		})
+	}
+
+	err = database.DB.Save(&clientParagraph).Error
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to save paragraphs.",
+		})
+	}
+
+	updatedParagraphs, err := actions.GetParagraphsByTemplate(template, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch paragraphs by template.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": updatedParagraphs,
+	})
+}
+
 func DeleteParagraph(c *fiber.Ctx) error {
 	paragraphsToDelete := c.Query("paragraphs")
 	template := c.Query("template")

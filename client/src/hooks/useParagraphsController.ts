@@ -4,7 +4,6 @@ import useFetch from "./useFetch";
 import { Paragraph, Template } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createParagraphsFactory from "../utils/createParagraphsFactory";
-import { getId } from "../utils/getId";
 import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
 
 export default function useParagraphsController() {
@@ -41,6 +40,21 @@ export default function useParagraphsController() {
       );
     },
     [makeRequest, FETCH_PARAMS, user.id, editSingleParagraph]
+  );
+
+  const updateParagraph = useCallback(
+    (paragraph: Paragraph) => {
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/paragraph/${paragraph.id}?template=${template}`,
+          method: "PUT",
+          data: paragraph,
+        },
+        (res) => setParagraphs(res.data.data)
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id, template]
   );
 
   const bulkUpdateParagraphs = useCallback(
@@ -81,25 +95,23 @@ export default function useParagraphsController() {
   }, [makeRequest, FETCH_PARAMS, user.id, template]);
 
   const createParagraphs = useCallback(
-    (opts: { paragraphs: string; template: string }, templates: Template[]) => {
-      const template_id = getId(opts.template, templates, "name");
+    (opts: { paragraphs: string; template: number }) => {
 
-      if (!template_id) {
+      if (!opts.template) {
         return;
       }
 
       const paragraphs = createParagraphsFactory({
         paragraphs: opts.paragraphs,
-        template_id,
-        user_id: user.id,
+        template_id: opts.template,
       });
 
       makeRequest(
-        { ...FETCH_PARAMS, method: "POST", data: paragraphs },
+        { ...FETCH_PARAMS, data: paragraphs },
         (res) => setParagraphs(res.data.data)
       );
     },
-    [makeRequest, user.id, FETCH_PARAMS]
+    [makeRequest, FETCH_PARAMS]
   );
 
   const deleteParagraph = useCallback(
@@ -137,6 +149,7 @@ export default function useParagraphsController() {
     setEditSingleParagraph,
     paragraphs,
     isLoading,
+    updateParagraph,
     error,
   };
 }

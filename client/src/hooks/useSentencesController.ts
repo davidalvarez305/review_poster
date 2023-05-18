@@ -8,9 +8,6 @@ import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFact
 export default function useSentencesController() {
   const { user } = useContext(UserContext);
   const [sentences, setSentences] = useState<Sentence[]>([]);
-  const [editSingleSentence, setEditSingleSentence] = useState<Sentence | null>(
-    null
-  );
   const { isLoading, makeRequest, error } = useFetch();
   const paragraph = useMemo((): string | undefined => {
     return window.location.pathname.split("/paragraph/")[1]
@@ -38,7 +35,6 @@ export default function useSentencesController() {
         },
         (res) => {
           setSentences(res.data.data);
-          setEditSingleSentence(null);
         }
       );
     },
@@ -56,7 +52,6 @@ export default function useSentencesController() {
         },
         (res) => {
           setSentences(res.data.data);
-          setEditSingleSentence(null);
         }
       );
     },

@@ -14,19 +14,19 @@ import useTemplatesController from "../hooks/useTemplatesController";
 
 export const CreateParagraph: React.FC = () => {
   const { createParagraphs, isLoading, error } = useParagraphsController();
-  const { templates, createTemplates } = useTemplatesController();
+  const { templates } = useTemplatesController();
   useLoginRequired();
 
   return (
     <Layout>
       <Formik
-        initialValues={{ paragraphs: "", template: "" }}
+        initialValues={{ paragraphs: "", template: 0 }}
         onSubmit={(values, actions) => {
-          createParagraphs(values, templates);
+          createParagraphs(values);
           actions.resetForm({
             values: {
               paragraphs: "",
-              template: "",
+              template: 0,
             },
           });
         }}
@@ -44,13 +44,14 @@ export const CreateParagraph: React.FC = () => {
                 }}
               >
                 <FormSelectComponent
-                  options={templates.map((t) => t.name)}
+                  options={templates}
                   name={"template"}
                 />
                 <SaveButton
                   aria-label={"save"}
                   onClick={() => {
-                    createTemplates(values);
+                    // createTemplates(values);
+                    alert("Creating templates is disabled right now.")
                   }}
                   isLoading={isLoading}
                 />

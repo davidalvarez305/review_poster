@@ -107,7 +107,7 @@ func UpdateSynonym(c *fiber.Ctx) error {
 
 	var existingSynonym models.Synonym
 
-	err = database.DB.Joins("JOIN word ON word.id = synonym.word_id").Where("id = ? AND word.user_id = ?", clientSynonym.ID, userId).Find(&existingSynonym).Error
+	err = database.DB.Joins("JOIN word ON word.id = synonym.word_id").Where("synonym.id = ? AND word.user_id = ?", clientSynonym.ID, userId).Find(&existingSynonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

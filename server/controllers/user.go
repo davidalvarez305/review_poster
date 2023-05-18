@@ -36,7 +36,8 @@ func User(router fiber.Router) {
 	// Paragraph related endpoints
 	user.Get("/:userId/paragraph", handlers.GetParagraphs)
 	user.Post("/:userId/paragraph", handlers.CreateParagraphs)
-	user.Put("/:userId/paragraph/:paragraphId", handlers.UpdateParagraphs)
+	user.Put("/:userId/paragraph", handlers.UpdateParagraphs)
+	user.Put("/:userId/paragraph/:paragraphId", handlers.UpdateParagraph)
 	user.Delete("/:userId/paragraph/:paragraphId", handlers.DeleteParagraph)
 	user.Post("/:userId/paragraph/bulk", handlers.BulkParagraphsUpdate)
 
