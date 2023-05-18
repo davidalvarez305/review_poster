@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
@@ -15,12 +14,13 @@ import {
 } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
-import { Paragraph, Template } from "../types/general";
+import { Paragraph } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { UserContext } from "../context/UserContext";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import useParagraphsController from "../hooks/useParagraphsController";
+import useTemplatesController from "../hooks/useTemplatesController";
 
 export const ParagraphsList: React.FC = () => {
   useLoginRequired();
@@ -35,30 +35,23 @@ export const ParagraphsList: React.FC = () => {
     isLoading,
     error,
   } = useParagraphsController();
+  const { templates, getTemplates } = useTemplatesController();
 
   const [editModal, setEditModal] = useState(false);
   const [editingParagraph, setEditingParagraph] = useState<Paragraph | null>(
     null
   );
   const [bulkModal, setBulkModal] = useState(false);
-  const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
 
   useEffect(() => {
     if (bulkModal) {
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/template`,
-        },
-        (res) => {
-          setTemplates(res.data.data);
-        }
-      );
+      getTemplates();
     }
     if (!bulkModal) {
       setSelectedTemplate(null);
     }
-  }, [bulkModal, makeRequest, user.id]);
+  }, [bulkModal, makeRequest, user.id, getTemplates]);
 
   const columns = ["id", "name", "order", "action"];
 
@@ -92,9 +85,9 @@ export const ParagraphsList: React.FC = () => {
             setSelectedTemplate(Number(e?.value));
           }}
           aria-label={"select change template"}
-          options={templates.map((op, index) => {
+          options={templates.map((op) => {
             return {
-              value: index,
+              value: op.id,
               label: capitalizeFirstLetter(op.name),
             };
           })}

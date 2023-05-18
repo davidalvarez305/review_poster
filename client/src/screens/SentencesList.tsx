@@ -14,14 +14,14 @@ import {
 import useLoginRequired from "../hooks/useLoginRequired";
 import EditModal from "../components/EditModal";
 import TableRow from "../components/TableRow";
-import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Paragraph, Sentence } from "../types/general";
+import { Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { UserContext } from "../context/UserContext";
 import useSentencesController from "../hooks/useSentencesController";
+import useParagraphsController from "../hooks/useParagraphsController";
 
 export const SentencesList: React.FC = () => {
   useLoginRequired();
@@ -37,30 +37,23 @@ export const SentencesList: React.FC = () => {
     updateSentence,
     sentences
   } = useSentencesController();
+  const { paragraphs, getParagraphs } = useParagraphsController();
 
   const [bulkModal, setBulkModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [editingSentence, setEditingSentence] = useState<Sentence | null>(null);
-  const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState<number | null>(
     null
   );
 
   useEffect(() => {
     if (bulkModal) {
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/paragraph`,
-        },
-        (res) => {
-          setParagraphs(res.data.data);
-        }
-      );
+      getParagraphs();
     }
     if (!bulkModal) {
       setSelectedParagraph(null);
     }
-  }, [bulkModal, makeRequest, user.id]);
+  }, [bulkModal, makeRequest, user.id, getParagraphs]);
 
   const headers = ["id", "sentence", "action"];
 
@@ -92,9 +85,9 @@ export const SentencesList: React.FC = () => {
             setSelectedParagraph(Number(e?.value));
           }}
           aria-label={"select change paragraph"}
-          options={paragraphs.map((paragraph, index) => {
+          options={paragraphs.map((paragraph) => {
             return {
-              value: index,
+              value: paragraph.id!,
               label: capitalizeFirstLetter(paragraph.name),
             };
           })}

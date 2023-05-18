@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Synonym, Word } from "../types/general";
+import { Synonym } from "../types/general";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
@@ -22,6 +21,7 @@ import ReactSelect from "react-select";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import useSynonymsController from "../hooks/useSynonymsController";
 import { UserContext } from "../context/UserContext";
+import useWordsController from "../hooks/useWordsController";
 
 export const SynonymsList: React.FC = () => {
   useLoginRequired();
@@ -43,24 +43,17 @@ export const SynonymsList: React.FC = () => {
   const [editModal, setEditModal] = useState(false);
   const [editingSynonym, setEditingSynonym] = useState<Synonym | null>(null);
   const [bulkModal, setBulkModal] = useState(false);
-  const [words, setWords] = useState<Word[]>([]);
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
+  const { words, getWords } = useWordsController();
 
   useEffect(() => {
     if (bulkModal) {
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/word`,
-        },
-        (res) => {
-          setWords(res.data.data);
-        }
-      );
+      getWords();
     }
     if (!bulkModal) {
       setSelectedWord(null);
     }
-  }, [bulkModal, makeRequest, user.id]);
+  }, [bulkModal, makeRequest, user.id, getWords]);
 
   const columns = ["id", "synonym", "action"];
 
@@ -96,9 +89,9 @@ export const SynonymsList: React.FC = () => {
             setSelectedWord(Number(e?.value));
           }}
           aria-label={"select change word"}
-          options={words.map((op, index) => {
+          options={words.map((op) => {
             return {
-              value: index,
+              value: op.id,
               label: capitalizeFirstLetter(op.name),
             };
           })}
