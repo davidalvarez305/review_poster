@@ -12,7 +12,7 @@ import { useField, useFormikContext } from "formik";
 type SelectType = { value: string; label: string };
 
 interface Props {
-  options: string[];
+  options: any[];
   name: string;
 }
 
@@ -65,13 +65,14 @@ const FormSelectComponent: React.FC<Props> = ({ options, name }) => {
           placeholder={""}
           value={selectedValue}
           onChange={(e) => {
+            console.log(e);
             setSelectedValue(e);
             setFieldValue(field.name, e?.value);
           }}
           options={options.map((op) => {
             return {
-              value: op,
-              label: capitalizeFirstLetter(op),
+              value: op.id,
+              label: capitalizeFirstLetter(op.name),
             };
           })}
         />

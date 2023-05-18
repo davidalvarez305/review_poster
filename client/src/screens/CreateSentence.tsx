@@ -23,13 +23,13 @@ export const CreateSentence: React.FC = () => {
   return (
     <Layout>
       <Formik
-        initialValues={{ paragraph: "", template: "", sentence: "" }}
+        initialValues={{ paragraph: 0, template: 0, sentence: "" }}
         onSubmit={(values, actions) => {
-          createSentences(values, paragraphs, templates);
+          createSentences(values);
           actions.resetForm({
             values: {
-              paragraph: "",
-              template: "",
+              paragraph: 0,
+              template: 0,
               sentence: "",
             },
           });
@@ -48,11 +48,11 @@ export const CreateSentence: React.FC = () => {
             >
               <FormSelectComponent
                 name={"paragraph"}
-                options={paragraphs.map((p) => p.name)}
+                options={paragraphs}
               />
               <FormSelectComponent
                 name={"template"}
-                options={[...new Set(templates.map((t) => t.name))]}
+                options={templates}
               />
             </Box>
             <Box>

@@ -122,21 +122,17 @@ export default function useSentencesController() {
 
   const createSentences = useCallback(
     (
-      opts: { paragraph: string; template: string; sentence: string },
-      paragraphs: Paragraph[],
-      templates: Template[]
+      opts: { paragraph: number; template: number; sentence: string },
     ) => {
-      const paragraph_id = getId(opts.paragraph, paragraphs, "name");
-      const template_id = getId(opts.template, templates, "name");
       const sentenceBody = opts.sentence.split("\n").map((sentence) => {
         return {
-          paragraph_id,
-          template_id,
+          paragraph_id: opts.paragraph,
+          template_id: opts.template,
           sentence,
         };
       });
 
-      if (!paragraph_id || !template_id) {
+      if (!opts.paragraph || !opts.template) {
         return;
       }
 
