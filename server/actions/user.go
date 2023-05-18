@@ -77,7 +77,7 @@ func GetUserIdFromSession(c *fiber.Ctx) (string, error) {
 		return userId, errors.New("user not found")
 	}
 
-	return fmt.Sprintf("%s", uId), nil
+	return fmt.Sprintf("%v", uId), nil
 }
 
 func GetUserFromSession(c *fiber.Ctx) (models.User, error) {

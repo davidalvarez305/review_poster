@@ -62,7 +62,7 @@ func AddBulkSynonyms(clientSnonyms, existingSynonyms []models.Synonym) error {
 	}
 
 	if len(synonyms) > 0 {
-		err := database.DB.Create(&synonyms).Error
+		err := database.DB.Save(&synonyms).Error
 
 		if err != nil {
 			return err

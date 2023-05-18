@@ -195,7 +195,7 @@ func BulkSentencesUpdate(c *fiber.Ctx) error {
 	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"data": "Failed to fetch sentences by paragraph.",
 		})
 	}

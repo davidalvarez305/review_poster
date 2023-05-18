@@ -19,7 +19,6 @@ export const Dictionary: React.FC<Props> = () => {
   const { createWords, words, isLoading, error } = useWordsController();
   const { makeRequest, isLoading: Loading } = useFetch();
   useLoginRequired();
-  console.log(window.location.pathname.split("/word/")[1]);
 
   function handlePullFromChatGPT(
     values: {

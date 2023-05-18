@@ -109,7 +109,7 @@ export default function useParagraphsController() {
           ...FETCH_PARAMS,
           url:
             USER_ROUTE +
-            `/${user.id}/paragraph?paragraphs=${[id]}&template=${template}`,
+            `/${user.id}/paragraph/${[id]}?paragraphs=${[id]}&template=${template}`,
           method: "DELETE",
         },
         (res) => setParagraphs(res.data.data)

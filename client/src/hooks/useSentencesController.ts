@@ -70,7 +70,7 @@ export default function useSentencesController() {
           ...FETCH_PARAMS,
           url:
             USER_ROUTE +
-            `/${user.id}/sentence?sentences=${[id]}&paragraph=${paragraph}`,
+            `/${user.id}/sentence/${[id]}?sentences=${[id]}&paragraph=${paragraph}`,
           method: "DELETE",
         },
         (res) => setSentences(res.data.data)

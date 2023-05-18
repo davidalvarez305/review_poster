@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "../hooks/useFetch";
-import { Word } from "../types/general";
+import { Synonym, Word } from "../types/general";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
@@ -31,9 +31,9 @@ export const SynonymsList: React.FC = () => {
     synonyms,
     isLoading,
     error,
-    setEditSingleSynonym,
     bulkUpdateSynonyms,
     deleteSynonym,
+    updateSynonym,
     word,
   } = useSynonymsController();
 
@@ -41,7 +41,7 @@ export const SynonymsList: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const [editModal, setEditModal] = useState(false);
-  const [editingSynonym, setEditingSynonym] = useState("");
+  const [editingSynonym, setEditingSynonym] = useState<Synonym | null>(null);
   const [bulkModal, setBulkModal] = useState(false);
   const [words, setWords] = useState<Word[]>([]);
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
@@ -154,8 +154,7 @@ export const SynonymsList: React.FC = () => {
                     items={synonyms}
                     onClickEdit={() => {
                       setEditModal(true);
-                      setEditingSynonym(synonyms[i].synonym);
-                      setEditSingleSynonym(synonyms[i]);
+                      setEditingSynonym(synonyms[i]);
                     }}
                     onClickDelete={() => deleteSynonym(synonyms[i].id!)}
                   />
@@ -170,13 +169,13 @@ export const SynonymsList: React.FC = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              if (word) {
-                updateSynonyms(values, synonyms[0].id!, word);
-                setEditingSynonym("");
+              if (editingSynonym) {
+                updateSynonym({ ...editingSynonym, synonym: values.input });
+                setEditingSynonym(null);
                 setEditModal(false);
               }
             }}
-            editingItem={editingSynonym}
+            editingItem={editingSynonym?.synonym || ""}
             isLoading={isLoading}
           />
         )}
