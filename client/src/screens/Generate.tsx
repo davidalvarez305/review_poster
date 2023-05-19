@@ -1,4 +1,4 @@
-import { Box, Button, FormLabel, useToast } from "@chakra-ui/react";
+import { Box, Button, FormLabel } from "@chakra-ui/react";
 import React, {
   useCallback,
   useContext,
@@ -20,23 +20,22 @@ import {
   Sentence,
   SpunContent,
   Synonym,
-  Template,
   Word,
 } from "../types/general";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
-import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
 import { createDictionaryFactory } from "../utils/createDictionaryFactory";
+import useTemplatesController from "../hooks/useTemplatesController";
+import useWordsController from "../hooks/useWordsController";
+import useSentencesController from "../hooks/useSentencesController";
+import useSynonymsController from "../hooks/useSynonymsController";
 
 const Generate: React.FC = () => {
   const { makeRequest, isLoading } = useFetch();
   const { user } = useContext(UserContext);
-  const toast = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedWord, setSelectedWord] = useState<number>();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [sentences, setSentences] = useState<Sentence[]>([]);
   const [dictionary, setDictionary] = useState<Dictionary>({});
   const [generatedContent, setGeneratedContent] = useState<SpunContent[]>([]);
   const [editModal, setEditModal] = useState(false);
@@ -49,9 +48,13 @@ const Generate: React.FC = () => {
   }>({ word: "", synonyms: [""] });
   const [synonymModal, setSynonymModal] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>();
-  const [words, setWords] = useState<Word[]>([]);
   const [existingSynonyms, setExistingSynonyms] = useState<Synonym[]>([]);
   const [seeTagged, setSeeTagged] = useState(false);
+  const { templates, getTemplates } = useTemplatesController();
+  const { words } = useWordsController();
+  const { sentences } = useSentencesController();
+  const { synonyms, bulkUpdateSynonyms, updateSynonyms } =
+    useSynonymsController();
   useLoginRequired();
 
   useEffect(() => {
@@ -70,14 +73,7 @@ const Generate: React.FC = () => {
   useEffect(() => {
     // If no template has been selected, fetch templates.
     if (selectedTemplate.length === 0) {
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/template`,
-        },
-        (res) => {
-          setTemplates(res.data.data);
-        }
-      );
+      getTemplates();
     } else {
       // Otherwise, pull the content associated with that template.
       makeRequest(
@@ -140,60 +136,23 @@ const Generate: React.FC = () => {
 
   const handleSynonyms = useCallback(
     (values: { input: string }) => {
-      const synonyms = values.input.split("\n");
-
-      let word_id = editingWord?.id;
-      let wordString = editSynonyms.word;
-      let method = "POST";
-      let body = synonyms.map((synonym) => {
-        return { synonym, word_id };
-      });
-      let route = USER_ROUTE + `/${user.id}/synonym/bulk?word=${wordString}`;
-
+      if (editingWord) {
+        bulkUpdateSynonyms({ ...values });
+      }
       // Change request format if user selected a word.
       if (selectedWord) {
-        word_id = words[selectedWord].id;
-        wordString = words[selectedWord].name;
-        method = "PUT";
-        body = createUpdateSynonymsFactory(
-          existingSynonyms,
-          synonyms,
-          word_id
+        updateSynonyms(
+          { ...values },
+          words[selectedWord].id,
+          words[selectedWord].name
         );
-        route = USER_ROUTE + `/${user.id}/synonym?word=${wordString}`;
       }
 
-      makeRequest(
-        {
-          url: route,
-          method: method,
-          data: body,
-        },
-        (res) => {
-          toast({
-            title: "Success!",
-            description: "Synonyms have been successfully submitted.",
-            status: "success",
-            isClosable: true,
-            duration: 5000,
-            variant: "left-accent",
-          });
-          setEditingSentences([]);
-          setEditingSentencesParagraph("");
-          setSynonymModal(false);
-        }
-      );
+      setEditingSentences([]);
+      setEditingSentencesParagraph("");
+      setSynonymModal(false);
     },
-    [
-      editSynonyms.word,
-      makeRequest,
-      editingWord?.id,
-      existingSynonyms,
-      selectedWord,
-      toast,
-      words,
-      user.id,
-    ]
+    [bulkUpdateSynonyms, editingWord, selectedWord, updateSynonyms, words]
   );
 
   const editSentence = (sentence: Sentence) => {
@@ -205,7 +164,6 @@ const Generate: React.FC = () => {
             `/${user.id}/sentence?paragraph=${sentence.paragraph.name}`,
         },
         (res) => {
-          console.log(res.data.data);
           setEditingSentences(res.data.data);
         }
       );
@@ -416,7 +374,7 @@ const Generate: React.FC = () => {
     synonymModal,
     SelectChangeWord,
     selectedWord,
-    words
+    words,
   ]);
 
   return (
