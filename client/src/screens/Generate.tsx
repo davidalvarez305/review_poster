@@ -15,13 +15,7 @@ import { UserContext } from "../context/UserContext";
 import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
-import {
-  Dictionary,
-  Sentence,
-  SpunContent,
-  Synonym,
-  Word,
-} from "../types/general";
+import { Dictionary, Sentence, SpunContent, Word } from "../types/general";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
@@ -48,43 +42,27 @@ const Generate: React.FC = () => {
   }>({ word: "", synonyms: [""] });
   const [synonymModal, setSynonymModal] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>();
-  const [existingSynonyms, setExistingSynonyms] = useState<Synonym[]>([]);
   const [seeTagged, setSeeTagged] = useState(false);
   const { templates, getTemplates } = useTemplatesController();
-  const { words } = useWordsController();
-  const { sentences } = useSentencesController();
-  const { synonyms, bulkUpdateSynonyms, updateSynonyms } =
+  const { words, getWords } = useWordsController();
+  const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
+    useSentencesController();
+  const { bulkUpdateSynonyms, updateSynonyms, getSynonymsByWord } =
     useSynonymsController();
   useLoginRequired();
 
   useEffect(() => {
     if (selectedWord) {
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/synonym?word=${selectedWord}`,
-        },
-        (res) => {
-          setExistingSynonyms(res.data.data);
-        }
-      );
+      getSynonymsByWord(words[selectedWord].name);
     }
-  }, [makeRequest, selectedWord, user.id]);
+  }, [getSynonymsByWord, selectedWord, user.id, words]);
 
   useEffect(() => {
     // If no template has been selected, fetch templates.
     if (selectedTemplate.length === 0) {
       getTemplates();
     } else {
-      // Otherwise, pull the content associated with that template.
-      makeRequest(
-        {
-          url: USER_ROUTE + `/${user.id}/content?template=${selectedTemplate}`,
-        },
-        (res) => {
-          const initialContent: Sentence[] = res.data.data;
-          setSentences(initialContent);
-        }
-      );
+      getSentencesByTemplate(selectedTemplate);
 
       // Pull dictionary
       makeRequest(
@@ -100,38 +78,25 @@ const Generate: React.FC = () => {
       // On Change Template => set the content back to an empty array.
       setGeneratedContent([]);
     }
-  }, [makeRequest, selectedTemplate, user.id]);
+  }, [
+    makeRequest,
+    selectedTemplate,
+    user.id,
+    getSentencesByTemplate,
+    getTemplates,
+  ]);
 
-  // This function will use the Set Sentences to send a "bulk request" to the server.
-  // The server will take care of the rest.
   const handleSubmit = useCallback(
     (values: { input: string }) => {
-      const sentences = values.input.split("\n");
-      const template_id = editingSentences[0].paragraph!.template_id;
-      const paragraph_id = editingSentences[0].paragraph_id;
-      const body = sentences.map((sentence) => {
-        return {
-          paragraph_id: paragraph_id,
-          template_id: template_id,
-          sentence,
-        };
-      });
-      makeRequest(
-        {
-          url:
-            USER_ROUTE +
-            `/${user.id}/sentence/bulk?paragraph=${editingSentencesParagraph}`,
-          method: "POST",
-          data: body,
-        },
-        (res) => {
-          setEditingSentences([]);
-          setEditingSentencesParagraph("");
-          setEditModal(false);
-        }
-      );
+      /* const template_id = editingSentences[0].paragraph!.template_id;
+      const paragraph_id = editingSentences[0].paragraph_id; */
+      bulkUpdateSentences({ ...values });
+
+      setEditingSentences([]);
+      setEditingSentencesParagraph("");
+      setEditModal(false);
     },
-    [makeRequest, editingSentences, editingSentencesParagraph, user.id]
+    [bulkUpdateSentences]
   );
 
   const handleSynonyms = useCallback(
@@ -178,25 +143,9 @@ const Generate: React.FC = () => {
       return words.filter((word) => word.name === item.word)[0];
     });
 
-    // Get the synonyms associated with the clicked word.
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/synonym?word=${item.word}`,
-      },
-      (res) => {
-        setExistingSynonyms(res.data.data);
-      }
-    );
+    getSynonymsByWord(word);
 
-    // Get all of the user's words.
-    makeRequest(
-      {
-        url: USER_ROUTE + `/${user.id}/word`,
-      },
-      (res) => {
-        setWords(res.data.data);
-      }
-    );
+    getWords();
 
     const synonyms = dictionary[item.tag];
 

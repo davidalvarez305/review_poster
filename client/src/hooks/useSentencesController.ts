@@ -75,6 +75,17 @@ export default function useSentencesController() {
     );
   }, [makeRequest, FETCH_PARAMS, paragraph, user.id]);
 
+  const getSentencesByTemplate = useCallback((template: string) => {
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/sentence?template=${template}`,
+      },
+      (res) => setSentences(res.data.data)
+    );
+  }, [makeRequest, FETCH_PARAMS, user.id]);
+
   const deleteSentence = useCallback(
     (id: number) => {
       makeRequest(
@@ -158,5 +169,6 @@ export default function useSentencesController() {
     paragraph,
     createSentences,
     updateSentence,
+    getSentencesByTemplate
   };
 }

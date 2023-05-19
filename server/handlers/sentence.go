@@ -11,6 +11,7 @@ import (
 func GetSentences(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	paragraph := c.Query("paragraph")
+	template := c.Query("template")
 
 	if len(paragraph) > 0 {
 		sentences, err := actions.GetSentencesByParagraph(paragraph, userId)
@@ -18,6 +19,20 @@ func GetSentences(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
 				"data": "Failed to fetch sentences by paragraph.",
+			})
+		}
+
+		return c.Status(200).JSON(fiber.Map{
+			"data": sentences,
+		})
+	}
+
+	if len(template) > 0 {
+		sentences, err := actions.GetSentencesByTemplate(template, userId)
+
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"data": "Failed to fetch sentences by template.",
 			})
 		}
 
