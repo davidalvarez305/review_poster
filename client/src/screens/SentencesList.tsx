@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import {
@@ -35,6 +35,8 @@ export const SentencesList: React.FC = () => {
     deleteSentence,
     bulkUpdateSentences,
     updateSentence,
+    getSentencesByParagraph,
+    getSentences,
     sentences
   } = useSentencesController();
   const { paragraphs, getParagraphs } = useParagraphsController();
@@ -45,15 +47,25 @@ export const SentencesList: React.FC = () => {
   const [selectedParagraph, setSelectedParagraph] = useState<number | null>(
     null
   );
+  const paragraph = useMemo((): string | undefined => {
+    return window.location.pathname.split("/paragraph/")[1]
+  }, []);
 
   useEffect(() => {
     if (bulkModal) {
       getParagraphs();
-    }
-    if (!bulkModal) {
+    } else {
       setSelectedParagraph(null);
     }
   }, [bulkModal, makeRequest, user.id, getParagraphs]);
+
+  useEffect(() => {
+    if (paragraph) {
+      getSentencesByParagraph(paragraph);
+    } else {
+      getSentences();
+    }
+  }, [getSentences, getSentencesByParagraph, paragraph]);
 
   const headers = ["id", "sentence", "action"];
 

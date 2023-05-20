@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import { useState, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Sentence } from "../types/general";
@@ -64,7 +64,7 @@ export default function useSentencesController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
-  const getSentencesByParagraph = useCallback(() => {
+  const getSentencesByParagraph = useCallback((paragraph: string) => {
     makeRequest(
       {
         ...FETCH_PARAMS,
@@ -73,7 +73,7 @@ export default function useSentencesController() {
       },
       (res) => setSentences(res.data.data)
     );
-  }, [makeRequest, FETCH_PARAMS, paragraph, user.id]);
+  }, [makeRequest, FETCH_PARAMS, user.id]);
 
   const getSentencesByTemplate = useCallback((template: string) => {
     makeRequest(
@@ -149,14 +149,6 @@ export default function useSentencesController() {
     [FETCH_PARAMS, makeRequest, user.id]
   );
 
-  useEffect(() => {
-    if (paragraph) {
-      getSentencesByParagraph();
-    } else {
-      getSentences();
-    }
-  }, [getSentences, getSentencesByParagraph, paragraph]);
-
   return {
     updateSentences,
     getSentences,
@@ -169,6 +161,7 @@ export default function useSentencesController() {
     paragraph,
     createSentences,
     updateSentence,
-    getSentencesByTemplate
+    getSentencesByTemplate,
+    getSentencesByParagraph
   };
 }
