@@ -47,7 +47,7 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	if os.Getenv("PRODUCTION") == "0" || secretAgent == os.Getenv("X_SECRET_AGENT") {
+	if secretAgent == os.Getenv("X_SECRET_AGENT") {
 		return c.Next()
 	}
 
@@ -61,6 +61,9 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 
 	uId := c.Params("userId")
 
+	fmt.Println(uId)
+	fmt.Println(c.Path())
+
 	userId, err := strconv.Atoi(uId)
 
 	if err != nil {
@@ -68,8 +71,6 @@ func ResourceAccessRestriction(c *fiber.Ctx) error {
 			"data": "Could not convert ID from params to int.",
 		})
 	}
-
-	fmt.Printf("THE FIRST VALUE %s IS NOT EQUAL TO THE SECOND VALUE %s", fmt.Sprintf("%v", sessionUser.ID), uId)
 
 	if sessionUser.ID != userId {
 		return c.Status(403).JSON(fiber.Map{
