@@ -20,10 +20,10 @@ func GetSentencesByParagraph(paragraph, userId string) ([]models.Sentence, error
 func GetSentencesByTemplate(template, userId string) ([]models.Sentence, error) {
 	var sentences []models.Sentence
 
-	err := database.DB.Preload("Paragraph.Template.User").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id INNER JOIN \"user\" ON \"user\".id = template.user_id").Where("\"user\".id = ? AND template.name = ?", userId, template).Find(&sentences).Error
+	err := database.DB.Preload("Paragraph.Template").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_id = ? AND template.name = ?", userId, template).Find(&sentences)
 
-	if err != nil {
-		return sentences, err
+	if err.Error != nil {
+		return sentences, err.Error
 	}
 
 	return sentences, nil
