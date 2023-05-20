@@ -78,7 +78,7 @@
                                 <div class="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
                                     <ul class="navigation clearfix">
                                         {% for group in groups %}
-                                        <li class="dropdown"><a href="#">{{ group.name }}</a>
+                                        <li class="dropdown"><a href="{{ group.slug }}">{{ group.name }}</a>
                                             <div class="megamenu">
                                                 <div class="row clearfix">
                                                     <div class="col-lg-6 column">
@@ -86,7 +86,7 @@
                                                         {% for category in group.category_set.all %}
                                                             <ul>
                                                                 <li>
-                                                                    <a href="/{{ category.name }}/">
+                                                                    <a href="/{{ category.slug }}/">
                                                                         {{ category.name }}
                                                                     </a>
                                                                 </li>
