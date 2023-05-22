@@ -36,7 +36,7 @@ func (server *Server) Start() {
 		AllowCredentials: true,
 	}))
 
-	api := server.App.Group("api", middleware.AuthMiddleware, middleware.ResourceAccessRestriction)
+	api := server.App.Group("api", middleware.AuthMiddleware)
 
 	controllers.Google(api)
 	controllers.Amazon(api)
