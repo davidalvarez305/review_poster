@@ -16,12 +16,6 @@ export default function useWordsController() {
     };
   }, [user.id]);
 
-  useEffect(() => {
-    makeRequest({ url: USER_ROUTE + `/${user.id}/word` }, (res) =>
-      setWords(res.data.data)
-    );
-  }, [makeRequest, setWords, user.id]);
-
   const updateWords = useCallback(
     (opts: WordFormInput) => {
       const wordsToCreate = createWordsFactory(opts, user.id, words);
@@ -47,10 +41,6 @@ export default function useWordsController() {
     },
     [makeRequest, user.id, FETCH_PARAMS, words]
   );
-
-  useEffect(() => {
-    getWords();
-  }, [getWords]);
 
   return {
     updateWords,

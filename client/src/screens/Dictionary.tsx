@@ -1,5 +1,5 @@
 import { Box, Button } from "@chakra-ui/react";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import useLoginRequired from "../hooks/useLoginRequired";
 import { centeredDiv } from "../utils/centeredDiv";
@@ -13,11 +13,13 @@ import { API_ROUTE } from "../constants";
 import useWordsController from "../hooks/useWordsController";
 import createTagFactory from "../utils/createTagFactory";
 import { WordFormInput } from "../types/general";
+import { UserContext } from "../context/UserContext";
 
 interface Props {}
 
 export const Dictionary: React.FC<Props> = () => {
-  const { createWords, words, isLoading, error } = useWordsController();
+  const { user } = useContext(UserContext);
+  const { createWords, words, isLoading, error, getWords } = useWordsController();
   const { makeRequest, isLoading: Loading } = useFetch();
   useLoginRequired();
 
@@ -39,6 +41,10 @@ export const Dictionary: React.FC<Props> = () => {
       }
     );
   }
+
+  useEffect(() => {
+    user.id && getWords();
+  }, [getWords, user.id]);
 
   return (
     <Layout>
