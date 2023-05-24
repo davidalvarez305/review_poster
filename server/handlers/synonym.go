@@ -66,7 +66,7 @@ func UpdateSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedSynonyms, err := actions.GetSynonymsByWord(word, userId)
+	updatedSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -123,7 +123,7 @@ func UpdateSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedSynonyms, err := actions.GetSynonymsByWord(word, userId)
+	updatedSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -146,11 +146,34 @@ func GetSelectedSynonyms(c *fiber.Ctx) error {
 		})
 	}
 
-	synonyms, err := actions.GetSynonymsByWord(word, userId)
+	synonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "Failed to fetch synonyms by word.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": synonyms,
+	})
+}
+
+func GetUserSynonymsByWord(c *fiber.Ctx) error {
+	word := c.Params("word")
+	userId := c.Params("userId")
+
+	if len(word) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No word in URL params.",
+		})
+	}
+
+	synonyms, err := actions.GetUserSynonymsByWord(word, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch user's synonyms by word.",
 		})
 	}
 
@@ -180,7 +203,7 @@ func DeleteSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	synonyms, err := actions.GetSynonymsByWord(word, userId)
+	synonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -212,7 +235,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 		})
 	}
 
-	existingSynonyms, err := actions.GetSynonymsByWord(word, userId)
+	existingSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -239,7 +262,7 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 	}
 
 	// Re-assign synonyms to what's now on the database.
-	updatedSynonyms, err := actions.GetSynonymsByWord(word, userId)
+	updatedSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

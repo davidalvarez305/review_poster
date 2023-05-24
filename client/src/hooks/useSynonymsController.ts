@@ -64,12 +64,12 @@ export default function useSynonymsController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
-  const getSynonymsByWord = useCallback((wordString: string) => {
+  const getUserSynonymsByWord = useCallback((wordString: string) => {
     makeRequest(
       {
         ...FETCH_PARAMS,
         method: "GET",
-        url: USER_ROUTE + `/${user.id}/synonym?word=${wordString}`,
+        url: USER_ROUTE + `/${user.id}/word/${wordString}/synonym`,
       },
       (res) => setSynonyms(res.data.data)
     );
@@ -109,11 +109,11 @@ export default function useSynonymsController() {
 
   useEffect(() => {
     if (word) {
-      getSynonymsByWord(word);
+      getUserSynonymsByWord(word);
     } else {
       getSynonyms();
     }
-  }, [getSynonyms, getSynonymsByWord, word]);
+  }, [getSynonyms, getUserSynonymsByWord, word]);
 
   return {
     updateSynonyms,
@@ -126,6 +126,6 @@ export default function useSynonymsController() {
     bulkUpdateSynonyms,
     updateSynonym,
     word,
-    getSynonymsByWord
+    getUserSynonymsByWord
   };
 }

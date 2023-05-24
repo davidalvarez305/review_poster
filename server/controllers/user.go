@@ -25,6 +25,9 @@ func User(router fiber.Router) {
 	user.Put("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.UpdateWord))
 	user.Delete("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.DeleteWord))
 
+	// User synonyms by word
+	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
+
 	// Template related endpoints
 	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))
 	user.Post("/:userId/template", middleware.ResourceAccessRestriction(handlers.CreateTemplate))

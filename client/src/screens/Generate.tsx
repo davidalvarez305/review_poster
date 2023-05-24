@@ -47,15 +47,15 @@ const Generate: React.FC = () => {
   const { words, getWords } = useWordsController();
   const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
     useSentencesController();
-  const { bulkUpdateSynonyms, updateSynonyms, getSynonymsByWord } =
+  const { bulkUpdateSynonyms, updateSynonyms, getUserSynonymsByWord } =
     useSynonymsController();
   useLoginRequired();
 
   useEffect(() => {
     if (selectedWord) {
-      getSynonymsByWord(words[selectedWord].name);
+      getUserSynonymsByWord(words[selectedWord].name);
     }
-  }, [getSynonymsByWord, selectedWord, user.id, words]);
+  }, [getUserSynonymsByWord, selectedWord, user.id, words]);
 
   useEffect(() => {
     // If no template has been selected, fetch templates.
@@ -143,7 +143,7 @@ const Generate: React.FC = () => {
       return words.filter((word) => word.name === item.word)[0];
     });
 
-    getSynonymsByWord(word);
+    getUserSynonymsByWord(word);
 
     getWords();
 

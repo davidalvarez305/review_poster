@@ -6,7 +6,7 @@ import (
 )
 
 // Select records from DB by a word string.
-func GetSynonymsByWord(word, userId string) ([]models.Synonym, error) {
+func GetUserSynonymsByWord(word, userId string) ([]models.Synonym, error) {
 	var synonyms []models.Synonym
 
 	err := database.DB.Preload("Word").Joins("INNER JOIN word ON word.id = synonym.word_id").Where("word.name = ? AND word.user_id = ?", word, userId).Find(&synonyms).Error
