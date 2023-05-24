@@ -19,7 +19,8 @@ interface Props {}
 
 export const Dictionary: React.FC<Props> = () => {
   const { user } = useContext(UserContext);
-  const { createWords, words, isLoading, error, getWords } = useWordsController();
+  const { createUserWords, words, isLoading, error, getUserWords } =
+    useWordsController();
   const { makeRequest, isLoading: Loading } = useFetch();
   useLoginRequired();
 
@@ -43,32 +44,31 @@ export const Dictionary: React.FC<Props> = () => {
   }
 
   useEffect(() => {
-    user.id && getWords();
-  }, [getWords, user.id]);
+    user.id && getUserWords();
+  }, [getUserWords, user.id]);
 
   return (
     <Layout>
       <Formik
         initialValues={{ name: "", synonyms: "", id: null }}
         onSubmit={(values, actions) => {
-          createWords(values);
-          actions.resetForm({
-            values: {
-              name: "",
-              synonyms: "",
-              id: null
-            },
-          });
+          if (values.name.length > 0 && values.synonyms.length > 0) {
+            createUserWords(values);
+            actions.resetForm({
+              values: {
+                name: "",
+                synonyms: "",
+                id: null,
+              },
+            });
+          }
         }}
       >
         {({ values, setFieldValue }) => (
           <Form>
             <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
               <Box sx={{ ...centeredDiv, width: "25%", height: "20%" }}>
-                <FormSelectComponent
-                  options={words}
-                  name={"name"}
-                />
+                <FormSelectComponent options={words} name={"name"} />
               </Box>
               <Box>
                 <LargeInputBox label="Synonyms" name="synonyms" />

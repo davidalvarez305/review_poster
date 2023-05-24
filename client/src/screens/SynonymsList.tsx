@@ -50,7 +50,7 @@ export const SynonymsList: React.FC = () => {
   const [editingSynonym, setEditingSynonym] = useState<Synonym | null>(null);
   const [bulkModal, setBulkModal] = useState(false);
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
-  const { words, getWords } = useWordsController();
+  const { words, getUserWords } = useWordsController();
 
   const word = useMemo((): string | undefined => {
     return window.location.pathname.split("/word/")[1];
@@ -58,12 +58,12 @@ export const SynonymsList: React.FC = () => {
 
   useEffect(() => {
     if (bulkModal) {
-      getWords();
+      getUserWords();
     }
     if (!bulkModal) {
       setSelectedWord(null);
     }
-  }, [bulkModal, makeRequest, user.id, getWords]);
+  }, [bulkModal, makeRequest, user.id, getUserWords]);
 
   useEffect(() => {
     if (word && user.id) getUserSynonymsByWord(word);
@@ -75,7 +75,7 @@ export const SynonymsList: React.FC = () => {
     if (selectedWord) {
       updateSynonyms(
         { ...values },
-        words[selectedWord!].id,
+        words[selectedWord!].id!,
         words[selectedWord!].name
       );
       navigate("/word/" + word);
@@ -104,7 +104,7 @@ export const SynonymsList: React.FC = () => {
           aria-label={"select change word"}
           options={words.map((op) => {
             return {
-              value: op.id,
+              value: op.id!,
               label: capitalizeFirstLetter(op.name),
             };
           })}

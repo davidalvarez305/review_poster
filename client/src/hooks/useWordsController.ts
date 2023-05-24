@@ -21,8 +21,9 @@ export default function useWordsController() {
   const updateUserWords = useCallback(
     (opts: WordFormInput) => {
       const wordsToCreate = createWordsFactory(opts, user.id, words);
-      makeRequest({ ...FETCH_PARAMS, method: "PUT", data: wordsToCreate }, (res) =>
-        setWords(res.data.data)
+      makeRequest(
+        { ...FETCH_PARAMS, method: "PUT", data: wordsToCreate },
+        (res) => setWords(res.data.data)
       );
     },
     [makeRequest, FETCH_PARAMS, user.id, words]
@@ -40,7 +41,7 @@ export default function useWordsController() {
       makeRequest({ ...FETCH_PARAMS, data: wordsToCreate }, (res) => {
         const word: Word = res.data.data;
         createUserSynonymsByWord({ input: opts.synonyms }, word);
-        setWords(res.data.data)
+        setWords((prev) => [...prev, res.data.data]);
       });
     },
     [makeRequest, user.id, FETCH_PARAMS, words, createUserSynonymsByWord]
@@ -53,6 +54,6 @@ export default function useWordsController() {
     createUserWords,
     words,
     isLoading,
-    error
+    error,
   };
 }

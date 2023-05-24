@@ -161,7 +161,7 @@ func CreateUserSynonymsByWord(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to delete synonyms.",
+			"data": "Failed to save synonyms.",
 		})
 	}
 

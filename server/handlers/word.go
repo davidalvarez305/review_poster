@@ -79,9 +79,9 @@ func CreateUserWord(c *fiber.Ctx) error {
 		})
 	}
 
-	var updatedWords []models.Word
+	var updatedWords models.Word
 
-	err = database.DB.Where("user_id = ?", userId).Find(&updatedWords).Error
+	err = database.DB.Where("user_id = ? AND name = ?", userId, input.Name).First(&updatedWords).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

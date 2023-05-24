@@ -44,7 +44,7 @@ const Generate: React.FC = () => {
   const [editingWord, setEditingWord] = useState<Word | null>();
   const [seeTagged, setSeeTagged] = useState(false);
   const { templates, getTemplates } = useTemplatesController();
-  const { words, getWords } = useWordsController();
+  const { words, getUserWords } = useWordsController();
   const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
     useSentencesController();
   const { updateUserSynonymsByWord, updateSynonyms, getUserSynonymsByWord } =
@@ -108,7 +108,7 @@ const Generate: React.FC = () => {
       if (selectedWord) {
         updateSynonyms(
           { ...values },
-          words[selectedWord].id,
+          words[selectedWord].id!,
           words[selectedWord].name
         );
       }
@@ -145,7 +145,7 @@ const Generate: React.FC = () => {
 
     getUserSynonymsByWord(word);
 
-    getWords();
+    getUserWords();
 
     const synonyms = dictionary[item.tag];
 
