@@ -1,69 +1,35 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import useFetch from "../hooks/useFetch";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Synonym } from "../types/general";
-import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
-import {
-  Box,
-  Button,
-  FormLabel,
-  Table,
-  Tbody,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
+import { Box, Button, Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import ReactSelect from "react-select";
-import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import useSynonymsController from "../hooks/useSynonymsController";
 import { UserContext } from "../context/UserContext";
-import useWordsController from "../hooks/useWordsController";
 
 export const SynonymsList: React.FC = () => {
   useLoginRequired();
 
   const {
-    updateSynonyms,
     synonyms,
     isLoading,
     error,
     updateUserSynonymsByWord,
-    deleteSynonym,
-    updateSynonym,
-    getUserSynonymsByWord
+    deleteUserSynonymByWord,
+    updateUserSynonymByWord,
+    getUserSynonymsByWord,
   } = useSynonymsController();
 
-  const { makeRequest } = useFetch();
-  const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const [editModal, setEditModal] = useState(false);
   const [editingSynonym, setEditingSynonym] = useState<Synonym | null>(null);
   const [bulkModal, setBulkModal] = useState(false);
-  const [selectedWord, setSelectedWord] = useState<number | null>(null);
-  const { words, getUserWords } = useWordsController();
 
   const word = useMemo((): string | undefined => {
     return window.location.pathname.split("/word/")[1];
   }, []);
-
-  useEffect(() => {
-    if (bulkModal) {
-      getUserWords();
-    }
-    if (!bulkModal) {
-      setSelectedWord(null);
-    }
-  }, [bulkModal, makeRequest, user.id, getUserWords]);
 
   useEffect(() => {
     if (word && user.id) getUserSynonymsByWord(word);
@@ -72,46 +38,11 @@ export const SynonymsList: React.FC = () => {
   const columns = ["id", "synonym", "action"];
 
   function handleSubmitBulk(values: { input: string }) {
-    if (selectedWord) {
-      updateSynonyms(
-        { ...values },
-        words[selectedWord!].id!,
-        words[selectedWord!].name
-      );
-      navigate("/word/" + word);
-    } else if (word) {
+    if (word) {
       updateUserSynonymsByWord({ ...values }, word);
     }
     setBulkModal(false);
   }
-
-  const SelectChangeWord = useCallback(() => {
-    return (
-      <Box sx={{ width: 400, my: 2 }}>
-        <FormLabel>Select a new word (or leave bank)</FormLabel>
-        <ReactSelect
-          name={"select change word"}
-          placeholder={"select change word"}
-          value={{
-            value: selectedWord ? selectedWord : "",
-            label: selectedWord
-              ? capitalizeFirstLetter(words[selectedWord].name)
-              : "",
-          }}
-          onChange={(e) => {
-            setSelectedWord(Number(e?.value));
-          }}
-          aria-label={"select change word"}
-          options={words.map((op) => {
-            return {
-              value: op.id!,
-              label: capitalizeFirstLetter(op.name),
-            };
-          })}
-        />
-      </Box>
-    );
-  }, [selectedWord, words]);
 
   return (
     <Layout>
@@ -161,7 +92,7 @@ export const SynonymsList: React.FC = () => {
                     }}
                     onClickDelete={() => {
                       if (word) {
-                        deleteSynonym(synonyms[i].id!, word);
+                        deleteUserSynonymByWord(synonyms[i].id!, word);
                       }
                     }}
                   />
@@ -177,7 +108,10 @@ export const SynonymsList: React.FC = () => {
             setEditModal={setEditModal}
             handleSubmit={(values) => {
               if (editingSynonym && editingSynonym.word) {
-                updateSynonym({ ...editingSynonym, synonym: values.input }, editingSynonym.word?.name);
+                updateUserSynonymByWord(
+                  { ...editingSynonym, synonym: values.input },
+                  editingSynonym.word?.name
+                );
                 setEditingSynonym(null);
                 setEditModal(false);
               }
@@ -189,7 +123,6 @@ export const SynonymsList: React.FC = () => {
         {bulkModal && (
           <Box sx={{ my: 5 }}>
             <EditModal
-              selectComponent={SelectChangeWord()}
               setEditModal={setBulkModal}
               editModal={bulkModal}
               editingItem={synonyms.map((op) => op.synonym).join("\n")}
@@ -197,9 +130,6 @@ export const SynonymsList: React.FC = () => {
               handleSubmit={(values) => {
                 handleSubmitBulk(values);
               }}
-              selectedWord={
-                selectedWord ? words[selectedWord!].name : undefined
-              }
             />
           </Box>
         )}

@@ -3,7 +3,6 @@ import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Synonym, Word } from "../types/general";
 import { UserContext } from "../context/UserContext";
-import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
 import updateUserSynonymsByWordFactory from "../utils/updateUserSynonymsByWordFactory";
 import createSynonymsFactory from "../utils/createSynonymsFactory";
 
@@ -18,12 +17,12 @@ export default function useSynonymsController() {
     };
   }, [user.id]);
 
-  const updateSynonym = useCallback(
+  const updateUserSynonymByWord = useCallback(
     (synonym: Synonym, word: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/synonym/${synonym.id}?word=${word}`,
+          url: USER_ROUTE + `/${user.id}/word/${word}/synonym/${synonym.id}`,
           method: "PUT",
           data: synonym,
         },
@@ -34,34 +33,6 @@ export default function useSynonymsController() {
     },
     [makeRequest, FETCH_PARAMS, user.id]
   );
-
-  const updateSynonyms = useCallback(
-    (opts: { input: string }, word_id: number, word: string) => {
-      const synonymsToUpdate = createUpdateSynonymsFactory(
-        synonyms,
-        opts.input.split("\n"),
-        word_id
-      );
-      makeRequest(
-        {
-          ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
-          method: "PUT",
-          data: synonymsToUpdate,
-        },
-        (res) => {
-          setSynonyms(res.data.data);
-        }
-      );
-    },
-    [makeRequest, FETCH_PARAMS, user.id, synonyms]
-  );
-
-  const getSynonyms = useCallback(() => {
-    makeRequest({ ...FETCH_PARAMS, method: "GET" }, (res) =>
-      setSynonyms(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS]);
 
   const getUserSynonymsByWord = useCallback(
     (wordString: string) => {
@@ -77,14 +48,12 @@ export default function useSynonymsController() {
     [makeRequest, FETCH_PARAMS, user.id]
   );
 
-  const deleteSynonym = useCallback(
+  const deleteUserSynonymByWord = useCallback(
     (id: number, word: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url:
-            USER_ROUTE +
-            `/${user.id}/synonym/${[id]}?word=${word}&synonyms=${[id]}`,
+          url: USER_ROUTE + `/${user.id}/word/${word}/synonym/${id}`,
           method: "DELETE",
         },
         (res) => setSynonyms(res.data.data)
@@ -126,15 +95,13 @@ export default function useSynonymsController() {
   );
 
   return {
-    updateSynonyms,
-    getSynonyms,
     setSynonyms,
     synonyms,
     isLoading,
     error,
-    deleteSynonym,
+    deleteUserSynonymByWord,
     updateUserSynonymsByWord,
-    updateSynonym,
+    updateUserSynonymByWord,
     getUserSynonymsByWord,
     createUserSynonymsByWord,
   };

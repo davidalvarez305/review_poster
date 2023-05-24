@@ -5,92 +5,21 @@ import (
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/types"
-	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateSynonym(c *fiber.Ctx) error {
+func UpdateUserSynonymByWord(c *fiber.Ctx) error {
 	var synonym models.Synonym
+	word := c.Params("word")
+	synonymId := c.Params("synonymId")
+
+	if len(word) == 0 || len(synonymId) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No word in URL params.",
+		})
+	}
 
 	err := c.BodyParser(&synonym)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse body.",
-		})
-	}
-
-	err = database.DB.Save(&synonym).First(&synonym).Error
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to save synonym.",
-		})
-	}
-
-	return c.Status(201).JSON(fiber.Map{
-		"data": synonym,
-	})
-}
-
-func UpdateSynonyms(c *fiber.Ctx) error {
-	var synonyms []models.Synonym
-	word := c.Query("word")
-
-	if len(word) == 0 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No word in query.",
-		})
-	}
-
-	err := c.BodyParser(&synonyms)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse body.",
-		})
-	}
-
-	userId, err := actions.GetUserIdFromSession(c)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch user ID from session.",
-		})
-	}
-
-	err = database.DB.Save(&synonyms).Error
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to save synonyms.",
-		})
-	}
-
-	updatedSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch synonyms by word.",
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": updatedSynonyms,
-	})
-}
-
-func UpdateSynonym(c *fiber.Ctx) error {
-	var clientSynonym models.Synonym
-	word := c.Query("word")
-
-	if len(word) == 0 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No word in query.",
-		})
-	}
-
-	err := c.BodyParser(&clientSynonym)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -108,7 +37,7 @@ func UpdateSynonym(c *fiber.Ctx) error {
 
 	var existingSynonym models.Synonym
 
-	err = database.DB.Joins("JOIN word ON word.id = synonym.word_id").Where("synonym.id = ? AND word.user_id = ?", clientSynonym.ID, userId).Find(&existingSynonym).Error
+	err = database.DB.Joins("JOIN word ON word.id = synonym.word_id").Where("synonym.id = ? AND word.user_id = ? AND word.name = ?", synonym.ID, userId, word).Find(&existingSynonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -116,7 +45,7 @@ func UpdateSynonym(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&clientSynonym).Error
+	err = database.DB.Save(&synonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -201,24 +130,32 @@ func GetUserSynonymsByWord(c *fiber.Ctx) error {
 	})
 }
 
-func DeleteSynonym(c *fiber.Ctx) error {
-	s := c.Query("synonyms")
-	word := c.Query("word")
+func DeleteUserSynonymByWord(c *fiber.Ctx) error {
+	word := c.Params("word")
 	userId := c.Params("userId")
+	synonymId := c.Params("synonymId")
 
-	ids, err := utils.GetIds(s)
-
-	if err != nil {
+	if len(word) == 0 || len(synonymId) == 0 {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to parse IDs.",
+			"data": "Word or synonym not in URL params.",
 		})
 	}
 
-	err = database.DB.Delete(&models.Synonym{}, ids).Error
+	var synonym models.Synonym
+
+	err := database.DB.Joins("INNER JOIN word ON word.id = synonym.word_id").Where("word.name = ? AND word.user_id = ? AND id = ?", word, userId, synonymId).First(&synonym).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to delete synonyms.",
+			"data": "Failed to find synonym.",
+		})
+	}
+
+	err = database.DB.Delete(&synonym).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to delete synonym.",
 		})
 	}
 

@@ -28,10 +28,12 @@ func User(router fiber.Router) {
 	user.Put("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.UpdateUserWord))
 	user.Delete("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.DeleteUserWord))
 
-	// User Synonyms By Word Resources
+	// User Synonyms By Word
 	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
 	user.Put("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
 	user.Post("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.CreateUserSynonymsByWord))
+	user.Put("/:userId/word/:word/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymByWord))
+	user.Delete("/:userId/word/:word/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteUserSynonymByWord))
 
 	// User Templates Resource
 	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))
@@ -63,12 +65,4 @@ func User(router fiber.Router) {
 	user.Put("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateSentence))
 	user.Delete("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteSentence))
 	user.Post("/:userId/sentence/bulk", middleware.ResourceAccessRestriction(handlers.BulkSentencesUpdate))
-
-	// User Synonyms By Word Resource
-	user.Post("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.CreateSynonym))
-	user.Put("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.UpdateSynonyms))
-
-	// User Synonym By Word Resource
-	user.Put("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.UpdateSynonym))
-	user.Delete("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteSynonym))
 }
