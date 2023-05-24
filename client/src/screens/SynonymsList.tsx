@@ -35,6 +35,8 @@ export const SynonymsList: React.FC = () => {
     deleteSynonym,
     updateSynonym,
     word,
+    getUserSynonymsByWord,
+    getSynonyms
   } = useSynonymsController();
 
   const { makeRequest } = useFetch();
@@ -54,6 +56,10 @@ export const SynonymsList: React.FC = () => {
       setSelectedWord(null);
     }
   }, [bulkModal, makeRequest, user.id, getWords]);
+
+  useEffect(() => {
+    if (word && user.id) getUserSynonymsByWord(word);
+  }, [getSynonyms, getUserSynonymsByWord, word, user.id]);
 
   const columns = ["id", "synonym", "action"];
 

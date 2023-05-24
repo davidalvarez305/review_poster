@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import { useState, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Synonym } from "../types/general";
@@ -106,14 +106,6 @@ export default function useSynonymsController() {
     },
     [FETCH_PARAMS, makeRequest, user.id, word, synonyms]
   );
-
-  useEffect(() => {
-    if (word) {
-      getUserSynonymsByWord(word);
-    } else {
-      getSynonyms();
-    }
-  }, [getSynonyms, getUserSynonymsByWord, word]);
 
   return {
     updateSynonyms,
