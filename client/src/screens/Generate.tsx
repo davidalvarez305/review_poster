@@ -47,7 +47,7 @@ const Generate: React.FC = () => {
   const { words, getWords } = useWordsController();
   const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
     useSentencesController();
-  const { bulkUpdateSynonyms, updateSynonyms, getUserSynonymsByWord } =
+  const { updateUserSynonymsByWord, updateSynonyms, getUserSynonymsByWord } =
     useSynonymsController();
   useLoginRequired();
 
@@ -102,7 +102,7 @@ const Generate: React.FC = () => {
   const handleSynonyms = useCallback(
     (values: { input: string }) => {
       if (editingWord) {
-        bulkUpdateSynonyms({ ...values }, editingWord.name);
+        updateUserSynonymsByWord({ ...values }, editingWord.name);
       }
       // Change request format if user selected a word.
       if (selectedWord) {
@@ -117,7 +117,7 @@ const Generate: React.FC = () => {
       setEditingSentencesParagraph("");
       setSynonymModal(false);
     },
-    [bulkUpdateSynonyms, editingWord, selectedWord, updateSynonyms, words]
+    [updateUserSynonymsByWord, editingWord, selectedWord, updateSynonyms, words]
   );
 
   const editSentence = (sentence: Sentence) => {

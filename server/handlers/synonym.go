@@ -4,6 +4,7 @@ import (
 	"github.com/davidalvarez305/review_poster/server/actions"
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
+	"github.com/davidalvarez305/review_poster/server/types"
 	"github.com/davidalvarez305/review_poster/server/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -216,18 +217,19 @@ func DeleteSynonym(c *fiber.Ctx) error {
 	})
 }
 
-func BulkSynonymsPost(c *fiber.Ctx) error {
-	var clientSynonyms []models.Synonym
-	word := c.Query("word")
+func UpdateUserSynonymsByWord(c *fiber.Ctx) error {
+	word := c.Params("word")
 	userId := c.Params("userId")
 
 	if len(word) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No word in query.",
+			"data": "No word in URL params.",
 		})
 	}
 
-	err := c.BodyParser(&clientSynonyms)
+	var input types.UpdateUserSynonymsByWordInput
+
+	err := c.BodyParser(&input)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -235,30 +237,24 @@ func BulkSynonymsPost(c *fiber.Ctx) error {
 		})
 	}
 
-	existingSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
+	if len(input.DeleteSynonyms) > 0 {
+		err = database.DB.Delete(&models.Synonym{}, input.DeleteSynonyms).Error
 
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch synonyms by word.",
-		})
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to delete synonyms.",
+			})
+		}
 	}
 
-	// These functions will filter synonyms coming from the client & compare with existing ones.
-	// It will keep anything that's new, and delete what was not sent from the client.
-	err = actions.DeleteBulkSynonyms(clientSynonyms, existingSynonyms)
+	if len(input.Synonyms) > 0 {
+		err = database.DB.Save(&input.Synonyms).Error
 
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to delete bulk synonyms.",
-		})
-	}
-
-	err = actions.AddBulkSynonyms(clientSynonyms, existingSynonyms)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to add bulk synonyms.",
-		})
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to save synonyms.",
+			})
+		}
 	}
 
 	// Re-assign synonyms to what's now on the database.

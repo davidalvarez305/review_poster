@@ -95,3 +95,8 @@ export type WordFormInput = {
   synonyms: string;
   id: number | null;
 };
+
+export type UpdateUserSynonymsByWordInput = {
+  synonyms: Synonym[];
+  delete_synonyms: number[];
+};

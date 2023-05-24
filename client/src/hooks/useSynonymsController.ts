@@ -4,6 +4,7 @@ import useFetch from "./useFetch";
 import { Synonym } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
+import updateUserSynonymsByWordFactory from "../utils/updateUserSynonymsByWordFactory";
 
 export default function useSynonymsController() {
   const { user } = useContext(UserContext);
@@ -86,16 +87,14 @@ export default function useSynonymsController() {
     [makeRequest, user.id, FETCH_PARAMS]
   );
 
-  const bulkUpdateSynonyms = useCallback(
+  const updateUserSynonymsByWord = useCallback(
     (values: { input: string }, word: string) => {
-      let body = values.input.split("\n").map((synonym) => {
-        return { synonym, word_id: synonyms[0].word_id };
-      });
+      const body = updateUserSynonymsByWordFactory(values, synonyms);
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/synonym/bulk?word=${word}`,
-          method: "POST",
+          url: USER_ROUTE + `/${user.id}/word/${word}/synonym`,
+          method: "PUT",
           data: body,
         },
         (res) => setSynonyms(res.data.data)
@@ -112,7 +111,7 @@ export default function useSynonymsController() {
     isLoading,
     error,
     deleteSynonym,
-    bulkUpdateSynonyms,
+    updateUserSynonymsByWord,
     updateSynonym,
     getUserSynonymsByWord
   };

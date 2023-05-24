@@ -1,5 +1,7 @@
 package types
 
+import "github.com/davidalvarez305/review_poster/server/models"
+
 type CreatePostInput struct {
 	ProductName    string `json:"productName"`
 	Category       string `json:"category"`
@@ -49,4 +51,9 @@ type CreateWordInput struct {
 	Word     string   `json:"word"`
 	Tag      string   `json:"tag"`
 	Synonyms []string `json:"synonyms"`
+}
+
+type UpdateUserSynonymsByWordInput struct {
+	Synonyms       []models.Synonym `json:"synonyms" form:"synonyms"`
+	DeleteSynonyms []int            `json:"delete_synonyms" form:"delete_synonyms"`
 }

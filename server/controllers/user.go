@@ -27,6 +27,7 @@ func User(router fiber.Router) {
 
 	// User synonyms by word
 	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
+	user.Put("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
 
 	// Template related endpoints
 	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))
@@ -59,5 +60,4 @@ func User(router fiber.Router) {
 	user.Put("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.UpdateSynonyms))
 	user.Put("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.UpdateSynonym))
 	user.Delete("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteSynonym))
-	user.Post("/:userId/synonym/bulk", middleware.ResourceAccessRestriction(handlers.BulkSynonymsPost))
 }

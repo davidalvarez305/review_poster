@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -60,8 +59,6 @@ func ResourceAccessRestriction(fn fiber.Handler) fiber.Handler {
 		}
 
 		userId, err := c.ParamsInt("userId")
-
-		fmt.Printf("%+v\n", userId)
 
 		if err != nil {
 			return c.Status(403).JSON(fiber.Map{

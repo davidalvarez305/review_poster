@@ -37,7 +37,7 @@ export const SynonymsList: React.FC = () => {
     synonyms,
     isLoading,
     error,
-    bulkUpdateSynonyms,
+    updateUserSynonymsByWord,
     deleteSynonym,
     updateSynonym,
     getUserSynonymsByWord
@@ -80,7 +80,7 @@ export const SynonymsList: React.FC = () => {
       );
       navigate("/word/" + word);
     } else if (word) {
-      bulkUpdateSynonyms({ ...values }, word);
+      updateUserSynonymsByWord({ ...values }, word);
     }
     setBulkModal(false);
   }
