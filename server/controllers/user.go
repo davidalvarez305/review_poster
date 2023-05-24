@@ -19,46 +19,56 @@ func User(router fiber.Router) {
 	user.Get("/change-password", middleware.ResourceAccessRestriction(handlers.RequestChangePasswordCode))
 	user.Put("/change-password/:code", middleware.ResourceAccessRestriction(handlers.ChangePassword))
 
-	// Words related endpoints
-	user.Get("/:userId/word", middleware.ResourceAccessRestriction(handlers.GetWords))
-	user.Post("/:userId/word", middleware.ResourceAccessRestriction(handlers.CreateWord))
-	user.Put("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.UpdateWord))
-	user.Delete("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.DeleteWord))
+	// User Words Resources
+	user.Get("/:userId/word", middleware.ResourceAccessRestriction(handlers.GetUserWords))
+	user.Post("/:userId/word", middleware.ResourceAccessRestriction(handlers.CreateUserWord))
 
-	// User synonyms by word
+	// User Word Resource
+	user.Get("/:userId/word/:wordName", middleware.ResourceAccessRestriction(handlers.GetUserWord))
+	user.Put("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.UpdateUserWord))
+	user.Delete("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.DeleteUserWord))
+
+	// User Synonyms By Word Resources
 	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
 	user.Put("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
 	user.Post("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.CreateUserSynonymsByWord))
 
-	// Template related endpoints
+	// User Templates Resource
 	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))
 	user.Post("/:userId/template", middleware.ResourceAccessRestriction(handlers.CreateTemplate))
+
+	// User Template Resource
 	user.Put("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.UpdateTemplate))
 	user.Delete("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.DeleteTemplate))
 
 	// Content related endpoints
 	user.Get("/:userId/content", middleware.ResourceAccessRestriction(handlers.GetContent))
 
-	// Paragraph related endpoints
+	// User Paragraphs Resource
 	user.Get("/:userId/paragraph", middleware.ResourceAccessRestriction(handlers.GetParagraphs))
 	user.Post("/:userId/paragraph", middleware.ResourceAccessRestriction(handlers.CreateParagraphs))
 	user.Put("/:userId/paragraph", middleware.ResourceAccessRestriction(handlers.UpdateParagraphs))
+
+	// User Paragraph Resource
 	user.Put("/:userId/paragraph/:paragraphId", middleware.ResourceAccessRestriction(handlers.UpdateParagraph))
 	user.Delete("/:userId/paragraph/:paragraphId", middleware.ResourceAccessRestriction(handlers.DeleteParagraph))
 	user.Post("/:userId/paragraph/bulk", middleware.ResourceAccessRestriction(handlers.BulkParagraphsUpdate))
 
-	// Sentence related endpoints
+	// User Sentence By Paragraph Resource
 	user.Get("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.GetSentences))
 	user.Post("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.CreateSentences))
 	user.Put("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.UpdateSentences))
+
+	// User Sentences By Paragraph Resource
 	user.Put("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateSentence))
 	user.Delete("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteSentence))
 	user.Post("/:userId/sentence/bulk", middleware.ResourceAccessRestriction(handlers.BulkSentencesUpdate))
 
-	// Synonym related endpoints
-	user.Get("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.GetSelectedSynonyms))
+	// User Synonyms By Word Resource
 	user.Post("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.CreateSynonym))
 	user.Put("/:userId/synonym", middleware.ResourceAccessRestriction(handlers.UpdateSynonyms))
+
+	// User Synonym By Word Resource
 	user.Put("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.UpdateSynonym))
 	user.Delete("/:userId/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteSynonym))
 }

@@ -4,10 +4,12 @@ import useFetch from "./useFetch";
 import { Word, WordFormInput } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createWordsFactory from "../utils/createWordsFactory";
+import useSynonymsController from "./useSynonymsController";
 
 export default function useWordsController() {
   const { user } = useContext(UserContext);
   const [words, setWords] = useState<Word[]>([]);
+  const { createUserSynonymsByWord } = useSynonymsController();
   const { isLoading, makeRequest, error } = useFetch();
   const FETCH_PARAMS = useMemo(() => {
     return {
@@ -16,7 +18,7 @@ export default function useWordsController() {
     };
   }, [user.id]);
 
-  const updateWords = useCallback(
+  const updateUserWords = useCallback(
     (opts: WordFormInput) => {
       const wordsToCreate = createWordsFactory(opts, user.id, words);
       makeRequest({ ...FETCH_PARAMS, method: "PUT", data: wordsToCreate }, (res) =>
@@ -26,27 +28,29 @@ export default function useWordsController() {
     [makeRequest, FETCH_PARAMS, user.id, words]
   );
 
-  const getWords = useCallback(() => {
+  const getUserWords = useCallback(() => {
     makeRequest({ ...FETCH_PARAMS, method: "GET" }, (res) =>
       setWords(res.data.data)
     );
   }, [makeRequest, FETCH_PARAMS]);
 
-  const createWords = useCallback(
+  const createUserWords = useCallback(
     (opts: WordFormInput) => {
       const wordsToCreate = createWordsFactory(opts, user.id, words);
-      makeRequest({ ...FETCH_PARAMS, data: wordsToCreate }, (res) =>
+      makeRequest({ ...FETCH_PARAMS, data: wordsToCreate }, (res) => {
+        const word: Word = res.data.data;
+        createUserSynonymsByWord({ input: opts.synonyms }, word);
         setWords(res.data.data)
-      );
+      });
     },
-    [makeRequest, user.id, FETCH_PARAMS, words]
+    [makeRequest, user.id, FETCH_PARAMS, words, createUserSynonymsByWord]
   );
 
   return {
-    updateWords,
-    getWords,
+    updateUserWords,
+    getUserWords,
     setWords,
-    createWords,
+    createUserWords,
     words,
     isLoading,
     error

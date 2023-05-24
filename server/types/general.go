@@ -46,13 +46,6 @@ type Prompt struct {
 	MaxTokens   int     `json:"max_tokens"`
 }
 
-type CreateWordInput struct {
-	ID       int      `json:"id"`
-	Name     string   `json:"name"`
-	Tag      string   `json:"tag"`
-	Synonyms []string `json:"synonyms"`
-}
-
 type UpdateUserSynonymsByWordInput struct {
 	Synonyms       []models.Synonym `json:"synonyms" form:"synonyms"`
 	DeleteSynonyms []int            `json:"delete_synonyms" form:"delete_synonyms"`

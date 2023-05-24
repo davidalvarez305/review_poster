@@ -1,10 +1,11 @@
 import { useState, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
-import { Synonym } from "../types/general";
+import { Synonym, Word } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import { createUpdateSynonymsFactory } from "../utils/createUpdateSynonymsFactory";
 import updateUserSynonymsByWordFactory from "../utils/updateUserSynonymsByWordFactory";
+import createSynonymsFactory from "../utils/createSynonymsFactory";
 
 export default function useSynonymsController() {
   const { user } = useContext(UserContext);
@@ -62,23 +63,28 @@ export default function useSynonymsController() {
     );
   }, [makeRequest, FETCH_PARAMS]);
 
-  const getUserSynonymsByWord = useCallback((wordString: string) => {
-    makeRequest(
-      {
-        ...FETCH_PARAMS,
-        method: "GET",
-        url: USER_ROUTE + `/${user.id}/word/${wordString}/synonym`,
-      },
-      (res) => setSynonyms(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS, user.id]);
+  const getUserSynonymsByWord = useCallback(
+    (wordString: string) => {
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          method: "GET",
+          url: USER_ROUTE + `/${user.id}/word/${wordString}/synonym`,
+        },
+        (res) => setSynonyms(res.data.data)
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id]
+  );
 
   const deleteSynonym = useCallback(
     (id: number, word: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/synonym/${[id]}?word=${word}&synonyms=${[id]}`,
+          url:
+            USER_ROUTE +
+            `/${user.id}/synonym/${[id]}?word=${word}&synonyms=${[id]}`,
           method: "DELETE",
         },
         (res) => setSynonyms(res.data.data)
@@ -103,6 +109,22 @@ export default function useSynonymsController() {
     [FETCH_PARAMS, makeRequest, user.id, synonyms]
   );
 
+  const createUserSynonymsByWord = useCallback(
+    (values: { input: string }, word: Word) => {
+      const body = createSynonymsFactory(values, word);
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/word/${word.name}/synonym`,
+          method: "POST",
+          data: body,
+        },
+        (res) => setSynonyms(res.data.data)
+      );
+    },
+    [FETCH_PARAMS, makeRequest, user.id]
+  );
+
   return {
     updateSynonyms,
     getSynonyms,
@@ -113,6 +135,7 @@ export default function useSynonymsController() {
     deleteSynonym,
     updateUserSynonymsByWord,
     updateSynonym,
-    getUserSynonymsByWord
+    getUserSynonymsByWord,
+    createUserSynonymsByWord,
   };
 }

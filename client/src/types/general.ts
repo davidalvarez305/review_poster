@@ -22,7 +22,7 @@ export type Template = {
 };
 
 export type Word = {
-  id: number;
+  id: number | null;
   name: string;
   tag: string;
   user_id: number;
@@ -80,14 +80,6 @@ export type SpunContent = {
   paragraph: string;
   sentence: string;
   order: number;
-};
-
-export type CreateWordInput = {
-  id: number | null;
-  name: string;
-  tag: string;
-  user_id: any;
-  synonyms: string[];
 };
 
 export type WordFormInput = {

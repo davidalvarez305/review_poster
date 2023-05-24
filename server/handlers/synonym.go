@@ -137,26 +137,44 @@ func UpdateSynonym(c *fiber.Ctx) error {
 	})
 }
 
-func GetSelectedSynonyms(c *fiber.Ctx) error {
-	word := c.Query("word")
+func CreateUserSynonymsByWord(c *fiber.Ctx) error {
+	word := c.Params("word")
 	userId := c.Params("userId")
 
 	if len(word) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No word in query.",
+			"data": "No word in URL params.",
 		})
 	}
 
-	synonyms, err := actions.GetUserSynonymsByWord(word, userId)
+	var synonyms []models.Synonym
+
+	err := c.BodyParser(&synonyms)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch synonyms by word.",
+			"data": "Failed to parse body.",
+		})
+	}
+
+	err = database.DB.Save(&synonyms).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to delete synonyms.",
+		})
+	}
+
+	createdSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to fetch user's synonyms by word.",
 		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"data": synonyms,
+		"data": createdSynonyms,
 	})
 }
 
