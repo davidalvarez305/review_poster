@@ -65,9 +65,12 @@ const FormSelectComponent: React.FC<Props> = ({ options, name }) => {
           placeholder={""}
           value={selectedValue}
           onChange={(e) => {
-            console.log(e);
             setSelectedValue(e);
-            setFieldValue(field.name, e?.value);
+            if (field.name === "word") {
+              setFieldValue(field.name, e?.label);
+            } else {
+              setFieldValue(field.name, e?.value);
+            }
           }}
           options={options.map((op) => {
             return {

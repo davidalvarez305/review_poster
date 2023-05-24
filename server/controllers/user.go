@@ -28,6 +28,7 @@ func User(router fiber.Router) {
 	// User synonyms by word
 	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
 	user.Put("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
+	user.Post("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.CreateUserSynonymsByWord))
 
 	// Template related endpoints
 	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))

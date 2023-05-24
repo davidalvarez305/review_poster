@@ -48,7 +48,7 @@ type Prompt struct {
 
 type CreateWordInput struct {
 	ID       int      `json:"id"`
-	Word     string   `json:"word"`
+	Name     string   `json:"name"`
 	Tag      string   `json:"tag"`
 	Synonyms []string `json:"synonyms"`
 }

@@ -84,14 +84,14 @@ export type SpunContent = {
 
 export type CreateWordInput = {
   id: number | null;
-  word: string;
+  name: string;
   tag: string;
   user_id: any;
   synonyms: string[];
 };
 
 export type WordFormInput = {
-  word: string;
+  name: string;
   synonyms: string;
   id: number | null;
 };

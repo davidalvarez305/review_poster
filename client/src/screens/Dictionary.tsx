@@ -31,7 +31,7 @@ export const Dictionary: React.FC<Props> = () => {
       shouldValidate?: boolean | undefined
     ) => void
   ) {
-    const tag = createTagFactory(values.word);
+    const tag = createTagFactory(values.name);
     makeRequest(
       {
         url: API_ROUTE + `/ai/tags?tag=${encodeURIComponent(tag)}`,
@@ -49,12 +49,12 @@ export const Dictionary: React.FC<Props> = () => {
   return (
     <Layout>
       <Formik
-        initialValues={{ word: "", synonyms: "", id: null }}
+        initialValues={{ name: "", synonyms: "", id: null }}
         onSubmit={(values, actions) => {
           createWords(values);
           actions.resetForm({
             values: {
-              word: "",
+              name: "",
               synonyms: "",
               id: null
             },
@@ -67,7 +67,7 @@ export const Dictionary: React.FC<Props> = () => {
               <Box sx={{ ...centeredDiv, width: "25%", height: "20%" }}>
                 <FormSelectComponent
                   options={words}
-                  name={"word"}
+                  name={"name"}
                 />
               </Box>
               <Box>
@@ -84,7 +84,7 @@ export const Dictionary: React.FC<Props> = () => {
                 >
                   Submit
                 </Button>
-                {values.word.length > 0 && (
+                {values.name.length > 0 && (
                   <Button
                     variant={"outline"}
                     colorScheme={"red"}

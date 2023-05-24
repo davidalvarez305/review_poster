@@ -9,23 +9,28 @@ export default function updateUserSynonymsByWordFactory(
 
   const vals = values.input.split("\n");
 
-  for (let n = 0; n < vals.length; n++) {
+  add: for (let n = 0; n < vals.length; n++) {
     for (let i = 0; i < userSynonymsByWord.length; i++) {
       if (userSynonymsByWord[i].synonym === vals[n]) {
-        synonyms.push(userSynonymsByWord[i]);
-      } else {
         synonyms.push({
-          id: null,
-          synonym: vals[n],
-          word_id: userSynonymsByWord[0].word_id,
+          ...userSynonymsByWord[i],
           word: null,
         });
+        continue add;
       }
+    }
+
+    if (vals[n].length > 0) {
+      synonyms.push({
+        id: null,
+        synonym: vals[n],
+        word_id: userSynonymsByWord[0].word_id,
+        word: null,
+      });
     }
   }
 
-  filter:
-  for (let i = 0; i < userSynonymsByWord.length; i++) {
+  filter: for (let i = 0; i < userSynonymsByWord.length; i++) {
     for (let n = 0; n < synonyms.length; n++) {
       if (userSynonymsByWord[i].synonym === synonyms[n].synonym) {
         continue filter;

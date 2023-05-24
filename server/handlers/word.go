@@ -49,7 +49,7 @@ func CreateWord(c *fiber.Ctx) error {
 
 	err := c.BodyParser(&body)
 
-	if err != nil || len(body.Word) == 0 || len(body.Tag) == 0 {
+	if err != nil || len(body.Name) == 0 || len(body.Tag) == 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"data": "Bad Request.",
 		})
@@ -71,7 +71,7 @@ func CreateWord(c *fiber.Ctx) error {
 
 	word := models.Word{
 		ID:     body.ID,
-		Name:   body.Word,
+		Name:   body.Name,
 		Tag:    body.Tag,
 		UserID: user.ID,
 	}
