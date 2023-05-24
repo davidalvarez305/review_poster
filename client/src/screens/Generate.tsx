@@ -1,4 +1,4 @@
-import { Box, Button, FormLabel } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import React, {
   useCallback,
   useContext,
@@ -29,7 +29,6 @@ const Generate: React.FC = () => {
   const { makeRequest, isLoading } = useFetch();
   const { user } = useContext(UserContext);
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [selectedWord, setSelectedWord] = useState<number>();
   const [dictionary, setDictionary] = useState<Dictionary>({});
   const [generatedContent, setGeneratedContent] = useState<SpunContent[]>([]);
   const [editModal, setEditModal] = useState(false);
@@ -47,15 +46,9 @@ const Generate: React.FC = () => {
   const { words, getUserWords } = useWordsController();
   const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
     useSentencesController();
-  const { updateUserSynonymsByWord, updateUserSynonyms, getUserSynonymsByWord } =
+  const { updateUserSynonymsByWord, getUserSynonymsByWord } =
     useSynonymsController();
   useLoginRequired();
-
-  useEffect(() => {
-    if (selectedWord) {
-      getUserSynonymsByWord(words[selectedWord].name);
-    }
-  }, [getUserSynonymsByWord, selectedWord, user.id, words]);
 
   useEffect(() => {
     // If no template has been selected, fetch templates.
@@ -104,20 +97,12 @@ const Generate: React.FC = () => {
       if (editingWord) {
         updateUserSynonymsByWord({ ...values }, editingWord.name);
       }
-      // Change request format if user selected a word.
-      if (selectedWord) {
-        updateUserSynonyms(
-          { ...values },
-          words[selectedWord].id!,
-          words[selectedWord].name
-        );
-      }
 
       setEditingSentences([]);
       setEditingSentencesParagraph("");
       setSynonymModal(false);
     },
-    [updateUserSynonymsByWord, editingWord, selectedWord, updateUserSynonyms, words]
+    [updateUserSynonymsByWord, editingWord]
   );
 
   const editSentence = (sentence: Sentence) => {
@@ -188,35 +173,6 @@ const Generate: React.FC = () => {
     }
     return data.sort((a, b) => a.order - b.order);
   }
-
-  // Select Component for Words
-  const SelectChangeWord = useCallback(() => {
-    return (
-      <Box sx={{ width: 400, my: 2 }}>
-        <FormLabel>Select a new word (or leave bank)</FormLabel>
-        <ReactSelect
-          name={"select change word"}
-          placeholder={"select change word"}
-          value={{
-            value: selectedWord ? selectedWord : "",
-            label: selectedWord
-              ? capitalizeFirstLetter(words[selectedWord].name)
-              : "",
-          }}
-          onChange={(e) => {
-            setSelectedWord(Number(e?.value));
-          }}
-          aria-label={"select change word"}
-          options={words.map((op, index) => {
-            return {
-              value: index,
-              label: capitalizeFirstLetter(op.name),
-            };
-          })}
-        />
-      </Box>
-    );
-  }, [selectedWord, words]);
 
   // Navigate to paragraph detail while on sentences modal.
   const navigateToParagraph = useCallback(() => {
@@ -304,16 +260,13 @@ const Generate: React.FC = () => {
 
   // Modal for editing synonyms
   const renderSynonymsModal = useMemo(() => {
-    const word = selectedWord ? words[selectedWord].name : "";
     return (
       <EditModal
-        selectComponent={SelectChangeWord()}
         editModal={synonymModal}
         setEditModal={setSynonymModal}
         handleSubmit={handleSynonyms}
         editingItem={editSynonyms.synonyms.join("\n")}
         isLoading={isLoading}
-        selectedWord={word}
       />
     );
   }, [
@@ -321,9 +274,6 @@ const Generate: React.FC = () => {
     handleSynonyms,
     isLoading,
     synonymModal,
-    SelectChangeWord,
-    selectedWord,
-    words,
   ]);
 
   return (
