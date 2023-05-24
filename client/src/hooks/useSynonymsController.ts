@@ -9,18 +9,15 @@ export default function useSynonymsController() {
   const { user } = useContext(UserContext);
   const [synonyms, setSynonyms] = useState<Synonym[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
-  const word = useMemo((): string | undefined => {
-    return window.location.pathname.split("/word/")[1]
-  }, []);
   const FETCH_PARAMS = useMemo(() => {
     return {
-      url: USER_ROUTE + `/${user.id}/synonym?word=${word}`,
+      url: USER_ROUTE + `/${user.id}/word/`,
       method: "POST",
     };
-  }, [user.id, word]);
+  }, [user.id]);
 
   const updateSynonym = useCallback(
-    (synonym: Synonym) => {
+    (synonym: Synonym, word: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
@@ -33,7 +30,7 @@ export default function useSynonymsController() {
         }
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, word]
+    [makeRequest, FETCH_PARAMS, user.id]
   );
 
   const updateSynonyms = useCallback(
@@ -76,7 +73,7 @@ export default function useSynonymsController() {
   }, [makeRequest, FETCH_PARAMS, user.id]);
 
   const deleteSynonym = useCallback(
-    (id: number) => {
+    (id: number, word: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
@@ -86,11 +83,11 @@ export default function useSynonymsController() {
         (res) => setSynonyms(res.data.data)
       );
     },
-    [makeRequest, user.id, FETCH_PARAMS, word]
+    [makeRequest, user.id, FETCH_PARAMS]
   );
 
   const bulkUpdateSynonyms = useCallback(
-    (values: { input: string }) => {
+    (values: { input: string }, word: string) => {
       let body = values.input.split("\n").map((synonym) => {
         return { synonym, word_id: synonyms[0].word_id };
       });
@@ -104,7 +101,7 @@ export default function useSynonymsController() {
         (res) => setSynonyms(res.data.data)
       );
     },
-    [FETCH_PARAMS, makeRequest, user.id, word, synonyms]
+    [FETCH_PARAMS, makeRequest, user.id, synonyms]
   );
 
   return {
@@ -117,7 +114,6 @@ export default function useSynonymsController() {
     deleteSynonym,
     bulkUpdateSynonyms,
     updateSynonym,
-    word,
     getUserSynonymsByWord
   };
 }

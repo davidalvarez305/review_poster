@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import useFetch from "../hooks/useFetch";
 import { Synonym } from "../types/general";
 import { useNavigate } from "react-router-dom";
@@ -34,9 +40,7 @@ export const SynonymsList: React.FC = () => {
     bulkUpdateSynonyms,
     deleteSynonym,
     updateSynonym,
-    word,
-    getUserSynonymsByWord,
-    getSynonyms
+    getUserSynonymsByWord
   } = useSynonymsController();
 
   const { makeRequest } = useFetch();
@@ -47,6 +51,10 @@ export const SynonymsList: React.FC = () => {
   const [bulkModal, setBulkModal] = useState(false);
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
   const { words, getWords } = useWordsController();
+
+  const word = useMemo((): string | undefined => {
+    return window.location.pathname.split("/word/")[1];
+  }, []);
 
   useEffect(() => {
     if (bulkModal) {
@@ -59,7 +67,7 @@ export const SynonymsList: React.FC = () => {
 
   useEffect(() => {
     if (word && user.id) getUserSynonymsByWord(word);
-  }, [getSynonyms, getUserSynonymsByWord, word, user.id]);
+  }, [getUserSynonymsByWord, word, user.id]);
 
   const columns = ["id", "synonym", "action"];
 
@@ -71,10 +79,9 @@ export const SynonymsList: React.FC = () => {
         words[selectedWord!].name
       );
       navigate("/word/" + word);
-    } else {
-      bulkUpdateSynonyms({ ...values });
+    } else if (word) {
+      bulkUpdateSynonyms({ ...values }, word);
     }
-
     setBulkModal(false);
   }
 
@@ -152,7 +159,11 @@ export const SynonymsList: React.FC = () => {
                       setEditModal(true);
                       setEditingSynonym(synonyms[i]);
                     }}
-                    onClickDelete={() => deleteSynonym(synonyms[i].id!)}
+                    onClickDelete={() => {
+                      if (word) {
+                        deleteSynonym(synonyms[i].id!, word);
+                      }
+                    }}
                   />
                 </React.Fragment>
               ))}
@@ -165,8 +176,8 @@ export const SynonymsList: React.FC = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              if (editingSynonym) {
-                updateSynonym({ ...editingSynonym, synonym: values.input });
+              if (editingSynonym && editingSynonym.word) {
+                updateSynonym({ ...editingSynonym, synonym: values.input }, editingSynonym.word?.name);
                 setEditingSynonym(null);
                 setEditModal(false);
               }

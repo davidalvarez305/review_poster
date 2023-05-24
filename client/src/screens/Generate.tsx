@@ -102,7 +102,7 @@ const Generate: React.FC = () => {
   const handleSynonyms = useCallback(
     (values: { input: string }) => {
       if (editingWord) {
-        bulkUpdateSynonyms({ ...values });
+        bulkUpdateSynonyms({ ...values }, editingWord.name);
       }
       // Change request format if user selected a word.
       if (selectedWord) {
