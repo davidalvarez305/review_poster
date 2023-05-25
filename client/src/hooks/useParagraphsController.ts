@@ -4,93 +4,101 @@ import useFetch from "./useFetch";
 import { Paragraph } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createParagraphsFactory from "../utils/createParagraphsFactory";
-import { createUpdateParagraphsFactory } from "../utils/createUpdateParagraphsFactory";
+import updateUserParagraphsByTemplateFactory from "../utils/updateUserParagraphsByTemplateFactory";
+import deleteUserParagraphsByTemplateFactory from "../utils/deleteUserParagraphsByTemplateFactory";
 
 export default function useParagraphsController() {
   const template = useMemo((): string | undefined => {
-    return window.location.pathname.split("/template/")[1]
+    return window.location.pathname.split("/template/")[1];
   }, []);
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
   const FETCH_PARAMS = useMemo(() => {
     return {
-      url: USER_ROUTE + `/${user.id}/paragraph`,
+      url: USER_ROUTE + `/${user.id}/template/${template}/paragraph`,
       method: "POST",
     };
-  }, [user.id]);
+  }, [user.id, template]);
 
-  const updateParagraphs = useCallback(
-    (opts: { input: string }, template_id: number, template: string) => {
-      const paragraphsToUpdate = createUpdateParagraphsFactory(paragraphs, opts.input.split("\n"), template_id);
+  const updateUserParagraphByTemplate = useCallback(
+    (paragraph: Paragraph, template: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
-          method: "PUT",
-          data: paragraphsToUpdate,
-        },
-        (res) => setParagraphs(res.data.data)
-      );
-    },
-    [makeRequest, FETCH_PARAMS, user.id, paragraphs]
-  );
-
-  const updateParagraph = useCallback(
-    (paragraph: Paragraph) => {
-      makeRequest(
-        {
-          ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/paragraph/${paragraph.id}?template=${template}`,
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph/${paragraph.id}`,
           method: "PUT",
           data: paragraph,
         },
-        (res) => setParagraphs(res.data.data)
+        (res) => {
+          setParagraphs(res.data.data);
+        }
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, template]
+    [makeRequest, FETCH_PARAMS, user.id]
   );
 
-  const bulkUpdateParagraphs = useCallback(
-    (values: { input: string }) => {
-      let data = createUpdateParagraphsFactory(
-        paragraphs,
-        values.input.split("\n"),
-        paragraphs[0].template_id
-      );
+  const deleteUserParagraphByWord = useCallback(
+    (id: number, template: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/paragraph/bulk?template=${template}`,
-          method: "POST",
-          data,
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph/${id}`,
+          method: "DELETE",
         },
         (res) => setParagraphs(res.data.data)
       );
     },
-    [FETCH_PARAMS, makeRequest, paragraphs, user.id, template]
+    [makeRequest, user.id, FETCH_PARAMS]
   );
 
-  const getParagraphs = useCallback(() => {
-    makeRequest({ ...FETCH_PARAMS, method: "GET" }, (res) =>
-      setParagraphs(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS]);
+  const deleteUserParagraphsByTemplate = useCallback(
+    (values: { input: string }, template: string) => {
+      const body = deleteUserParagraphsByTemplateFactory(values, paragraphs);
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph`,
+          method: "DELETE",
+          data: body,
+        },
+        (res) => setParagraphs(res.data.data)
+      );
+    },
+    [FETCH_PARAMS, makeRequest, user.id, paragraphs]
+  );
 
-  const getParagraphsByTemplate = useCallback(() => {
+  const updateUserParagraphsByTemplate = useCallback(
+    (values: { input: string }, template: string) => {
+      const body = updateUserParagraphsByTemplateFactory(values, paragraphs);
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph`,
+          method: "PATCH",
+          data: body,
+        },
+        (res) => {
+          setParagraphs(res.data.data);
+          deleteUserParagraphsByTemplate({ ...values }, template);
+        }
+      );
+    },
+    [FETCH_PARAMS, makeRequest, user.id, paragraphs, deleteUserParagraphsByTemplate]
+  );
+
+  const getUserParagraphsByTemplate = useCallback(() => {
     makeRequest(
       {
         ...FETCH_PARAMS,
         method: "GET",
-        url: USER_ROUTE + `/${user.id}/paragraph?template=${template}`,
       },
       (res) => setParagraphs(res.data.data)
     );
-  }, [makeRequest, FETCH_PARAMS, user.id, template]);
+  }, [makeRequest, FETCH_PARAMS]);
 
-  const createParagraphs = useCallback(
+  const createUserParagraphsByTemplate = useCallback(
     (opts: { paragraphs: string; template: number }) => {
-
       if (!opts.template) {
         return;
       }
@@ -100,9 +108,8 @@ export default function useParagraphsController() {
         template_id: opts.template,
       });
 
-      makeRequest(
-        { ...FETCH_PARAMS, data: paragraphs },
-        (res) => setParagraphs(res.data.data)
+      makeRequest({ ...FETCH_PARAMS, data: paragraphs }, (res) =>
+        setParagraphs(res.data.data)
       );
     },
     [makeRequest, FETCH_PARAMS]
@@ -115,7 +122,9 @@ export default function useParagraphsController() {
           ...FETCH_PARAMS,
           url:
             USER_ROUTE +
-            `/${user.id}/paragraph/${[id]}?paragraphs=${[id]}&template=${template}`,
+            `/${user.id}/paragraph/${[id]}?paragraphs=${[
+              id,
+            ]}&template=${template}`,
           method: "DELETE",
         },
         (res) => setParagraphs(res.data.data)
@@ -126,23 +135,20 @@ export default function useParagraphsController() {
 
   useEffect(() => {
     if (template) {
-      getParagraphsByTemplate();
-    } else {
-      getParagraphs();
+      getUserParagraphsByTemplate();
     }
-  }, [getParagraphs, getParagraphsByTemplate, template]);
+  }, [getUserParagraphsByTemplate, template]);
 
   return {
-    updateParagraphs,
-    getParagraphs,
+    updateUserParagraphByTemplate,
     setParagraphs,
-    createParagraphs,
+    createUserParagraphsByTemplate,
     deleteParagraph,
-    getParagraphsByTemplate,
-    bulkUpdateParagraphs,
+    getUserParagraphsByTemplate,
+    deleteUserParagraphByWord,
     paragraphs,
     isLoading,
-    updateParagraph,
+    updateUserParagraphsByTemplate,
     error,
   };
 }

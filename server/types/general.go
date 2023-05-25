@@ -53,3 +53,11 @@ type UpdateUserSynonymsByWordInput struct {
 type DeleteUserSynonymsByWordInput struct {
 	DeleteSynonyms []int `json:"delete_synonyms" form:"delete_synonyms"`
 }
+
+type UpdateUserParagraphsByTemplateInput struct {
+	Paragraphs []models.Paragraph `json:"paragraphs" form:"paragraphs"`
+}
+
+type DeleteUserParagraphsByTemplateInput struct {
+	DeleteParagraphs []int `json:"delete_paragraphs" form:"delete_paragraphs"`
+}
