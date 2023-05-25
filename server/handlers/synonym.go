@@ -192,22 +192,56 @@ func UpdateUserSynonymsByWord(c *fiber.Ctx) error {
 		})
 	}
 
-	if len(input.DeleteSynonyms) > 0 {
-		err = database.DB.Delete(&models.Synonym{}, input.DeleteSynonyms).Error
-
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{
-				"data": "Failed to delete synonyms.",
-			})
-		}
-	}
-
 	if len(input.Synonyms) > 0 {
 		err = database.DB.Save(&input.Synonyms).Error
 
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{
 				"data": "Failed to save synonyms.",
+			})
+		}
+	}
+
+	// Re-assign synonyms to what's now on the database.
+	updatedSynonyms, err := actions.GetUserSynonymsByWord(word, userId)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch synonyms by word.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": updatedSynonyms,
+	})
+}
+
+func DeleteUserSynonymsByWord(c *fiber.Ctx) error {
+	word := c.Params("word")
+	userId := c.Params("userId")
+
+	if len(word) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No word in URL params.",
+		})
+	}
+
+	var input types.DeleteUserSynonymsByWordInput
+
+	err := c.BodyParser(&input)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse body.",
+		})
+	}
+
+	if len(input.DeleteSynonyms) > 0 {
+		err = database.DB.Delete(&models.Synonym{}, input.DeleteSynonyms).Error
+
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to delete synonyms.",
 			})
 		}
 	}

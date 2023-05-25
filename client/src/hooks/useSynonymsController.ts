@@ -5,6 +5,7 @@ import { Synonym, Word } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import updateUserSynonymsByWordFactory from "../utils/updateUserSynonymsByWordFactory";
 import createSynonymsFactory from "../utils/createSynonymsFactory";
+import deleteUserSynonymsByWordFactory from "../utils/deleteUserSynonymsByWordFactory";
 
 export default function useSynonymsController() {
   const { user } = useContext(UserContext);
@@ -62,6 +63,22 @@ export default function useSynonymsController() {
     [makeRequest, user.id, FETCH_PARAMS]
   );
 
+  const deleteUserSynonymsByWord = useCallback(
+    (values: { input: string }, word: string) => {
+      const body = deleteUserSynonymsByWordFactory(values, synonyms);
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/word/${word}/synonym`,
+          method: "DELETE",
+          data: body,
+        },
+        (res) => setSynonyms(res.data.data)
+      );
+    },
+    [FETCH_PARAMS, makeRequest, user.id, synonyms]
+  );
+
   const updateUserSynonymsByWord = useCallback(
     (values: { input: string }, word: string) => {
       const body = updateUserSynonymsByWordFactory(values, synonyms);
@@ -69,13 +86,16 @@ export default function useSynonymsController() {
         {
           ...FETCH_PARAMS,
           url: USER_ROUTE + `/${user.id}/word/${word}/synonym`,
-          method: "PUT",
+          method: "PATCH",
           data: body,
         },
-        (res) => setSynonyms(res.data.data)
+        (res) => {
+          setSynonyms(res.data.data);
+          deleteUserSynonymsByWord({ ...values }, word);
+        }
       );
     },
-    [FETCH_PARAMS, makeRequest, user.id, synonyms]
+    [FETCH_PARAMS, makeRequest, user.id, synonyms, deleteUserSynonymsByWord]
   );
 
   const createUserSynonymsByWord = useCallback(
@@ -104,5 +124,6 @@ export default function useSynonymsController() {
     updateUserSynonymByWord,
     getUserSynonymsByWord,
     createUserSynonymsByWord,
+    deleteUserSynonymsByWord,
   };
 }

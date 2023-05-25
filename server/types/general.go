@@ -47,6 +47,9 @@ type Prompt struct {
 }
 
 type UpdateUserSynonymsByWordInput struct {
-	Synonyms       []models.Synonym `json:"synonyms" form:"synonyms"`
-	DeleteSynonyms []int            `json:"delete_synonyms" form:"delete_synonyms"`
+	Synonyms []models.Synonym `json:"synonyms" form:"synonyms"`
+}
+
+type DeleteUserSynonymsByWordInput struct {
+	DeleteSynonyms []int `json:"delete_synonyms" form:"delete_synonyms"`
 }

@@ -22,16 +22,15 @@ func User(router fiber.Router) {
 	// User Words Resources
 	user.Get("/:userId/word", middleware.ResourceAccessRestriction(handlers.GetUserWords))
 	user.Post("/:userId/word", middleware.ResourceAccessRestriction(handlers.CreateUserWord))
-
-	// User Word Resource
 	user.Get("/:userId/word/:wordName", middleware.ResourceAccessRestriction(handlers.GetUserWord))
 	user.Put("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.UpdateUserWord))
 	user.Delete("/:userId/word/:wordId", middleware.ResourceAccessRestriction(handlers.DeleteUserWord))
 
 	// User Synonyms By Word
 	user.Get("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.GetUserSynonymsByWord))
-	user.Put("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
+	user.Patch("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymsByWord))
 	user.Post("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.CreateUserSynonymsByWord))
+	user.Delete("/:userId/word/:word/synonym", middleware.ResourceAccessRestriction(handlers.DeleteUserSynonymsByWord))
 	user.Put("/:userId/word/:word/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.UpdateUserSynonymByWord))
 	user.Delete("/:userId/word/:word/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteUserSynonymByWord))
 

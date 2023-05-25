@@ -1,12 +1,10 @@
-import { Synonym, UpdateUserSynonymsByWordInput } from "../types/general";
+import { Synonym } from "../types/general";
 
 export default function updateUserSynonymsByWordFactory(
   values: { input: string },
   userSynonymsByWord: Synonym[]
-): UpdateUserSynonymsByWordInput {
-  let delete_synonyms: number[] = [];
+): { synonyms: Synonym[] } {
   let synonyms: Synonym[] = [];
-
   const vals = values.input.split("\n");
 
   add: for (let n = 0; n < vals.length; n++) {
@@ -30,15 +28,5 @@ export default function updateUserSynonymsByWordFactory(
     }
   }
 
-  filter: for (let i = 0; i < userSynonymsByWord.length; i++) {
-    for (let n = 0; n < synonyms.length; n++) {
-      if (userSynonymsByWord[i].synonym === synonyms[n].synonym) {
-        continue filter;
-      }
-    }
-    // Any existing synonym that is not in the newly formed array means it's going to be deleted.
-    delete_synonyms.push(userSynonymsByWord[i].id!);
-  }
-
-  return { synonyms, delete_synonyms };
+  return { synonyms };
 }
