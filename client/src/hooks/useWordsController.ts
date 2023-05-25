@@ -3,7 +3,7 @@ import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Word, WordFormInput } from "../types/general";
 import { UserContext } from "../context/UserContext";
-import createWordsFactory from "../utils/createWordsFactory";
+import createWordFactory from "../utils/createWordFactory";
 import useSynonymsController from "./useSynonymsController";
 
 export default function useWordsController() {
@@ -18,11 +18,16 @@ export default function useWordsController() {
     };
   }, [user.id]);
 
-  const updateUserWords = useCallback(
+  const updateUserWord = useCallback(
     (opts: WordFormInput) => {
-      const wordsToCreate = createWordsFactory(opts, user.id, words);
+      const word = createWordFactory(opts, user.id, words);
       makeRequest(
-        { ...FETCH_PARAMS, method: "PUT", data: wordsToCreate },
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/word/${word.id}`,
+          method: "PUT",
+          data: word,
+        },
         (res) => setWords(res.data.data)
       );
     },
@@ -37,8 +42,8 @@ export default function useWordsController() {
 
   const createUserWords = useCallback(
     (opts: WordFormInput) => {
-      const wordsToCreate = createWordsFactory(opts, user.id, words);
-      makeRequest({ ...FETCH_PARAMS, data: wordsToCreate }, (res) => {
+      const word = createWordFactory(opts, user.id, words);
+      makeRequest({ ...FETCH_PARAMS, data: word }, (res) => {
         const word: Word = res.data.data;
         createUserSynonymsByWord({ input: opts.synonyms }, word);
         setWords((prev) => [...prev, res.data.data]);
@@ -48,7 +53,7 @@ export default function useWordsController() {
   );
 
   return {
-    updateUserWords,
+    updateUserWord,
     getUserWords,
     setWords,
     createUserWords,
