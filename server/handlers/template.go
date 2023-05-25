@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetTemplates(c *fiber.Ctx) error {
+func GetUserTemplates(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	var templates []models.Template
 
@@ -23,7 +23,7 @@ func GetTemplates(c *fiber.Ctx) error {
 	})
 }
 
-func CreateTemplate(c *fiber.Ctx) error {
+func CreateUserTemplates(c *fiber.Ctx) error {
 	var template models.Template
 	userId := c.Params("userId")
 
@@ -58,7 +58,7 @@ func CreateTemplate(c *fiber.Ctx) error {
 	})
 }
 
-func UpdateTemplate(c *fiber.Ctx) error {
+func UpdateUserTemplate(c *fiber.Ctx) error {
 	var template models.Template
 	userId := c.Params("userId")
 
@@ -108,7 +108,7 @@ func UpdateTemplate(c *fiber.Ctx) error {
 	})
 }
 
-func DeleteTemplate(c *fiber.Ctx) error {
+func DeleteUserTemplate(c *fiber.Ctx) error {
 	templateId := c.Query("template")
 	userId := c.Params("userId")
 	var template models.Template

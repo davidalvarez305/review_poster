@@ -33,12 +33,10 @@ func User(router fiber.Router) {
 	user.Delete("/:userId/word/:word/synonym/:synonymId", middleware.ResourceAccessRestriction(handlers.DeleteUserSynonymByWord))
 
 	// User Templates Resource
-	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetTemplates))
-	user.Post("/:userId/template", middleware.ResourceAccessRestriction(handlers.CreateTemplate))
-
-	// User Template Resource
-	user.Put("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.UpdateTemplate))
-	user.Delete("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.DeleteTemplate))
+	user.Get("/:userId/template", middleware.ResourceAccessRestriction(handlers.GetUserTemplates))
+	user.Post("/:userId/template", middleware.ResourceAccessRestriction(handlers.CreateUserTemplates))
+	user.Put("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.UpdateUserTemplate))
+	user.Delete("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.DeleteUserTemplate))
 
 	// Content related endpoints
 	user.Get("/:userId/content", middleware.ResourceAccessRestriction(handlers.GetContent))

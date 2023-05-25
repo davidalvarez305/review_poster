@@ -42,7 +42,7 @@ const Generate: React.FC = () => {
   const [synonymModal, setSynonymModal] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>();
   const [seeTagged, setSeeTagged] = useState(false);
-  const { templates, getTemplates } = useTemplatesController();
+  const { templates, getUserTemplates } = useTemplatesController();
   const { words, getUserWords } = useWordsController();
   const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
     useSentencesController();
@@ -53,7 +53,7 @@ const Generate: React.FC = () => {
   useEffect(() => {
     // If no template has been selected, fetch templates.
     if (selectedTemplate.length === 0) {
-      getTemplates();
+      getUserTemplates();
     } else {
       getSentencesByTemplate(selectedTemplate);
 
@@ -76,7 +76,7 @@ const Generate: React.FC = () => {
     selectedTemplate,
     user.id,
     getSentencesByTemplate,
-    getTemplates,
+    getUserTemplates,
   ]);
 
   const handleSubmit = useCallback(

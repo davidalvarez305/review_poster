@@ -1,5 +1,5 @@
 import { Box, Button } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import LargeInputBox from "../components/LargeInputBox";
 import { centeredDiv } from "../utils/centeredDiv";
 import { Formik, Form } from "formik";
@@ -18,7 +18,12 @@ export const CreateSentence: React.FC = () => {
   const { templates } = useTemplatesController();
   const { paragraphs, getParagraphs } = useParagraphsController();
   const { createSentences } = useSentencesController();
+  const { getUserTemplates } = useTemplatesController();
   useLoginRequired();
+
+  useEffect(() => {
+    getUserTemplates();
+  }, [getUserTemplates]);
 
   return (
     <Layout>

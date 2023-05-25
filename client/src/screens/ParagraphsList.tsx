@@ -35,7 +35,7 @@ export const ParagraphsList: React.FC = () => {
     isLoading,
     error,
   } = useParagraphsController();
-  const { templates, getTemplates } = useTemplatesController();
+  const { templates, getUserTemplates } = useTemplatesController();
 
   const [editModal, setEditModal] = useState(false);
   const [editingParagraph, setEditingParagraph] = useState<Paragraph | null>(
@@ -46,12 +46,12 @@ export const ParagraphsList: React.FC = () => {
 
   useEffect(() => {
     if (bulkModal) {
-      getTemplates();
+      getUserTemplates();
     }
     if (!bulkModal) {
       setSelectedTemplate(null);
     }
-  }, [bulkModal, makeRequest, user.id, getTemplates]);
+  }, [bulkModal, makeRequest, user.id, getUserTemplates]);
 
   const columns = ["id", "name", "order", "action"];
 
