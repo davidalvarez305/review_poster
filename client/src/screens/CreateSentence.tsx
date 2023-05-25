@@ -15,10 +15,9 @@ import useSentencesController from "../hooks/useSentencesController";
 
 export const CreateSentence: React.FC = () => {
   const { isLoading, error } = useFetch();
-  const { templates } = useTemplatesController();
-  const { paragraphs, getParagraphs } = useParagraphsController();
+  const { paragraphs, getUserParagraphsByTemplate } = useParagraphsController();
   const { createSentences } = useSentencesController();
-  const { getUserTemplates } = useTemplatesController();
+  const { templates, getUserTemplates } = useTemplatesController();
   useLoginRequired();
 
   useEffect(() => {
@@ -38,7 +37,9 @@ export const CreateSentence: React.FC = () => {
               sentence: "",
             },
           });
-          getParagraphs();
+
+          const template = templates.filter(t => t.id === values.template)[0];
+          getUserParagraphsByTemplate(template.name);
         }}
       >
         <Form>

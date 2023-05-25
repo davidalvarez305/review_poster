@@ -13,7 +13,7 @@ import useParagraphsController from "../hooks/useParagraphsController";
 import useTemplatesController from "../hooks/useTemplatesController";
 
 export const CreateParagraph: React.FC = () => {
-  const { createParagraphs, isLoading, error } = useParagraphsController();
+  const { createUserParagraphsByTemplate, isLoading, error } = useParagraphsController();
   const { templates, getUserTemplates } = useTemplatesController();
   useLoginRequired();
 
@@ -26,7 +26,8 @@ export const CreateParagraph: React.FC = () => {
       <Formik
         initialValues={{ paragraphs: "", template: 0 }}
         onSubmit={(values, actions) => {
-          createParagraphs(values);
+          const template = templates.filter(t => t.id === values.template)[0];
+          createUserParagraphsByTemplate(values, template);
           actions.resetForm({
             values: {
               paragraphs: "",

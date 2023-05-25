@@ -91,9 +91,7 @@ export const SynonymsList: React.FC = () => {
                       setEditingSynonym(synonyms[i]);
                     }}
                     onClickDelete={() => {
-                      if (word) {
-                        deleteUserSynonymByWord(synonyms[i].id!, word);
-                      }
+                      if (word) deleteUserSynonymByWord(synonyms[i].id!, word);
                     }}
                   />
                 </React.Fragment>

@@ -1,100 +1,47 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import useFetch from "../hooks/useFetch";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Layout from "../layout/Layout";
 import EditModal from "../components/EditModal";
-import {
-  Box,
-  Button,
-  FormLabel,
-  Table,
-  Tbody,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
+import { Box, Button, Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
 import useLoginRequired from "../hooks/useLoginRequired";
 import TableRow from "../components/TableRow";
 import { Paragraph } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
 import { UserContext } from "../context/UserContext";
-import ReactSelect from "react-select";
-import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import useParagraphsController from "../hooks/useParagraphsController";
-import useTemplatesController from "../hooks/useTemplatesController";
 
 export const ParagraphsList: React.FC = () => {
   useLoginRequired();
-  const { makeRequest } = useFetch();
   const { user } = useContext(UserContext);
   const {
-    updateParagraphs,
-    bulkUpdateParagraphs,
-    deleteParagraph,
-    updateParagraph,
+    updateUserParagraphsByTemplate,
+    updateUserParagraphByTemplate,
+    getUserParagraphsByTemplate,
+    deleteUserParagraphByWord,
     paragraphs,
     isLoading,
     error,
   } = useParagraphsController();
-  const { templates, getUserTemplates } = useTemplatesController();
-
   const [editModal, setEditModal] = useState(false);
   const [editingParagraph, setEditingParagraph] = useState<Paragraph | null>(
     null
   );
   const [bulkModal, setBulkModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const template = useMemo((): string | undefined => {
+    return window.location.pathname.split("/template/")[1];
+  }, []);
 
   useEffect(() => {
-    if (bulkModal) {
-      getUserTemplates();
-    }
-    if (!bulkModal) {
-      setSelectedTemplate(null);
-    }
-  }, [bulkModal, makeRequest, user.id, getUserTemplates]);
+    if (template && user.id) getUserParagraphsByTemplate(template);
+  }, [getUserParagraphsByTemplate, template, user.id]);
 
   const columns = ["id", "name", "order", "action"];
 
   function handleSubmitBulk(values: { input: string }) {
-    if (selectedTemplate) {
-      updateParagraphs(
-        { ...values },
-        templates[selectedTemplate].id,
-        templates[selectedTemplate].name
-      );
-    } else {
-      bulkUpdateParagraphs({ ...values });
+    if (template) {
+      updateUserParagraphsByTemplate({ ...values }, template);
     }
     setBulkModal(false);
   }
-
-  const SelectChangeTemplate = useCallback(() => {
-    return (
-      <Box sx={{ width: 400, my: 2 }}>
-        <FormLabel>Re-assign to a new template (or leave bank)</FormLabel>
-        <ReactSelect
-          name={"select change template"}
-          placeholder={"select change template"}
-          value={{
-            value: selectedTemplate ? selectedTemplate : "",
-            label: selectedTemplate
-              ? capitalizeFirstLetter(templates[selectedTemplate].name)
-              : "",
-          }}
-          onChange={(e) => {
-            setSelectedTemplate(Number(e?.value));
-          }}
-          aria-label={"select change template"}
-          options={templates.map((op) => {
-            return {
-              value: op.id,
-              label: capitalizeFirstLetter(op.name),
-            };
-          })}
-        />
-      </Box>
-    );
-  }, [selectedTemplate, templates]);
 
   return (
     <Layout>
@@ -135,7 +82,9 @@ export const ParagraphsList: React.FC = () => {
                     setEditModal(true);
                     setEditingParagraph(paragraphs[i]);
                   }}
-                  onClickDelete={() => deleteParagraph(paragraphs[i].id!)}
+                  onClickDelete={() => {
+                    if (template) deleteUserParagraphByWord(paragraphs[i].id!, template);
+                  }}
                 />
               </React.Fragment>
             ))}
@@ -147,15 +96,13 @@ export const ParagraphsList: React.FC = () => {
             editModal={editModal}
             setEditModal={setEditModal}
             handleSubmit={(values) => {
-              if (editingParagraph) {
-                updateParagraph({
-                  ...editingParagraph,
-                  name: values.input,
-                  template: null,
-                });
-
-                setEditModal(false);
+              if (editingParagraph && editingParagraph.template) {
+                updateUserParagraphByTemplate(
+                  { ...editingParagraph, name: values.input, template: null },
+                  editingParagraph.template?.name
+                );
                 setEditingParagraph(null);
+                setEditModal(false);
               }
             }}
             editingItem={editingParagraph?.name || ""}
@@ -165,7 +112,6 @@ export const ParagraphsList: React.FC = () => {
         {bulkModal && (
           <Box sx={{ my: 5 }}>
             <EditModal
-              selectComponent={SelectChangeTemplate()}
               setEditModal={setBulkModal}
               editModal={bulkModal}
               editingItem={paragraphs.map((op) => op.name).join("\n")}

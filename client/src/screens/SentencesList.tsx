@@ -39,7 +39,7 @@ export const SentencesList: React.FC = () => {
     getSentences,
     sentences
   } = useSentencesController();
-  const { paragraphs, getParagraphs } = useParagraphsController();
+  const { paragraphs, getUserParagraphsByTemplate } = useParagraphsController();
 
   const [bulkModal, setBulkModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -53,11 +53,12 @@ export const SentencesList: React.FC = () => {
 
   useEffect(() => {
     if (bulkModal) {
-      getParagraphs();
+      // @TODO --> FIX THIS LOGIC
+      getUserParagraphsByTemplate("ReviewPost");
     } else {
       setSelectedParagraph(null);
     }
-  }, [bulkModal, makeRequest, user.id, getParagraphs]);
+  }, [bulkModal, makeRequest, user.id, getUserParagraphsByTemplate]);
 
   useEffect(() => {
     if (paragraph) {

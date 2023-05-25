@@ -1,32 +1,31 @@
 import { useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
-import { Paragraph } from "../types/general";
+import { Paragraph, Template } from "../types/general";
 import { UserContext } from "../context/UserContext";
 import createParagraphsFactory from "../utils/createParagraphsFactory";
 import updateUserParagraphsByTemplateFactory from "../utils/updateUserParagraphsByTemplateFactory";
 import deleteUserParagraphsByTemplateFactory from "../utils/deleteUserParagraphsByTemplateFactory";
 
 export default function useParagraphsController() {
-  const template = useMemo((): string | undefined => {
-    return window.location.pathname.split("/template/")[1];
-  }, []);
   const { user } = useContext(UserContext);
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
   const FETCH_PARAMS = useMemo(() => {
     return {
-      url: USER_ROUTE + `/${user.id}/template/${template}/paragraph`,
+      url: USER_ROUTE + `/${user.id}/template`,
       method: "POST",
     };
-  }, [user.id, template]);
+  }, [user.id]);
 
   const updateUserParagraphByTemplate = useCallback(
     (paragraph: Paragraph, template: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph/${paragraph.id}`,
+          url:
+            USER_ROUTE +
+            `/${user.id}/template/${template}/paragraph/${paragraph.id}`,
           method: "PUT",
           data: paragraph,
         },
@@ -84,21 +83,31 @@ export default function useParagraphsController() {
         }
       );
     },
-    [FETCH_PARAMS, makeRequest, user.id, paragraphs, deleteUserParagraphsByTemplate]
+    [
+      FETCH_PARAMS,
+      makeRequest,
+      user.id,
+      paragraphs,
+      deleteUserParagraphsByTemplate,
+    ]
   );
 
-  const getUserParagraphsByTemplate = useCallback(() => {
-    makeRequest(
-      {
-        ...FETCH_PARAMS,
-        method: "GET",
-      },
-      (res) => setParagraphs(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS]);
+  const getUserParagraphsByTemplate = useCallback(
+    (template: string) => {
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph`,
+          method: "GET",
+        },
+        (res) => setParagraphs(res.data.data)
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id]
+  );
 
   const createUserParagraphsByTemplate = useCallback(
-    (opts: { paragraphs: string; template: number }) => {
+    (opts: { paragraphs: string; template: number }, template: Template) => {
       if (!opts.template) {
         return;
       }
@@ -108,42 +117,22 @@ export default function useParagraphsController() {
         template_id: opts.template,
       });
 
-      makeRequest({ ...FETCH_PARAMS, data: paragraphs }, (res) =>
-        setParagraphs(res.data.data)
-      );
-    },
-    [makeRequest, FETCH_PARAMS]
-  );
-
-  const deleteParagraph = useCallback(
-    (id: number) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url:
-            USER_ROUTE +
-            `/${user.id}/paragraph/${[id]}?paragraphs=${[
-              id,
-            ]}&template=${template}`,
-          method: "DELETE",
+          url: USER_ROUTE + `/${user.id}/template/${template.name}/paragraph`,
+          data: paragraphs,
         },
         (res) => setParagraphs(res.data.data)
       );
     },
-    [makeRequest, user.id, FETCH_PARAMS, template]
+    [makeRequest, FETCH_PARAMS, user.id]
   );
-
-  useEffect(() => {
-    if (template) {
-      getUserParagraphsByTemplate();
-    }
-  }, [getUserParagraphsByTemplate, template]);
 
   return {
     updateUserParagraphByTemplate,
     setParagraphs,
     createUserParagraphsByTemplate,
-    deleteParagraph,
     getUserParagraphsByTemplate,
     deleteUserParagraphByWord,
     paragraphs,
