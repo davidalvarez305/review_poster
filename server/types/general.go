@@ -61,3 +61,11 @@ type UpdateUserParagraphsByTemplateInput struct {
 type DeleteUserParagraphsByTemplateInput struct {
 	DeleteParagraphs []int `json:"delete_paragraphs" form:"delete_paragraphs"`
 }
+
+type UpdateUserParagraphSentencesByTemplateInput struct {
+	Sentences []models.Sentence `json:"sentences" form:"sentences"`
+}
+
+type DeleteUserParagraphSentencesByTemplateInput struct {
+	DeleteSentences []int `json:"delete_sentences" form:"delete_sentences"`
+}

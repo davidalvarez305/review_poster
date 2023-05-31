@@ -4,50 +4,26 @@ import (
 	"github.com/davidalvarez305/review_poster/server/actions"
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
-	"github.com/davidalvarez305/review_poster/server/utils"
+	"github.com/davidalvarez305/review_poster/server/types"
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetSentences(c *fiber.Ctx) error {
+func GetUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 	userId := c.Params("userId")
-	paragraph := c.Query("paragraph")
-	template := c.Query("template")
+	paragraph := c.Params("paragraphName")
+	template := c.Params("templateName")
 
-	if len(paragraph) > 0 {
-		sentences, err := actions.GetSentencesByParagraph(paragraph, userId)
-
-		if err != nil {
-			return c.Status(400).JSON(fiber.Map{
-				"data": "Failed to fetch sentences by paragraph.",
-			})
-		}
-
-		return c.Status(200).JSON(fiber.Map{
-			"data": sentences,
+	if len(template) == 0 || len(paragraph) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Missing URL params.",
 		})
 	}
 
-	if len(template) > 0 {
-		sentences, err := actions.GetSentencesByTemplate(template, userId)
-
-		if err != nil {
-			return c.Status(400).JSON(fiber.Map{
-				"data": "Failed to fetch sentences by template.",
-			})
-		}
-
-		return c.Status(200).JSON(fiber.Map{
-			"data": sentences,
-		})
-	}
-
-	var sentences []models.Sentence
-
-	err := database.DB.Preload("Paragraph.Template.User").Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id INNER JOIN \"user\" ON \"user\".id = template.user_id").Where("\"user\".id = ?", userId).Find(&sentences).Error
+	sentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch all sentences.",
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch sentences by paragraph.",
 		})
 	}
 
@@ -56,8 +32,18 @@ func GetSentences(c *fiber.Ctx) error {
 	})
 }
 
-func CreateSentences(c *fiber.Ctx) error {
+func CreateUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 	var sentences []models.Sentence
+
+	userId := c.Params("userId")
+	paragraph := c.Params("paragraphName")
+	template := c.Params("templateName")
+
+	if len(template) == 0 || len(paragraph) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Missing URL params.",
+		})
+	}
 
 	err := c.BodyParser(&sentences)
 
@@ -67,7 +53,7 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&sentences).Find(&sentences).Error
+	err = database.DB.Save(&sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -75,17 +61,33 @@ func CreateSentences(c *fiber.Ctx) error {
 		})
 	}
 
+	sentences, err = actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch sentences by paragraph.",
+		})
+	}
+
 	return c.Status(201).JSON(fiber.Map{
-		"data": "OK!",
+		"data": sentences,
 	})
 }
 
-func UpdateSentences(c *fiber.Ctx) error {
-	var sentencesFromClient []models.Sentence
-	paragraph := c.Query("paragraph")
+func UpdateUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
+	paragraph := c.Params("paragraphName")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
-	err := c.BodyParser(&sentencesFromClient)
+	if len(template) == 0 || len(paragraph) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Missing URL params.",
+		})
+	}
+
+	var input types.UpdateUserParagraphSentencesByTemplateInput
+
+	err := c.BodyParser(&input)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -93,7 +95,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&sentencesFromClient).Error
+	err = database.DB.Save(&input.Sentences).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -101,7 +103,7 @@ func UpdateSentences(c *fiber.Ctx) error {
 		})
 	}
 
-	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -114,17 +116,57 @@ func UpdateSentences(c *fiber.Ctx) error {
 	})
 }
 
-func UpdateSentence(c *fiber.Ctx) error {
-	var clientSentence models.Sentence
-	paragraph := c.Query("paragraph")
+func DeleteUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
+	paragraph := c.Params("paragraphName")
+	template := c.Params("templateName")
+	userId := c.Params("userId")
 
-	if len(paragraph) == 0 {
+	if len(template) == 0 || len(paragraph) == 0 {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "No paragraph in query.",
+			"data": "Missing URL params.",
 		})
 	}
 
-	err := c.BodyParser(&clientSentence)
+	var input types.DeleteUserParagraphSentencesByTemplateInput
+
+	if len(input.DeleteSentences) > 0 {
+		err := database.DB.Delete(&models.Synonym{}, input.DeleteSentences).Error
+
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to delete synonyms.",
+			})
+		}
+	}
+
+	updatedSentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch synonyms by word.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": updatedSentences,
+	})
+}
+
+func UpdateUserSentence(c *fiber.Ctx) error {
+	paragraph := c.Params("paragraphName")
+	template := c.Params("templateName")
+	userId := c.Params("userId")
+	sentenceId := c.Params("sentenceId")
+
+	if len(template) == 0 || len(paragraph) == 0 || len(sentenceId) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Missing URL params.",
+		})
+	}
+
+	var sentence models.Sentence
+
+	err := c.BodyParser(&sentence)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -132,7 +174,7 @@ func UpdateSentence(c *fiber.Ctx) error {
 		})
 	}
 
-	userId, err := actions.GetUserIdFromSession(c)
+	userId, err = actions.GetUserIdFromSession(c)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -142,7 +184,7 @@ func UpdateSentence(c *fiber.Ctx) error {
 
 	var existingSentence models.Sentence
 
-	err = database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("sentence.id = ? AND template.user_id = ?", clientSentence.ID, userId).Find(&existingSentence).Error
+	err = database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("sentence.id = ? AND template.user_id = ? AND paragraph.name = ?", sentenceId, userId, paragraph).Find(&existingSentence).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -150,19 +192,22 @@ func UpdateSentence(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&clientSentence).Error
+	existingSentence.Sentence = sentence.Sentence
+	existingSentence.ParagraphID = sentence.ParagraphID
+
+	err = database.DB.Save(&existingSentence).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to save sentences.",
+			"data": "Failed to save sentence.",
 		})
 	}
 
-	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch sentences by paragraph.",
+			"data": "Failed to fetch synonyms by word.",
 		})
 	}
 
@@ -171,93 +216,41 @@ func UpdateSentence(c *fiber.Ctx) error {
 	})
 }
 
-func DeleteSentence(c *fiber.Ctx) error {
-	s := c.Query("sentences")
-	paragraph := c.Query("paragraph")
+func DeleteUserSentence(c *fiber.Ctx) error {
+	template := c.Params("template")
 	userId := c.Params("userId")
+	paragraph := c.Params("paragraphName")
+	sentenceId := c.Params("sentenceId")
 
-	ids, err := utils.GetIds(s)
+	if len(template) == 0 || len(paragraph) == 0 || len(sentenceId) == 0 {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Template or paragraph not in URL params.",
+		})
+	}
+
+	var existingSentence models.Sentence
+
+	err := database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ? AND template.user_id = ? AND id = ?", template, userId, sentenceId).First(&existingSentence).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to parse ids.",
+			"data": "Failed to find sentence.",
 		})
 	}
 
-	err = database.DB.Delete(&models.Sentence{}, ids).Error
+	err = database.DB.Delete(&existingSentence).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to delete sentences.",
+			"data": "Failed to delete sentence.",
 		})
 	}
 
-	newSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
+	updatedSentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch sentences by paragraph.",
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": newSentences,
-	})
-}
-
-func BulkSentencesUpdate(c *fiber.Ctx) error {
-	var sentencesFromClient []models.Sentence
-
-	paragraph := c.Query("paragraph")
-	userId := c.Params("userId")
-
-	if paragraph == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "No paragraph in query.",
-		})
-	}
-
-	err := c.BodyParser(&sentencesFromClient)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to parse body.",
-		})
-	}
-
-	existingSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Failed to fetch sentences by paragraph.",
-		})
-	}
-
-	// These functions will filter synonyms coming from the client & compare with existing ones.
-	// It will keep anything that's new, and delete what was not sent from the client.
-
-	err = actions.DeleteBulkSentences(sentencesFromClient, existingSentences)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to delete sentences.",
-		})
-	}
-
-	err = actions.AddBulkSentences(sentencesFromClient, existingSentences)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to save bulk sentences.",
-		})
-	}
-
-	// Re-assign sentences to what's now on the database.
-	updatedSentences, err := actions.GetSentencesByParagraph(paragraph, userId)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch sentences by paragraph.",
+			"data": "Failed to fetch sentences by template.",
 		})
 	}
 

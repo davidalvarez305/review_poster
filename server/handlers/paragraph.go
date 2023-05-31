@@ -198,7 +198,11 @@ func UpdateUserParagraphByTemplate(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&paragraph).Error
+	existingParagraph.Name = paragraph.Name
+	existingParagraph.Order = paragraph.Order
+	existingParagraph.TemplateID = paragraph.TemplateID
+
+	err = database.DB.Save(&existingParagraph).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{

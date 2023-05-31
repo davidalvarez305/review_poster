@@ -45,7 +45,10 @@ func UpdateUserSynonymByWord(c *fiber.Ctx) error {
 		})
 	}
 
-	err = database.DB.Save(&synonym).Error
+	existingSynonym.Synonym = synonym.Synonym
+	existingSynonym.WordID = synonym.WordID
+
+	err = database.DB.Save(&existingSynonym).Error
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
