@@ -49,12 +49,10 @@ func User(router fiber.Router) {
 	user.Delete("/:userId/template/:templateName/paragraph/:paragraphId", middleware.ResourceAccessRestriction(handlers.DeleteUserParagraphByTemplate))
 
 	// User Sentence By Paragraph Resource
-	user.Get("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.GetSentences))
-	user.Post("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.CreateSentences))
-	user.Put("/:userId/sentence", middleware.ResourceAccessRestriction(handlers.UpdateSentences))
-
-	// User Sentences By Paragraph Resource
-	user.Put("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateSentence))
-	user.Delete("/:userId/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteSentence))
-	user.Post("/:userId/sentence/bulk", middleware.ResourceAccessRestriction(handlers.BulkSentencesUpdate))
+	user.Get("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.GetSentences))
+	user.Post("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.CreateSentences))
+	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.UpdateSentences))
+	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateSentence))
+	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteSentence))
+	user.Post("/:userId/template/:templateName/paragraph/:paragraphName/sentence/bulk", middleware.ResourceAccessRestriction(handlers.BulkSentencesUpdate))
 }

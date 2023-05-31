@@ -1,10 +1,8 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Layout from "../layout/Layout";
 import {
   Box,
   Button,
-  FormLabel,
   Table,
   Tbody,
   Th,
@@ -17,8 +15,6 @@ import TableRow from "../components/TableRow";
 import useFetch from "../hooks/useFetch";
 import { Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import ReactSelect from "react-select";
-import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { UserContext } from "../context/UserContext";
 import useSentencesController from "../hooks/useSentencesController";
 import useParagraphsController from "../hooks/useParagraphsController";
@@ -26,7 +22,6 @@ import useParagraphsController from "../hooks/useParagraphsController";
 export const SentencesList: React.FC = () => {
   useLoginRequired();
   const { makeRequest } = useFetch();
-  const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const {
     updateSentences,
@@ -73,41 +68,12 @@ export const SentencesList: React.FC = () => {
   function handleSubmitBulk(values: { input: string }) {
     if (selectedParagraph) {
       updateSentences({ ...values }, paragraphs[selectedParagraph].id!, paragraphs[selectedParagraph].name);
-      navigate("/paragraph/" + paragraphs[selectedParagraph].name);
     } else {
       bulkUpdateSentences({ ...values });
     }
 
     setBulkModal(false);
   }
-
-  const SelectChangeParagraph = useCallback(() => {
-    return (
-      <Box sx={{ width: 400, my: 2 }}>
-        <FormLabel>Re-assign to a new paragraph (or leave bank)</FormLabel>
-        <ReactSelect
-          name={"select change paragraph"}
-          placeholder={"select change paragraph"}
-          value={{
-            value: selectedParagraph ? selectedParagraph : "",
-            label: selectedParagraph
-              ? capitalizeFirstLetter(paragraphs[selectedParagraph].name)
-              : "",
-          }}
-          onChange={(e) => {
-            setSelectedParagraph(Number(e?.value));
-          }}
-          aria-label={"select change paragraph"}
-          options={paragraphs.map((paragraph) => {
-            return {
-              value: paragraph.id!,
-              label: capitalizeFirstLetter(paragraph.name),
-            };
-          })}
-        />
-      </Box>
-    );
-  }, [selectedParagraph, paragraphs]);
 
   return (
     <Layout>
@@ -175,7 +141,6 @@ export const SentencesList: React.FC = () => {
           {bulkModal && (
             <Box sx={{ my: 5 }}>
               <EditModal
-                selectComponent={SelectChangeParagraph()}
                 setEditModal={setBulkModal}
                 editModal={bulkModal}
                 editingItem={sentences.map((op) => op.sentence).join("\n")}
