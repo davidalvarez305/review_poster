@@ -1,52 +1,83 @@
 import { useState, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
-import { Sentence } from "../types/general";
+import { Paragraph, Sentence, Template } from "../types/general";
 import { UserContext } from "../context/UserContext";
-import { createUpdateSentencesFactory } from "../utils/createUpdateSentencesFactory";
+import createUpdateSentencesFactory from "../utils/createUpdateSentencesFactory";
+import deleteUserParagraphSentencesByTemplateFactory from "../utils/deleteUserParagraphSentencesByTemplateFactory";
+import createSentencesFactory from "../utils/createSentencesFactory";
 
 export default function useSentencesController() {
   const { user } = useContext(UserContext);
   const [sentences, setSentences] = useState<Sentence[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
-  const paragraph = useMemo((): string | undefined => {
-    return window.location.pathname.split("/paragraph/")[1]
-  }, []);
   const FETCH_PARAMS = useMemo(() => {
     return {
-      url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
+      url: USER_ROUTE + `/${user.id}/template/`,
       method: "POST",
     };
-  }, [user.id, paragraph]);
+  }, [user.id]);
 
-  const updateSentences = useCallback(
-    (opts: { input: string }, paragraph_id: number, paragraph: string) => {
-      const sentencesToUpdate = createUpdateSentencesFactory(
-        sentences,
-        opts.input.split("\n"),
-        paragraph_id
+  const deleteUserParagraphSentencesByTemplate = useCallback(
+    (values: { input: string }, template: string, paragraph: string) => {
+      const body = deleteUserParagraphSentencesByTemplateFactory(
+        values,
+        sentences
       );
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
-          method: "PUT",
+          url:
+            USER_ROUTE +
+            `/${user.id}/template/${template}/paragraph/${paragraph}/sentence`,
+          method: "DELETE",
+          data: body,
+        },
+        (res) => setSentences(res.data.data)
+      );
+    },
+    [FETCH_PARAMS, makeRequest, user.id, sentences]
+  );
+
+  const updateUserParagraphSentencesByTemplate = useCallback(
+    (values: { input: string }, paragraph: string, template: string) => {
+      const sentencesToUpdate = createUpdateSentencesFactory(values, sentences);
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          url:
+            USER_ROUTE +
+            `/${user.id}/template/${template}/paragraph/${paragraph}/sentence`,
+          method: "PATCH",
           data: sentencesToUpdate,
         },
         (res) => {
           setSentences(res.data.data);
+          deleteUserParagraphSentencesByTemplate(
+            { ...values },
+            paragraph,
+            template
+          );
         }
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, sentences]
+    [
+      makeRequest,
+      FETCH_PARAMS,
+      user.id,
+      sentences,
+      deleteUserParagraphSentencesByTemplate,
+    ]
   );
 
-  const updateSentence = useCallback(
-    (sentence: Sentence) => {
+  const updateParagraphSentenceByTemplate = useCallback(
+    (sentence: Sentence, template: string, paragraph: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/sentence/${sentence.id}?paragraph=${paragraph}`,
+          url:
+            USER_ROUTE +
+            `/${user.id}/template/${template}/paragraph/${paragraph}/sentence/${sentence.id}`,
           method: "PUT",
           data: sentence,
         },
@@ -55,93 +86,34 @@ export default function useSentencesController() {
         }
       );
     },
-    [makeRequest, FETCH_PARAMS, user.id, paragraph]
+    [makeRequest, FETCH_PARAMS, user.id]
   );
 
-  const getSentences = useCallback(() => {
-    makeRequest({ ...FETCH_PARAMS, method: "GET" }, (res) =>
-      setSentences(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS]);
-
-  const getSentencesByParagraph = useCallback((paragraph: string) => {
-    makeRequest(
-      {
-        ...FETCH_PARAMS,
-        method: "GET",
-        url: USER_ROUTE + `/${user.id}/sentence?paragraph=${paragraph}`,
-      },
-      (res) => setSentences(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS, user.id]);
-
-  const getSentencesByTemplate = useCallback((template: string) => {
-    makeRequest(
-      {
-        ...FETCH_PARAMS,
-        method: "GET",
-        url: USER_ROUTE + `/${user.id}/sentence?template=${template}`,
-      },
-      (res) => setSentences(res.data.data)
-    );
-  }, [makeRequest, FETCH_PARAMS, user.id]);
-
-  const deleteSentence = useCallback(
-    (id: number) => {
+  const deleteUserParagraphSentenceByTemplate = useCallback(
+    (id: number, paragraph: string, template: string) => {
       makeRequest(
         {
           ...FETCH_PARAMS,
           url:
             USER_ROUTE +
-            `/${user.id}/sentence/${[id]}?sentences=${[id]}&paragraph=${paragraph}`,
+            `/${user.id}/template/${template}/paragraph/${paragraph}/sentence/${id}`,
           method: "DELETE",
         },
         (res) => setSentences(res.data.data)
       );
     },
-    [makeRequest, user.id, FETCH_PARAMS, paragraph]
+    [makeRequest, user.id, FETCH_PARAMS]
   );
 
-  const bulkUpdateSentences = useCallback(
-    (values: { input: string }) => {
-      let body = values.input.split("\n").map((sentence) => {
-        return { sentence, paragraph_id: sentences[0].paragraph_id };
-      });
+  const createUserParagraphSentencesByTemplate = useCallback(
+    (values: { input: string }, paragraph: Paragraph, template: Template) => {
+      const body = createSentencesFactory(values, paragraph);
       makeRequest(
         {
           ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/sentence/bulk?paragraph=${paragraph}`,
+          url: USER_ROUTE + `/${user.id}/template/${template.name}/paragraph/${paragraph.name}/sentence`,
           method: "POST",
           data: body,
-        },
-        (res) => setSentences(res.data.data)
-      );
-    },
-    [FETCH_PARAMS, makeRequest, user.id, paragraph, sentences]
-  );
-
-  const createSentences = useCallback(
-    (
-      opts: { paragraph: number; template: number; sentence: string },
-    ) => {
-      const sentenceBody = opts.sentence.split("\n").map((sentence) => {
-        return {
-          paragraph_id: opts.paragraph,
-          template_id: opts.template,
-          sentence,
-        };
-      });
-
-      if (!opts.paragraph || !opts.template) {
-        return;
-      }
-
-      makeRequest(
-        {
-          ...FETCH_PARAMS,
-          url: USER_ROUTE + `/${user.id}/sentence`,
-          method: "POST",
-          data: sentenceBody,
         },
         (res) => setSentences(res.data.data)
       );
@@ -149,19 +121,30 @@ export default function useSentencesController() {
     [FETCH_PARAMS, makeRequest, user.id]
   );
 
+  const getUserParagraphSentencesByTemplate = useCallback(
+    (paragraph: string, template: string) => {
+      makeRequest(
+        {
+          ...FETCH_PARAMS,
+          method: "GET",
+          url: USER_ROUTE + `/${user.id}/template/${template}/paragraph/${paragraph}/sentence`,
+        },
+        (res) => setSentences(res.data.data)
+      );
+    },
+    [makeRequest, FETCH_PARAMS, user.id]
+  );
+
   return {
-    updateSentences,
-    getSentences,
     setSentences,
     sentences,
     isLoading,
     error,
-    deleteSentence,
-    bulkUpdateSentences,
-    paragraph,
-    createSentences,
-    updateSentence,
-    getSentencesByTemplate,
-    getSentencesByParagraph
+    updateUserParagraphSentencesByTemplate,
+    deleteUserParagraphSentenceByTemplate,
+    deleteUserParagraphSentencesByTemplate,
+    createUserParagraphSentencesByTemplate,
+    updateParagraphSentenceByTemplate,
+    getUserParagraphSentencesByTemplate,
   };
 }

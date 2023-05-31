@@ -1,30 +1,32 @@
 import { Sentence } from "../types/general";
 
-export function createUpdateSentencesFactory(
-  existingSentences: Sentence[],
-  inputSentences: string[],
-  paragraph_id: number,
-): Sentence[] {
-  let sentencesToKeep: Sentence[] = [];
+export default function createUpdateSentencesFactory(
+  values: { input: string },
+  userSentencesByParagraphAndTemplate: Sentence[]
+): { sentences: Sentence[] } {
+  let sentences: Sentence[] = [];
+  const vals = values.input.split("\n");
 
-  inputSentences.forEach((sentence) => {
-    for (const existingSentence of existingSentences) {
-      if (sentence === existingSentence.sentence) {
-        sentencesToKeep.push({
-          sentence: existingSentence.sentence,
-          id: existingSentence.id,
-          paragraph_id,
+  add: for (let n = 0; n < vals.length; n++) {
+    for (let i = 0; i < userSentencesByParagraphAndTemplate.length; i++) {
+      if (userSentencesByParagraphAndTemplate[i].sentence === vals[n]) {
+        sentences.push({
+          ...userSentencesByParagraphAndTemplate[i],
           paragraph: null,
         });
-        break;
+        continue add;
       }
     }
-    sentencesToKeep.push({
-      sentence,
-      id: null,
-      paragraph_id,
-      paragraph: null,
-    });
-  });
-  return sentencesToKeep;
+
+    if (vals[n].length > 0) {
+      sentences.push({
+        id: null,
+        sentence: vals[n],
+        paragraph_id: userSentencesByParagraphAndTemplate[0].paragraph_id,
+        paragraph: null,
+      });
+    }
+  }
+
+  return { sentences };
 }

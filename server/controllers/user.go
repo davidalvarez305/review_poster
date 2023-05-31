@@ -54,6 +54,6 @@ func User(router fiber.Router) {
 	user.Post("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.CreateUserParagraphSentencesByTemplate))
 	user.Patch("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.UpdateUserParagraphSentencesByTemplate))
 	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.DeleteUserParagraphSentencesByTemplate))
-	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateUserSentence))
-	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteUserSentence))
+	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateParagraphSentenceByTemplate))
+	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteParagraphSentenceByTemplate))
 }

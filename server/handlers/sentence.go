@@ -152,7 +152,7 @@ func DeleteUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 	})
 }
 
-func UpdateUserSentence(c *fiber.Ctx) error {
+func UpdateParagraphSentenceByTemplate(c *fiber.Ctx) error {
 	paragraph := c.Params("paragraphName")
 	template := c.Params("templateName")
 	userId := c.Params("userId")
@@ -216,7 +216,7 @@ func UpdateUserSentence(c *fiber.Ctx) error {
 	})
 }
 
-func DeleteUserSentence(c *fiber.Ctx) error {
+func DeleteParagraphSentenceByTemplate(c *fiber.Ctx) error {
 	template := c.Params("template")
 	userId := c.Params("userId")
 	paragraph := c.Params("paragraphName")
