@@ -45,13 +45,15 @@ func User(router fiber.Router) {
 	user.Get("/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.GetUserParagraphsByTemplate))
 	user.Post("/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.CreateUserParagraphsByTemplate))
 	user.Patch("/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.UpdateUserParagraphsByTemplate))
+	user.Delete("/:/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.DeleteUserParagraphsByTemplate))
 	user.Put("/:userId/template/:templateName/paragraph/:paragraphId", middleware.ResourceAccessRestriction(handlers.UpdateUserParagraphByTemplate))
 	user.Delete("/:userId/template/:templateName/paragraph/:paragraphId", middleware.ResourceAccessRestriction(handlers.DeleteUserParagraphByTemplate))
 
 	// User Sentence By Paragraph Resource
 	user.Get("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.GetUserParagraphSentencesByTemplate))
 	user.Post("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.CreateUserParagraphSentencesByTemplate))
-	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.UpdateUserParagraphSentencesByTemplate))
+	user.Patch("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.UpdateUserParagraphSentencesByTemplate))
+	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence", middleware.ResourceAccessRestriction(handlers.DeleteUserParagraphSentencesByTemplate))
 	user.Put("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.UpdateUserSentence))
 	user.Delete("/:userId/template/:templateName/paragraph/:paragraphName/sentence/:sentenceId", middleware.ResourceAccessRestriction(handlers.DeleteUserSentence))
 }
