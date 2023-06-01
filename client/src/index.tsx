@@ -34,7 +34,7 @@ root.render(
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/word/:word" element={<SynonymsList />} />
-            <Route path="/paragraph/:paragraph" element={<SentencesList />} />
+            <Route path="/template/:template/paragraph/:paragraph" element={<SentencesList />} />
             <Route path="/template/:template" element={<ParagraphsList />} />
             <Route path="/generate" element={<Generate />} />
             <Route path="/user" element={<User />} />

@@ -24,15 +24,13 @@ export const SentencesList: React.FC = () => {
   const { makeRequest } = useFetch();
   const { user } = useContext(UserContext);
   const {
-    updateSentences,
+    sentences,
     isLoading,
     error,
-    deleteSentence,
-    bulkUpdateSentences,
-    updateSentence,
-    getSentencesByParagraph,
-    getSentences,
-    sentences
+    updateUserParagraphSentencesByTemplate,
+    deleteUserParagraphSentenceByTemplate,
+    updateParagraphSentenceByTemplate,
+    getUserParagraphSentencesByTemplate,
   } = useSentencesController();
   const { paragraphs, getUserParagraphsByTemplate } = useParagraphsController();
 
@@ -44,6 +42,9 @@ export const SentencesList: React.FC = () => {
   );
   const paragraph = useMemo((): string | undefined => {
     return window.location.pathname.split("/paragraph/")[1]
+  }, []);
+  const template = useMemo((): string | undefined => {
+    return window.location.pathname.split("/template/")[1]
   }, []);
 
   useEffect(() => {
@@ -57,19 +58,15 @@ export const SentencesList: React.FC = () => {
 
   useEffect(() => {
     if (paragraph) {
-      getSentencesByParagraph(paragraph);
-    } else {
-      getSentences();
+      getUserParagraphSentencesByTemplate(paragraph, "ReviewPost");
     }
-  }, [getSentences, getSentencesByParagraph, paragraph]);
+  }, [paragraph, getUserParagraphSentencesByTemplate]);
 
   const headers = ["id", "sentence", "action"];
 
   function handleSubmitBulk(values: { input: string }) {
     if (selectedParagraph) {
-      updateSentences({ ...values }, paragraphs[selectedParagraph].id!, paragraphs[selectedParagraph].name);
-    } else {
-      bulkUpdateSentences({ ...values });
+      updateUserParagraphSentencesByTemplate({ ...values }, paragraphs[selectedParagraph].template?.name!, paragraphs[selectedParagraph].name);
     }
 
     setBulkModal(false);
@@ -111,7 +108,9 @@ export const SentencesList: React.FC = () => {
                     columns={headers}
                     index={i}
                     items={sentences}
-                    onClickDelete={() => deleteSentence(sentences[i].id!)}
+                    onClickDelete={() => {
+                      if (paragraph && template) deleteUserParagraphSentenceByTemplate(sentences[i].id!, paragraph, template);
+                    }}
                     onClickEdit={() => {
                       setEditModal(true);
                       setEditingSentence(sentences[i]);
@@ -127,8 +126,8 @@ export const SentencesList: React.FC = () => {
               editModal={editModal}
               setEditModal={setEditModal}
               handleSubmit={(values) => {
-               if (editingSentence) {
-                  updateSentence({ ...editingSentence, sentence: values.input });
+               if (editingSentence && template && paragraph) {
+                updateParagraphSentenceByTemplate({ ...editingSentence, sentence: values.input }, template, paragraph);
 
                   setEditModal(false);
                   setEditingSentence(null);
