@@ -16,7 +16,7 @@ import useSentencesController from "../hooks/useSentencesController";
 export const CreateSentence: React.FC = () => {
   const { isLoading, error } = useFetch();
   const { paragraphs, getUserParagraphsByTemplate } = useParagraphsController();
-  const { createSentences } = useSentencesController();
+  const { createUserParagraphSentencesByTemplate } = useSentencesController();
   const { templates, getUserTemplates } = useTemplatesController();
   useLoginRequired();
 
@@ -29,7 +29,9 @@ export const CreateSentence: React.FC = () => {
       <Formik
         initialValues={{ paragraph: 0, template: 0, sentence: "" }}
         onSubmit={(values, actions) => {
-          createSentences(values);
+          const paragraph = paragraphs.filter(t => t.id === values.paragraph)[0];
+          createUserParagraphSentencesByTemplate({ input: values.sentence }, paragraph, paragraph?.template!);
+
           actions.resetForm({
             values: {
               paragraph: 0,
@@ -37,9 +39,8 @@ export const CreateSentence: React.FC = () => {
               sentence: "",
             },
           });
-
-          const template = templates.filter(t => t.id === values.template)[0];
-          getUserParagraphsByTemplate(template.name);
+          
+          if (paragraph && paragraph.template) getUserParagraphsByTemplate(paragraph.template.name);
         }}
       >
         <Form>
@@ -77,7 +78,7 @@ export const CreateSentence: React.FC = () => {
           </Box>
         </Form>
       </Formik>
-      <BottomNavigation message={"Enter A Paragraph"} path={"paragraph"} />
+      <BottomNavigation message={"Enter A Paragraph"} path={"template/ReviewPost/paragraph"} />
       <RequestErrorMessage {...error} />
     </Layout>
   );
