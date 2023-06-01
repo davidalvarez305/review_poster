@@ -135,6 +135,17 @@ export default function useSentencesController() {
     [makeRequest, FETCH_PARAMS, user.id]
   );
 
+  const getUserSentencesByTemplate = useCallback((template: string) => {
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/template/${template}/sentence`,
+      },
+      (res) => setSentences(res.data.data)
+    );
+  }, [FETCH_PARAMS, makeRequest, user.id]);
+
   return {
     setSentences,
     sentences,
@@ -146,5 +157,6 @@ export default function useSentencesController() {
     createUserParagraphSentencesByTemplate,
     updateParagraphSentenceByTemplate,
     getUserParagraphSentencesByTemplate,
+    getUserSentencesByTemplate
   };
 }

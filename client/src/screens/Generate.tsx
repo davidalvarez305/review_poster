@@ -15,7 +15,7 @@ import { UserContext } from "../context/UserContext";
 import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
-import { Dictionary, Sentence, SpunContent, Word } from "../types/general";
+import { Dictionary, Paragraph, Sentence, SpunContent, Word } from "../types/general";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
@@ -44,7 +44,7 @@ const Generate: React.FC = () => {
   const [seeTagged, setSeeTagged] = useState(false);
   const { templates, getUserTemplates } = useTemplatesController();
   const { words, getUserWords } = useWordsController();
-  const { sentences, getSentencesByTemplate, bulkUpdateSentences } =
+  const { sentences, updateUserParagraphSentencesByTemplate, getUserSentencesByTemplate } =
     useSentencesController();
   const { updateUserSynonymsByWord, getUserSynonymsByWord } =
     useSynonymsController();
@@ -55,7 +55,7 @@ const Generate: React.FC = () => {
     if (selectedTemplate.length === 0) {
       getUserTemplates();
     } else {
-      getSentencesByTemplate(selectedTemplate);
+      getUserSentencesByTemplate(selectedTemplate);
 
       // Pull dictionary
       makeRequest(
@@ -75,21 +75,21 @@ const Generate: React.FC = () => {
     makeRequest,
     selectedTemplate,
     user.id,
-    getSentencesByTemplate,
     getUserTemplates,
+    getUserSentencesByTemplate
   ]);
 
   const handleSubmit = useCallback(
-    (values: { input: string }) => {
+    (values: { input: string }, paragraph: Paragraph) => {
       /* const template_id = editingSentences[0].paragraph!.template_id;
       const paragraph_id = editingSentences[0].paragraph_id; */
-      bulkUpdateSentences({ ...values });
+      updateUserParagraphSentencesByTemplate({ ...values }, paragraph.name, selectedTemplate);
 
       setEditingSentences([]);
       setEditingSentencesParagraph("");
       setEditModal(false);
     },
-    [bulkUpdateSentences]
+    [updateUserParagraphSentencesByTemplate, selectedTemplate]
   );
 
   const handleSynonyms = useCallback(
@@ -239,13 +239,15 @@ const Generate: React.FC = () => {
 
   // Modal for editing senteces
   const renderSentencesModal = useMemo(() => {
-    console.log("editingSentences: ", editingSentences);
+    const paragraph = editingSentences.filter(s => s.sentence)[0].paragraph
     return (
       <EditModal
         selectComponent={navigateToParagraph()}
         editModal={editModal}
         setEditModal={setEditModal}
-        handleSubmit={handleSubmit}
+        handleSubmit={values => {
+          if (paragraph) handleSubmit(values, paragraph);
+        }}
         editingItem={editingSentences.map((s) => s.sentence).join("\n")}
         isLoading={isLoading}
       />
