@@ -8,29 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetContent(c *fiber.Ctx) error {
-	template := c.Query("template")
-	userId := c.Params("userId")
-
-	if len(template) == 0 || len(userId) == 0 {
-		return c.Status(400).JSON(fiber.Map{
-			"data": "Incorrect query or URL params.",
-		})
-	}
-
-	sentences, err := actions.GetSentencesByTemplate(template, userId)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch sentences.",
-		})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"data": sentences,
-	})
-}
-
 func GetDynamicContent(c *fiber.Ctx) error {
 	productName := c.Query("productName")
 	template := c.Query("template")

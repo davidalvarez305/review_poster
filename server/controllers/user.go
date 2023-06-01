@@ -19,9 +19,6 @@ func User(router fiber.Router) {
 	user.Get("/change-password", middleware.ResourceAccessRestriction(handlers.RequestChangePasswordCode))
 	user.Put("/change-password/:code", middleware.ResourceAccessRestriction(handlers.ChangePassword))
 
-	// Content related endpoints
-	user.Get("/:userId/content", middleware.ResourceAccessRestriction(handlers.GetContent))
-
 	// User Words Resources
 	user.Get("/:userId/word", middleware.ResourceAccessRestriction(handlers.GetUserWords))
 	user.Post("/:userId/word", middleware.ResourceAccessRestriction(handlers.CreateUserWord))
@@ -40,6 +37,7 @@ func User(router fiber.Router) {
 	user.Post("/:userId/template", middleware.ResourceAccessRestriction(handlers.CreateUserTemplates))
 	user.Put("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.UpdateUserTemplate))
 	user.Delete("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.DeleteUserTemplate))
+	user.Get("/:userId/template/:templateName/sentence", middleware.ResourceAccessRestriction(handlers.GetUserSentencesByTemplate))
 
 	// User Paragraphs Resource
 	user.Get("/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.GetUserParagraphsByTemplate))
