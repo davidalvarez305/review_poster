@@ -9,9 +9,10 @@ import { BsArrowReturnRight } from "react-icons/bs";
 interface BottomNavigationProps {
   path: string;
   message: string;
+  dropdownComponent?: React.ReactNode;
 }
 
-export const BottomNavigation: React.FC<BottomNavigationProps> = ({ message, path }) => {
+export const BottomNavigation: React.FC<BottomNavigationProps> = ({ message, path, dropdownComponent }) => {
   const navigate = useNavigate();
   function handleClick(values: { destination: string }) {
     navigate("/" + path + "/" + values.destination);
@@ -44,6 +45,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({ message, pat
           >
             Go
           </Button>
+          {dropdownComponent}
         </Box>
       </Form>
     </Formik>
