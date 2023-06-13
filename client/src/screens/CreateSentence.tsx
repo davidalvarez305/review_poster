@@ -20,7 +20,7 @@ export const CreateSentence: React.FC = () => {
   const { createUserParagraphSentencesByTemplate } = useSentencesController();
   const { templates, getUserTemplates } = useTemplatesController();
   const [dropdownTemplate, setDropdownTemplate] = useState("");
-  useLoginRequired();
+  // useLoginRequired();
 
   useEffect(() => {
     getUserTemplates();
@@ -28,19 +28,23 @@ export const CreateSentence: React.FC = () => {
 
   function TemplateSelectDropdown() {
     return (
-      <>
+      <Box
+        sx={{
+          ml: 2,
+          width: 250,
+        }}>
         <CreatableSelect
           name={"dropdown"}
           placeholder={""}
           value={{ value: dropdownTemplate, label: dropdownTemplate }}
           options={templates.map((template) => {
-            return { value: template.name, label: template.name }
+            return { value: template.name, label: template.name };
           })}
           onChange={(value) => {
             if (value) setDropdownTemplate(value.value);
           }}
         />
-      </>
+      </Box>
     );
   }
 

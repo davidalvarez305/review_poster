@@ -1,4 +1,4 @@
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Input } from "@chakra-ui/react";
 import React from "react";
 import { centeredDiv } from "../utils/centeredDiv";
 import { useNavigate } from "react-router-dom";
@@ -30,10 +30,10 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({ message, pat
             flexDirection: "row",
             justifyContent: "space-around",
             gap: 5,
-            w: '400px'
+            w: '700px'
           }}
         >
-          <SimpleInputField label={message} name={"destination"} />
+          <Input w={250} placeholder={message} name={"destination"} id={'destination'} />
           <Button
             variant={"outline"}
             colorScheme={"blue"}
