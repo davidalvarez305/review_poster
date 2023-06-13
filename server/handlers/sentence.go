@@ -260,7 +260,7 @@ func DeleteParagraphSentenceByTemplate(c *fiber.Ctx) error {
 }
 
 func GetUserSentencesByTemplate(c *fiber.Ctx) error {
-	template := c.Query("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
 	if len(template) == 0 || len(userId) == 0 {
