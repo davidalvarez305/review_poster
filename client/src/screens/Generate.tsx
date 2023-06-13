@@ -239,7 +239,8 @@ const Generate: React.FC = () => {
 
   // Modal for editing senteces
   const renderSentencesModal = useMemo(() => {
-    const paragraph = editingSentences.filter(s => s.sentence)[0].paragraph
+    let paragraph: Paragraph | null = null;
+    if (editingSentences.length > 0) paragraph = editingSentences.filter(s => s.sentence)[0].paragraph
     return (
       <EditModal
         selectComponent={navigateToParagraph()}
