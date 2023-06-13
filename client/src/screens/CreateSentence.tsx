@@ -12,7 +12,7 @@ import RequestErrorMessage from "../components/RequestErrorMessage";
 import useTemplatesController from "../hooks/useTemplatesController";
 import useParagraphsController from "../hooks/useParagraphsController";
 import useSentencesController from "../hooks/useSentencesController";
-import CreatableSelect from "react-select/dist/declarations/src/Creatable";
+import CreatableSelect from "react-select/creatable";
 
 export const CreateSentence: React.FC = () => {
   const { isLoading, error } = useFetch();
