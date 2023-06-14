@@ -52,6 +52,7 @@ export const Dictionary: React.FC<Props> = () => {
       <Formik
         initialValues={{ name: "", synonyms: "", id: null }}
         onSubmit={(values, actions) => {
+          console.log(values)
           if (values.name.length > 0 && values.synonyms.length > 0) {
             createUserWords(values);
             actions.resetForm({

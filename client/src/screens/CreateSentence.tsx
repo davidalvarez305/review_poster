@@ -20,7 +20,7 @@ export const CreateSentence: React.FC = () => {
   const { createUserParagraphSentencesByTemplate } = useSentencesController();
   const { templates, getUserTemplates } = useTemplatesController();
   const [dropdownTemplate, setDropdownTemplate] = useState("");
-  // useLoginRequired();
+  useLoginRequired();
 
   useEffect(() => {
     getUserTemplates();

@@ -134,7 +134,7 @@ func Login(user models.User, c *fiber.Ctx) error {
 		return err
 	}
 
-	sess.Set("csrf_token", csrfToken)
+	sess.Set("csrf_token", csrfToken.UUID)
 
 	err = sess.Save()
 

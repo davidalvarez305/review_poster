@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/davidalvarez305/review_poster/server/controllers"
-	"github.com/davidalvarez305/review_poster/server/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -36,7 +35,7 @@ func (server *Server) Start() {
 		AllowCredentials: true,
 	}))
 
-	api := server.App.Group("api", middleware.AuthMiddleware)
+	api := server.App.Group("api")
 
 	controllers.Google(api)
 	controllers.Amazon(api)

@@ -8,7 +8,7 @@ import (
 
 func User(router fiber.Router) {
 
-	user := router.Group("user")
+	user := router.Group("user", middleware.PostMiddleware)
 
 	user.Get("/", middleware.ResourceAccessRestriction(handlers.GetUser))
 	user.Put("/", middleware.ResourceAccessRestriction(handlers.UpdateUser))

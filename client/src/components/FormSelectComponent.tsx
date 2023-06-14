@@ -66,7 +66,8 @@ const FormSelectComponent: React.FC<Props> = ({ options, name }) => {
           value={selectedValue}
           onChange={(e) => {
             setSelectedValue(e);
-            setFieldValue(field.name, field.name === "word" ? e?.label : e?.value);
+            console.log(field.name)
+            setFieldValue(field.name, field.name === "name" ? e?.label : e?.value);
           }}
           options={options.map((op) => {
             return {

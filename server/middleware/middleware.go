@@ -11,9 +11,8 @@ import (
 func AuthMiddleware(c *fiber.Ctx) error {
 	headers := c.GetReqHeaders()
 	auth := headers["Authorization"]
-	path := c.Path()
 
-	if path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" {
+	if os.Getenv("PRODUCTION") == "0" {
 		return c.Next()
 	}
 
@@ -30,8 +29,9 @@ func PostMiddleware(c *fiber.Ctx) error {
 	headers := c.GetReqHeaders()
 	auth := headers["Authorization"]
 	method := c.Method()
+	path := c.Path()
 
-	if method == "GET" {
+	if method == "GET" || path == "/api/user/login" || path == "/api/user/register" || os.Getenv("PRODUCTION") == "0" {
 		return c.Next()
 	}
 
@@ -66,6 +66,7 @@ func ResourceAccessRestriction(fn fiber.Handler) fiber.Handler {
 			return fn(c)
 		}
 
+		// This is for testing in dev
 		if secretAgent == os.Getenv("X_SECRET_AGENT") {
 			return fn(c)
 		}
