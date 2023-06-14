@@ -26,6 +26,26 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+func PostMiddleware(c *fiber.Ctx) error {
+	headers := c.GetReqHeaders()
+	auth := headers["Authorization"]
+	method := c.Method()
+
+	if method == "GET" {
+		return c.Next()
+	}
+
+	token, err := actions.GetCsrfTokenFromSession(c)
+
+	if auth != token || err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"data": "Unauthorized request.",
+		})
+	}
+
+	return c.Next()
+}
+
 func ResourceAccessRestriction(fn fiber.Handler) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		protectedRoutes := []string{"word", "template", "sentence", "paragraph", "synonym", "content", "dictionary"}

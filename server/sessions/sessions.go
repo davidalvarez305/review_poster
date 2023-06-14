@@ -21,13 +21,13 @@ func Init() *session.Store {
 		Database:   "fiber",
 		Table:      "fiber_storage",
 		SslMode:    "disable",
-		GCInterval: 60 * 60 * 24 * 365 * time.Second,
+		GCInterval: 1 * time.Hour,
 	})
 
 	key := fmt.Sprintf("cookie:%s", os.Getenv("COOKIE_NAME"))
 
 	store := session.New(session.Config{
-		Expiration:     24 * 365 * time.Hour,
+		Expiration:     1 * time.Hour,
 		Storage:        storage,
 		KeyLookup:      key,
 		CookieSameSite: "lax",

@@ -128,6 +128,14 @@ func Login(user models.User, c *fiber.Ctx) error {
 
 	sess.Set("userId", user.ID)
 
+	csrfToken, err := generateToken(user.ID)
+
+	if err != nil {
+		return err
+	}
+
+	sess.Set("csrf_token", csrfToken)
+
 	err = sess.Save()
 
 	return err
@@ -231,4 +239,24 @@ func SendGmail(user models.User, uuidCode string) error {
 	}
 
 	return nil
+}
+
+func GetCsrfTokenFromSession(c *fiber.Ctx) (string, error) {
+	var token string
+
+	sess, err := sessions.Sessions.Get(c)
+
+	if err != nil {
+		return token, err
+	}
+
+	csrf_token := sess.Get("csrf_token")
+
+	if csrf_token == nil {
+		return token, errors.New("token not found")
+	}
+
+	token = fmt.Sprintf("%v", csrf_token)
+
+	return token, nil
 }

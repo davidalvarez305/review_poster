@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"errors"
-	"os"
 	"time"
 
 	"github.com/davidalvarez305/review_poster/server/actions"
@@ -26,7 +24,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to create user.",
 		})
 	}
 
@@ -39,18 +37,26 @@ func GetUser(c *fiber.Ctx) error {
 	user, err := actions.GetUserFromSession(c)
 
 	if err != nil {
-		return c.Status(401).JSON(fiber.Map{
-			"data": err.Error(),
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Could not get user from session.",
 		})
 	}
 
 	if user.Email == "" {
-		return c.Status(401).JSON(fiber.Map{
-			"data": errors.New("no user found"),
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Email not found.",
 		})
 	}
 
-	user.AuthHeaderString = os.Getenv("AUTH_HEADER_STRING")
+	token, err := actions.GetCsrfTokenFromSession(c)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Token could not be retrieved from session.",
+		})
+	}
+
+	user.AuthHeaderString = token
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": user,
@@ -62,7 +68,7 @@ func Logout(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Could not log out.",
 		})
 	}
 
@@ -82,7 +88,7 @@ func Logout(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to destroy session.",
 		})
 	}
 
@@ -97,7 +103,7 @@ func Login(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to parse user input.",
 		})
 	}
 
@@ -105,7 +111,7 @@ func Login(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"data": err.Error(),
+			"data": "Failed to login.",
 		})
 	}
 
