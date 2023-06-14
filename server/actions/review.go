@@ -2,18 +2,15 @@ package actions
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/types"
-	"github.com/davidalvarez305/review_poster/server/utils"
-	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 )
 
-func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word, sentences []models.Sentence) ([]models.ReviewPost, error) {
+func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word, paragraphs []models.Paragraph) ([]models.ReviewPost, error) {
 	var readyReviewPosts []models.ReviewPost
 
 	q := types.GoogleQuery{
@@ -82,7 +79,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 				return
 			}
 
-			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary, sentences)
+			reviewPosts, err := createReviewPostsFactory(subCategories, seedKeywords[keywordNum], data, dictionary, paragraphs)
 
 			if err != nil {
 				fmt.Printf("KEYWORD #%v - ERROR IN FACTORY: %+v\n", keywordNum, err)
@@ -172,14 +169,14 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 	return createdPosts, nil
 }
 
-func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []models.Word, sentences []models.Sentence) ([]models.ReviewPost, error) {
+func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []models.Word, paragraphs []models.Paragraph) ([]models.ReviewPost, error) {
 	var posts []models.ReviewPost
 
-	for i := 0; i < len(products); i++ {
+	/* for i := 0; i < len(products); i++ {
 		slug := slug.Make(products[i].Name)
 		replacedImage := strings.Replace(products[i].Image, "UL320", "UL640", 1)
 
-		data := utils.GenerateContentUtil(products[i].Name, dictionary, sentences)
+		data := utils.GenerateContentUtil(products[i].Name, dictionary, paragraphs)
 
 		var subCategoryId int
 		for _, subcategory := range subCategories {
@@ -221,79 +218,7 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 			},
 		}
 		posts = append(posts, post)
-	}
+	} */
 
 	return posts, nil
 }
-
-// What this function does is it limits the requests to OpenAI to 1,000 every 60 seconds.
-// The Requests Per Minute (RPM) Rate Limit is 3,500 but 1,000 requests is roughly $7.
-/* func replaceContentWithChatGPT(posts []models.ReviewPost) []models.ReviewPost {
-	var newReviewPosts []models.ReviewPost
-
-	limit := 1000
-	for i := 0; i < len(posts); {
-		reviewPosts := asyncRequestsToOpenAI(posts[i:limit])
-		newReviewPosts = append(newReviewPosts, reviewPosts...)
-		i = limit
-		limit += 1000
-
-		fmt.Println("STARTING A 60-SECOND PAUSE")
-		time.Sleep(60 * time.Second)
-		fmt.Println("COMPLETED A 60-SECOND PAUSE")
-	}
-
-	return newReviewPosts
-}
-
-func asyncRequestsToOpenAI(posts []models.ReviewPost) []models.ReviewPost {
-	var reviewPosts []models.ReviewPost
-	wg := sync.WaitGroup{}
-	for i := 0; i < len(posts)-1; i++ {
-		wg.Add(1)
-		go func(postNum int) {
-			fmt.Println("REQUESTING CONTENT FROM OPEN AI")
-			var post = posts[postNum]
-
-			additionalContent, err := getAIGeneratedContent("What are people saying about the " + post.Product.ProductName)
-
-			if err != nil {
-				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-				return
-			}
-
-			FAQ_ONE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_1)
-
-			if err != nil {
-				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-				return
-			}
-
-			FAQ_TWO, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_2)
-
-			if err != nil {
-				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-				return
-			}
-
-			FAQ_THREE, err := getAIGeneratedContent("Using college level writing, please re-write the following paragraph: " + post.Faq_Answer_3)
-
-			if err != nil {
-				fmt.Printf("FAILED TO FETCH CONTENT FROM OPEN AI: %+v\n", err)
-				return
-			}
-
-			post.Content = post.Content + utils.GetAIResponse(additionalContent)
-			post.Faq_Answer_1 = utils.GetAIResponse(FAQ_ONE)
-			post.Faq_Answer_2 = utils.GetAIResponse(FAQ_TWO)
-			post.Faq_Answer_3 = utils.GetAIResponse(FAQ_THREE)
-
-			reviewPosts = append(reviewPosts, post)
-
-			wg.Done()
-		}(i)
-	}
-
-	wg.Wait()
-	return reviewPosts
-} */

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/davidalvarez305/review_poster/server/models"
-	"github.com/davidalvarez305/review_poster/server/types"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -73,62 +72,19 @@ func spinnerFunction(productName, matchedWord string, dictionary []models.Word) 
 	return matchedWord
 }
 
-func selectRandomSentences(productName string, sentences []types.ProcessedContent, dictionary []models.Word) types.FinalizedContent {
-	var content types.FinalizedContent
-	for i := 0; i < len(sentences); i++ {
-		content.ReviewPostTitle = processSentence(productName, sentences[i].ReviewPostTitle[rand.Intn(len(sentences[i].ReviewPostTitle))], dictionary)
-		content.ReviewPostContent = processSentence(productName, sentences[i].ReviewPostContent[rand.Intn(len(sentences[i].ReviewPostContent))], dictionary)
-		content.ReviewPostHeadline = processSentence(productName, sentences[i].ReviewPostHeadline[rand.Intn(len(sentences[i].ReviewPostHeadline))], dictionary)
-		content.ReviewPostIntro = processSentence(productName, sentences[i].ReviewPostIntro[rand.Intn(len(sentences[i].ReviewPostIntro))], dictionary)
-		content.ReviewPostDescription = processSentence(productName, sentences[i].ReviewPostDescription[rand.Intn(len(sentences[i].ReviewPostDescription))], dictionary)
-		content.ReviewPostProductLabel = processSentence(productName, sentences[i].ReviewPostProductLabel[rand.Intn(len(sentences[i].ReviewPostProductLabel))], dictionary)
-		content.ReviewPostProductDescription = processSentence(productName, sentences[i].ReviewPostProductDescription[rand.Intn(len(sentences[i].ReviewPostProductDescription))], dictionary)
-		content.ReviewPostFaq_Answer_1 = processSentence(productName, sentences[i].ReviewPostFaq_Answer_1[rand.Intn(len(sentences[i].ReviewPostFaq_Answer_1))], dictionary)
-		content.ReviewPostFaq_Answer_2 = processSentence(productName, sentences[i].ReviewPostFaq_Answer_2[rand.Intn(len(sentences[i].ReviewPostFaq_Answer_2))], dictionary)
-		content.ReviewPostFaq_Answer_3 = processSentence(productName, sentences[i].ReviewPostFaq_Answer_3[rand.Intn(len(sentences[i].ReviewPostFaq_Answer_3))], dictionary)
-		content.ReviewPostFaq_Question_1 = processSentence(productName, sentences[i].ReviewPostFaq_Question_1[rand.Intn(len(sentences[i].ReviewPostFaq_Question_1))], dictionary)
-		content.ReviewPostFaq_Question_2 = processSentence(productName, sentences[i].ReviewPostFaq_Question_2[rand.Intn(len(sentences[i].ReviewPostFaq_Question_2))], dictionary)
-		content.ReviewPostFaq_Question_3 = processSentence(productName, sentences[i].ReviewPostFaq_Question_3[rand.Intn(len(sentences[i].ReviewPostFaq_Question_3))], dictionary)
+func selectRandomSentences(productName string, paragraphs []models.Paragraph, dictionary []models.Word) map[string]string {
+	content := make(map[string]string, len(paragraphs))
+	for i := 0; i < len(paragraphs); i++ {
+		if len(paragraphs[i].Sentences) == 0 {
+			continue
+		}
+		randomSentence := paragraphs[i].Sentences[rand.Intn(len(paragraphs[i].Sentences))].Sentence
+		content[paragraphs[i].Name] = processSentence(productName, randomSentence, dictionary)
 	}
 	return content
 }
 
 // In the future, this might have to be re-worked.
-func GenerateContentUtil(productName string, dictionary []models.Word, sentences []models.Sentence) types.FinalizedContent {
-	var content []types.ProcessedContent
-	var finalContent types.FinalizedContent
-
-	for i := 0; i < len(sentences); i++ {
-		a := filterSentences(sentences, "ReviewPostTitle")
-		b := filterSentences(sentences, "ReviewPostContent")
-		c := filterSentences(sentences, "ReviewPostHeadline")
-		d := filterSentences(sentences, "ReviewPostIntro")
-		e := filterSentences(sentences, "ReviewPostDescription")
-		f := filterSentences(sentences, "ReviewPostProductLabel")
-		g := filterSentences(sentences, "ReviewPostProductDescription")
-		h := filterSentences(sentences, "ReviewPostFaq_Answer_1")
-		j := filterSentences(sentences, "ReviewPostFaq_Answer_2")
-		k := filterSentences(sentences, "ReviewPostFaq_Answer_3")
-		l := filterSentences(sentences, "ReviewPostFaq_Question_1")
-		m := filterSentences(sentences, "ReviewPostFaq_Question_2")
-		n := filterSentences(sentences, "ReviewPostFaq_Question_3")
-		var final = types.ProcessedContent{
-			ReviewPostTitle:              a,
-			ReviewPostContent:            b,
-			ReviewPostHeadline:           c,
-			ReviewPostIntro:              d,
-			ReviewPostDescription:        e,
-			ReviewPostProductLabel:       f,
-			ReviewPostProductDescription: g,
-			ReviewPostFaq_Answer_1:       h,
-			ReviewPostFaq_Answer_2:       j,
-			ReviewPostFaq_Answer_3:       k,
-			ReviewPostFaq_Question_1:     l,
-			ReviewPostFaq_Question_2:     m,
-			ReviewPostFaq_Question_3:     n,
-		}
-		content = append(content, final)
-	}
-	finalContent = selectRandomSentences(productName, content, dictionary)
-	return finalContent
+func GenerateContentUtil(productName string, dictionary []models.Word, paragraphs []models.Paragraph) map[string]string {
+	return selectRandomSentences(productName, paragraphs, dictionary)
 }

@@ -292,9 +292,7 @@ func GetUserJoinedSentencesByParagraph(c *fiber.Ctx) error {
 		})
 	}
 
-	var paragraph []models.Paragraph
-
-	err := database.DB.Preload("Sentences").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_id = ? AND template.name = ?", userId, template).Find(&paragraph).Error
+	paragraph, err := actions.GetUserJoinedSentencesByParagraph(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

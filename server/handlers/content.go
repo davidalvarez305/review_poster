@@ -11,7 +11,7 @@ import (
 func GetDynamicContent(c *fiber.Ctx) error {
 	productName := c.Query("productName")
 	template := c.Query("template")
-	userId := c.Params("userId")
+	userId := c.Query("userId")
 
 	if len(template) == 0 || len(productName) == 0 {
 		return c.Status(400).JSON(fiber.Map{
@@ -31,7 +31,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 	}
 
 	// Second get the sentences
-	sentences, err := actions.GetSentencesByTemplate(template, userId)
+	paragraphs, err := actions.GetUserJoinedSentencesByParagraph(template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -39,7 +39,7 @@ func GetDynamicContent(c *fiber.Ctx) error {
 		})
 	}
 
-	content := utils.GenerateContentUtil(productName, words, sentences)
+	content := utils.GenerateContentUtil(productName, words, paragraphs)
 
 	return c.Status(200).JSON(fiber.Map{
 		"data": content,

@@ -17,6 +17,14 @@ func GetUserParagraphsByTemplate(template, userId string) ([]models.Paragraph, e
 	return paragraphs, nil
 }
 
+func GetUserJoinedSentencesByParagraph(template, userId string) ([]models.Paragraph, error) {
+	var paragraph []models.Paragraph
+
+	err := database.DB.Preload("Sentences").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_id = ? AND template.name = ?", userId, template).Find(&paragraph).Error
+
+	return paragraph, err
+}
+
 // Takes structs from the client & deletes them. Does not return records from DB.
 func DeleteBulkParagraphs(clientParagraphs, existingParagraphs []models.Paragraph) error {
 	var paragraphs []models.Paragraph

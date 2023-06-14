@@ -36,7 +36,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	sentences, err := actions.GetSentencesByTemplate(body.Template, userId)
+	paragraphs, err := actions.GetUserJoinedSentencesByParagraph(body.Template, userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -44,7 +44,7 @@ func CreatePosts(c *fiber.Ctx) error {
 		})
 	}
 
-	products, err := actions.CreateReviewPosts(body.Keyword, body.GroupName, words, sentences)
+	products, err := actions.CreateReviewPosts(body.Keyword, body.GroupName, words, paragraphs)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

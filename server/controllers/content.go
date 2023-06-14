@@ -9,5 +9,5 @@ import (
 func DynamicContent(router fiber.Router) {
 
 	content := router.Group("content", middleware.AuthMiddleware)
-	content.Get("/dynamic", handlers.GetDynamicContent)
+	content.Get("/", handlers.GetDynamicContent)
 }
