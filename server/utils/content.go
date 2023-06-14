@@ -68,7 +68,7 @@ func selectRandomSentences(productName string, paragraphs []models.Paragraph, di
 			continue
 		}
 		randomSentence := paragraphs[i].Sentences[rand.Intn(len(paragraphs[i].Sentences))].Sentence
-		content[paragraphs[i].Name] = processSentence(productName, randomSentence, dictionary)
+		content[paragraphs[i].Name] = randomSentence
 	}
 	return content
 }

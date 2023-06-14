@@ -2,11 +2,14 @@ package actions
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/davidalvarez305/review_poster/server/database"
 	"github.com/davidalvarez305/review_poster/server/models"
 	"github.com/davidalvarez305/review_poster/server/types"
+	"github.com/davidalvarez305/review_poster/server/utils"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm/clause"
 )
 
@@ -172,7 +175,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryName string, products []AmazonSearchResultsPage, dictionary []models.Word, paragraphs []models.Paragraph) ([]models.ReviewPost, error) {
 	var posts []models.ReviewPost
 
-	/* for i := 0; i < len(products); i++ {
+	for i := 0; i < len(products); i++ {
 		slug := slug.Make(products[i].Name)
 		replacedImage := strings.Replace(products[i].Image, "UL320", "UL640", 1)
 
@@ -191,19 +194,19 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 		}
 
 		post := models.ReviewPost{
-			Title:               data.ReviewPostTitle,
+			Title:               data["ReviewPostTitle"],
 			SubCategoryID:       subCategoryId,
 			Slug:                slug,
-			Content:             data.ReviewPostContent,
-			Headline:            data.ReviewPostHeadline,
-			Intro:               data.ReviewPostIntro,
-			Description:         data.ReviewPostDescription,
-			Faq_Answer_1:        data.ReviewPostFaq_Answer_1,
-			Faq_Answer_2:        data.ReviewPostFaq_Answer_2,
-			Faq_Answer_3:        data.ReviewPostFaq_Answer_3,
-			Faq_Question_1:      data.ReviewPostFaq_Question_1,
-			Faq_Question_2:      data.ReviewPostFaq_Question_2,
-			Faq_Question_3:      data.ReviewPostFaq_Question_3,
+			Content:             data["ReviewPostContent"],
+			Headline:            data["ReviewPostHeadline"],
+			Intro:               data["ReviewPostIntro"],
+			Description:         data["ReviewPostDescription"],
+			Faq_Answer_1:        data["ReviewPostFaq_Answer_1"],
+			Faq_Answer_2:        data["ReviewPostFaq_Answer_2"],
+			Faq_Answer_3:        data["ReviewPostFaq_Answer_3"],
+			Faq_Question_1:      data["ReviewPostFaq_Question_1"],
+			Faq_Question_2:      data["ReviewPostFaq_Question_2"],
+			Faq_Question_3:      data["ReviewPostFaq_Question_3"],
 			ProductAffiliateUrl: products[i].Link,
 			Product: &models.Product{
 				AffiliateUrl:       products[i].Link,
@@ -211,14 +214,14 @@ func createReviewPostsFactory(subCategories []models.SubCategory, subCategoryNam
 				ProductReviews:     products[i].Reviews,
 				ProductRatings:     products[i].Rating,
 				ProductImage:       replacedImage,
-				ProductLabel:       data.ReviewPostProductLabel,
+				ProductLabel:       data["ReviewPostProductLabel"],
 				ProductName:        products[i].Name,
-				ProductDescription: data.ReviewPostProductDescription,
+				ProductDescription: data["ReviewPostProductDescription"],
 				ProductImageAlt:    strings.ToLower(products[i].Name),
 			},
 		}
 		posts = append(posts, post)
-	} */
+	}
 
 	return posts, nil
 }
