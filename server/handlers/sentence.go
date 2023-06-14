@@ -281,3 +281,28 @@ func GetUserSentencesByTemplate(c *fiber.Ctx) error {
 		"data": sentences,
 	})
 }
+
+func GetUserJoinedSentencesByParagraph(c *fiber.Ctx) error {
+	template := c.Params("templateName")
+	userId := c.Params("userId")
+
+	if len(template) == 0 || len(userId) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Incorrect query or URL params.",
+		})
+	}
+
+	var paragraph []models.Paragraph
+
+	err := database.DB.Preload("Sentences").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_id = ? AND template.name = ?", userId, template).Find(&paragraph).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to fetch paragraphs.",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": paragraph,
+	})
+}

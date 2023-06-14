@@ -38,6 +38,7 @@ func User(router fiber.Router) {
 	user.Put("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.UpdateUserTemplate))
 	user.Delete("/:userId/template/:templateId", middleware.ResourceAccessRestriction(handlers.DeleteUserTemplate))
 	user.Get("/:userId/template/:templateName/sentence", middleware.ResourceAccessRestriction(handlers.GetUserSentencesByTemplate))
+	user.Get("/:userId/template/:templateName/paragraph/sentence", middleware.ResourceAccessRestriction(handlers.GetUserJoinedSentencesByParagraph))
 
 	// User Paragraphs Resource
 	user.Get("/:userId/template/:templateName/paragraph", middleware.ResourceAccessRestriction(handlers.GetUserParagraphsByTemplate))

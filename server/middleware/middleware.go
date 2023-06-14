@@ -60,13 +60,17 @@ func ResourceAccessRestriction(fn fiber.Handler) fiber.Handler {
 			}
 		}
 
+		if os.Getenv("PRODUCTION") == "0" {
+			return fn(c)
+		}
+
 		// If request was not made to one of the protected routes, continue on.
 		// This is for login, register, etc...
 		if len(found) == 0 {
 			return fn(c)
 		}
 
-		// This is for testing in dev
+		// This is so that admin user can access any resource
 		if secretAgent == os.Getenv("X_SECRET_AGENT") {
 			return fn(c)
 		}
