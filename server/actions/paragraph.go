@@ -8,7 +8,7 @@ import (
 func GetUserParagraphsByTemplate(template, userId string) ([]models.Paragraph, error) {
 	var paragraphs []models.Paragraph
 
-	err := database.DB.Preload("Template.User").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_.id = ? AND template.name = ?", userId, template).Find(&paragraphs).Error
+	err := database.DB.Preload("Template.User").Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.user_id = ? AND template.name = ?", userId, template).Find(&paragraphs).Error
 
 	if err != nil {
 		return paragraphs, err

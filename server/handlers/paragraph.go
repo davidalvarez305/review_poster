@@ -9,7 +9,7 @@ import (
 )
 
 func GetUserParagraphsByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
 	// Return paragraphs filtered by template if there's a query.
@@ -33,7 +33,7 @@ func GetUserParagraphsByTemplate(c *fiber.Ctx) error {
 }
 
 func CreateUserParagraphsByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
 	if len(template) == 0 {
@@ -74,7 +74,7 @@ func CreateUserParagraphsByTemplate(c *fiber.Ctx) error {
 }
 
 func UpdateUserParagraphsByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
 	if len(template) == 0 {
@@ -118,7 +118,7 @@ func UpdateUserParagraphsByTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteUserParagraphsByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 
 	if len(template) == 0 {
@@ -163,7 +163,7 @@ func DeleteUserParagraphsByTemplate(c *fiber.Ctx) error {
 
 func UpdateUserParagraphByTemplate(c *fiber.Ctx) error {
 	var paragraph models.Paragraph
-	template := c.Params("template")
+	template := c.Params("templateName")
 	paragraphId := c.Params("paragraphId")
 
 	if len(template) == 0 || len(paragraphId) == 0 {
@@ -224,7 +224,7 @@ func UpdateUserParagraphByTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteUserParagraphByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 	paragraphId := c.Params("paragraphId")
 

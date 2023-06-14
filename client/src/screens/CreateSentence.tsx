@@ -20,11 +20,14 @@ export const CreateSentence: React.FC = () => {
   const { createUserParagraphSentencesByTemplate } = useSentencesController();
   const { templates, getUserTemplates } = useTemplatesController();
   const [dropdownTemplate, setDropdownTemplate] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   useLoginRequired();
 
   useEffect(() => {
     getUserTemplates();
-  }, [getUserTemplates]);
+    if (selectedTemplate.length > 0)
+      getUserParagraphsByTemplate(selectedTemplate);
+  }, [getUserTemplates, selectedTemplate, getUserParagraphsByTemplate]);
 
   function TemplateSelectDropdown() {
     return (
@@ -32,7 +35,8 @@ export const CreateSentence: React.FC = () => {
         sx={{
           ml: 2,
           width: 250,
-        }}>
+        }}
+      >
         <CreatableSelect
           name={"dropdown"}
           placeholder={""}
@@ -72,7 +76,8 @@ export const CreateSentence: React.FC = () => {
 
           if (paragraph && paragraph.template)
             getUserParagraphsByTemplate(paragraph.template.name);
-        }}>
+        }}
+      >
         <Form>
           <Box sx={{ ...centeredDiv, gap: 2, height: "100%", my: 5 }}>
             <Box
@@ -81,9 +86,14 @@ export const CreateSentence: React.FC = () => {
                 width: "100%",
                 height: "20%",
                 flexDirection: "row",
-              }}>
+              }}
+            >
               <FormSelectComponent name={"paragraph"} options={paragraphs} />
-              <FormSelectComponent name={"template"} options={templates} />
+              <FormSelectComponent
+                name={"template"}
+                options={templates}
+                onChange={e => setSelectedTemplate(templates.filter((t) => t.id === Number(e?.value))[0].name)}
+              />
             </Box>
             <Box>
               <LargeInputBox label="Sentence" name="sentence" />
@@ -94,7 +104,8 @@ export const CreateSentence: React.FC = () => {
               size={"md"}
               type={"submit"}
               isLoading={isLoading}
-              loadingText={"Submitting"}>
+              loadingText={"Submitting"}
+            >
               Submit
             </Button>
           </Box>

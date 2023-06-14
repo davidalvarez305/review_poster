@@ -8,15 +8,17 @@ import { useEffect, useMemo, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { useField, useFormikContext } from "formik";
+import { SingleValue } from "react-select";
 
 type SelectType = { value: string; label: string };
 
 interface Props {
   options: any[];
   name: string;
+  onChange?: (e: SingleValue<SelectType>) => void | undefined
 }
 
-const FormSelectComponent: React.FC<Props> = ({ options, name }) => {
+const FormSelectComponent: React.FC<Props> = ({ options, name, onChange }) => {
   let initialProps = useMemo(
     () =>
       Object.create({
@@ -66,8 +68,8 @@ const FormSelectComponent: React.FC<Props> = ({ options, name }) => {
           value={selectedValue}
           onChange={(e) => {
             setSelectedValue(e);
-            console.log(field.name)
             setFieldValue(field.name, field.name === "name" ? e?.label : e?.value);
+            if (onChange) onChange(e);
           }}
           options={options.map((op) => {
             return {

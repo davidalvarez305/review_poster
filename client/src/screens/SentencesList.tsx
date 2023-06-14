@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Layout from "../layout/Layout";
 import {
   Box,
@@ -12,17 +12,12 @@ import {
 import useLoginRequired from "../hooks/useLoginRequired";
 import EditModal from "../components/EditModal";
 import TableRow from "../components/TableRow";
-import useFetch from "../hooks/useFetch";
 import { Sentence } from "../types/general";
 import RequestErrorMessage from "../components/RequestErrorMessage";
-import { UserContext } from "../context/UserContext";
 import useSentencesController from "../hooks/useSentencesController";
-import useParagraphsController from "../hooks/useParagraphsController";
 
 export const SentencesList: React.FC = () => {
   useLoginRequired();
-  const { makeRequest } = useFetch();
-  const { user } = useContext(UserContext);
   const {
     sentences,
     isLoading,
@@ -32,41 +27,26 @@ export const SentencesList: React.FC = () => {
     updateParagraphSentenceByTemplate,
     getUserParagraphSentencesByTemplate,
   } = useSentencesController();
-  const { paragraphs, getUserParagraphsByTemplate } = useParagraphsController();
 
   const [bulkModal, setBulkModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [editingSentence, setEditingSentence] = useState<Sentence | null>(null);
-  const [selectedParagraph, setSelectedParagraph] = useState<number | null>(
-    null
-  );
   const paragraph = useMemo((): string | undefined => {
     return window.location.pathname.split("/paragraph/")[1]
   }, []);
   const template = useMemo((): string | undefined => {
-    return window.location.pathname.split("/template/")[1]
+    return window.location.pathname.split("/")[2]
   }, []);
 
   useEffect(() => {
-    if (bulkModal) {
-      // @TODO --> FIX THIS LOGIC
-      getUserParagraphsByTemplate("ReviewPost");
-    } else {
-      setSelectedParagraph(null);
-    }
-  }, [bulkModal, makeRequest, user.id, getUserParagraphsByTemplate]);
-
-  useEffect(() => {
-    if (paragraph) {
-      getUserParagraphSentencesByTemplate(paragraph, "ReviewPost");
-    }
-  }, [paragraph, getUserParagraphSentencesByTemplate]);
+    if (paragraph && template) getUserParagraphSentencesByTemplate(paragraph, template);
+  }, [paragraph, getUserParagraphSentencesByTemplate, template]);
 
   const headers = ["id", "sentence", "action"];
 
   function handleSubmitBulk(values: { input: string }) {
-    if (selectedParagraph) {
-      updateUserParagraphSentencesByTemplate({ ...values }, paragraphs[selectedParagraph].template?.name!, paragraphs[selectedParagraph].name);
+    if (paragraph && template) {
+      updateUserParagraphSentencesByTemplate({ ...values }, paragraph, template);
     }
 
     setBulkModal(false);
