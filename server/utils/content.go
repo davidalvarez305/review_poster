@@ -10,17 +10,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-func filterSentences(sentences []models.Sentence, paragraph string) []string {
-	var s []string
-	for i := 0; i < len(sentences); i++ {
-		if sentences[i].Paragraph.Name == paragraph {
-
-			s = append(s, sentences[i].Sentence)
-		}
-	}
-	return s
-}
-
 func processSentence(productName, sentence string, dictionary []models.Word) string {
 	var s string
 
