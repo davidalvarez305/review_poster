@@ -236,7 +236,7 @@ func DeleteUserParagraphByTemplate(c *fiber.Ctx) error {
 
 	var paragraph models.Paragraph
 
-	err := database.DB.Joins("INNER JOIN word ON template.id = paragraph.template_id").Where("template.name = ? AND template.user_id = ? AND paragraph.id = ?", template, userId, paragraphId).First(&paragraph).Error
+	err := database.DB.Joins("INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ? AND template.user_id = ? AND paragraph.id = ?", template, userId, paragraphId).First(&paragraph).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
