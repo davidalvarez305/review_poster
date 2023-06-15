@@ -61,6 +61,13 @@ func CreateUserTemplates(c *fiber.Ctx) error {
 func UpdateUserTemplate(c *fiber.Ctx) error {
 	var template models.Template
 	userId := c.Params("userId")
+	templateId := c.Params("templateId")
+
+	if len(templateId) == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "No template in params.",
+		})
+	}
 
 	err := c.BodyParser(&template)
 
@@ -74,7 +81,7 @@ func UpdateUserTemplate(c *fiber.Ctx) error {
 	templateName := template.Name
 
 	// Query to find record
-	err = database.DB.Where("user_id = ? AND id = ?", userId, template.ID).First(&template).Error
+	err = database.DB.Where("user_id = ? AND id = ?", userId, templateId).First(&template).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -109,7 +116,7 @@ func UpdateUserTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteUserTemplate(c *fiber.Ctx) error {
-	templateId := c.Query("template")
+	templateId := c.Params("templateId")
 	userId := c.Params("userId")
 	var template models.Template
 

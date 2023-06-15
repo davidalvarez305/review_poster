@@ -217,7 +217,7 @@ func UpdateParagraphSentenceByTemplate(c *fiber.Ctx) error {
 }
 
 func DeleteParagraphSentenceByTemplate(c *fiber.Ctx) error {
-	template := c.Params("template")
+	template := c.Params("templateName")
 	userId := c.Params("userId")
 	paragraph := c.Params("paragraphName")
 	sentenceId := c.Params("sentenceId")
