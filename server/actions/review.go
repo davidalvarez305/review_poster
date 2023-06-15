@@ -169,6 +169,42 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 		createdPosts = append(createdPosts, slicedList...)
 	}
 
+	// Delete all sub_categories & categories which did not have associated posts
+	var categories []models.Category
+	err = database.DB.Preload("Category.SubCategories.ReviewPosts").Find(&categories).Error
+	if err != nil {
+		fmt.Printf("Error Preloading Categories, Subcategories & Review Posts: %+v\n", err)
+		return createdPosts, err
+	}
+
+	var deleteCategories []models.Category
+	var deleteSubCategories []models.SubCategory
+
+	for _, category := range categories {
+		if len(category.SubCategories) == 0 {
+			deleteCategories = append(deleteCategories, category)
+			continue
+		}
+
+		for _, subCategory := range category.SubCategories {
+			if len(subCategory.ReviewPosts) == 0 {
+				deleteSubCategories = append(deleteSubCategories, *subCategory)
+			}
+		}
+	}
+
+	err = database.DB.Delete(&deleteCategories).Error
+	if err != nil {
+		fmt.Printf("Error Deleting Categories: %+v\n", err)
+		return createdPosts, err
+	}
+
+	err = database.DB.Delete(&deleteSubCategories).Error
+	if err != nil {
+		fmt.Printf("Error Deleting SubCategories: %+v\n", err)
+		return createdPosts, err
+	}
+
 	return createdPosts, nil
 }
 
