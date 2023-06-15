@@ -230,7 +230,7 @@ func DeleteParagraphSentenceByTemplate(c *fiber.Ctx) error {
 
 	var existingSentence models.Sentence
 
-	err := database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ? AND template.user_id = ? AND id = ?", template, userId, sentenceId).First(&existingSentence).Error
+	err := database.DB.Joins("INNER JOIN paragraph ON paragraph.id = sentence.paragraph_id INNER JOIN template ON template.id = paragraph.template_id").Where("template.name = ? AND template.user_id = ? AND sentence.id = ?", template, userId, sentenceId).First(&existingSentence).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

@@ -146,7 +146,7 @@ func DeleteUserSynonymByWord(c *fiber.Ctx) error {
 
 	var synonym models.Synonym
 
-	err := database.DB.Joins("INNER JOIN word ON word.id = synonym.word_id").Where("word.name = ? AND word.user_id = ? AND id = ?", word, userId, synonymId).First(&synonym).Error
+	err := database.DB.Joins("INNER JOIN word ON word.id = synonym.word_id").Where("word.name = ? AND word.user_id = ? AND synonym.id = ?", word, userId, synonymId).First(&synonym).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
