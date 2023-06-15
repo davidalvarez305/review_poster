@@ -10,6 +10,7 @@ import createSentencesFactory from "../utils/createSentencesFactory";
 export default function useSentencesController() {
   const { user } = useContext(UserContext);
   const [sentences, setSentences] = useState<Sentence[]>([]);
+  const [joinedSentences, setJoinedSentences] = useState<Paragraph[]>([]);
   const { isLoading, makeRequest, error } = useFetch();
   const FETCH_PARAMS = useMemo(() => {
     return {
@@ -146,9 +147,21 @@ export default function useSentencesController() {
     );
   }, [FETCH_PARAMS, makeRequest, user.id]);
 
+  const GetUserJoinedSentencesByParagraph = useCallback((template: string) => {
+    makeRequest(
+      {
+        ...FETCH_PARAMS,
+        method: "GET",
+        url: USER_ROUTE + `/${user.id}/template/${template}/paragraph/sentence`,
+      },
+      (res) => setJoinedSentences(res.data.data)
+    );
+  }, [FETCH_PARAMS, makeRequest, user.id]);
+
   return {
     setSentences,
     sentences,
+    joinedSentences,
     isLoading,
     error,
     updateUserParagraphSentencesByTemplate,
@@ -157,6 +170,7 @@ export default function useSentencesController() {
     createUserParagraphSentencesByTemplate,
     updateParagraphSentenceByTemplate,
     getUserParagraphSentencesByTemplate,
-    getUserSentencesByTemplate
+    getUserSentencesByTemplate,
+    GetUserJoinedSentencesByParagraph
   };
 }

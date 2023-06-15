@@ -15,7 +15,13 @@ import { UserContext } from "../context/UserContext";
 import useFetch from "../hooks/useFetch";
 import useLoginRequired from "../hooks/useLoginRequired";
 import Layout from "../layout/Layout";
-import { Dictionary, Paragraph, Sentence, SpunContent, Word } from "../types/general";
+import {
+  Dictionary,
+  Paragraph,
+  Sentence,
+  SpunContent,
+  Word,
+} from "../types/general";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import { extractTags } from "../utils/extractTags";
 import { getRandomInt } from "../utils/getRandomInt";
@@ -44,8 +50,11 @@ const Generate: React.FC = () => {
   const [seeTagged, setSeeTagged] = useState(false);
   const { templates, getUserTemplates } = useTemplatesController();
   const { words, getUserWords } = useWordsController();
-  const { sentences, updateUserParagraphSentencesByTemplate, getUserSentencesByTemplate } =
-    useSentencesController();
+  const {
+    joinedSentences,
+    updateUserParagraphSentencesByTemplate,
+    GetUserJoinedSentencesByParagraph,
+  } = useSentencesController();
   const { updateUserSynonymsByWord, getUserSynonymsByWord } =
     useSynonymsController();
   useLoginRequired();
@@ -55,7 +64,7 @@ const Generate: React.FC = () => {
     if (selectedTemplate.length === 0) {
       getUserTemplates();
     } else {
-      getUserSentencesByTemplate(selectedTemplate);
+      GetUserJoinedSentencesByParagraph(selectedTemplate);
 
       // Pull dictionary
       makeRequest(
@@ -76,14 +85,18 @@ const Generate: React.FC = () => {
     selectedTemplate,
     user.id,
     getUserTemplates,
-    getUserSentencesByTemplate
+    GetUserJoinedSentencesByParagraph,
   ]);
 
   const handleSubmit = useCallback(
     (values: { input: string }, paragraph: Paragraph) => {
       /* const template_id = editingSentences[0].paragraph!.template_id;
       const paragraph_id = editingSentences[0].paragraph_id; */
-      updateUserParagraphSentencesByTemplate({ ...values }, paragraph.name, selectedTemplate);
+      updateUserParagraphSentencesByTemplate(
+        { ...values },
+        paragraph.name,
+        selectedTemplate
+      );
 
       setEditingSentences([]);
       setEditingSentencesParagraph("");
@@ -143,31 +156,17 @@ const Generate: React.FC = () => {
     }
   };
 
-  function selectContent(sentences: Sentence[]): SpunContent[] {
+  function selectContent(paragraphs: Paragraph[]): SpunContent[] {
     let data: SpunContent[] = [];
 
-    let adjustedSentences: { [key: string]: string[] } = {};
+    for (const paragraph of paragraphs) {
+      if (!paragraph.sentences || paragraph.sentences.length === 0) continue;
 
-    for (let i = 0; i < sentences.length; i++) {
-      if (!sentences[i].paragraph) continue;
-
-      const key = sentences[i].paragraph!.name;
-      if (adjustedSentences[key]) {
-        adjustedSentences[key] = [
-          ...adjustedSentences[key],
-          sentences[i].sentence,
-        ];
-      } else {
-        adjustedSentences[key] = [sentences[i].sentence];
-      }
-    }
-
-    for (const [key, value] of Object.entries(adjustedSentences)) {
-      const sentence = value[getRandomInt(value.length)];
+      const sentence = paragraph.sentences[getRandomInt(paragraph.sentences.length)];
 
       data.push({
-        paragraph: key,
-        sentence: sentence,
+        paragraph: paragraph.name,
+        sentence: sentence.sentence,
         order: 0,
       });
     }
@@ -202,7 +201,7 @@ const Generate: React.FC = () => {
         <Button
           variant={"outline"}
           colorScheme={"blue"}
-          onClick={() => setGeneratedContent(selectContent(sentences))}
+          onClick={() => setGeneratedContent(selectContent(joinedSentences))}
         >
           Generate
         </Button>
@@ -235,18 +234,19 @@ const Generate: React.FC = () => {
         </Box>
       </Box>
     );
-  }, [sentences, selectedTemplate, templates]);
+  }, [joinedSentences, selectedTemplate, templates]);
 
   // Modal for editing senteces
   const renderSentencesModal = useMemo(() => {
     let paragraph: Paragraph | null = null;
-    if (editingSentences.length > 0) paragraph = editingSentences.filter(s => s.sentence)[0].paragraph
+    if (editingSentences.length > 0)
+      paragraph = editingSentences.filter((s) => s.sentence)[0].paragraph;
     return (
       <EditModal
         selectComponent={navigateToParagraph()}
         editModal={editModal}
         setEditModal={setEditModal}
-        handleSubmit={values => {
+        handleSubmit={(values) => {
           if (paragraph) handleSubmit(values, paragraph);
         }}
         editingItem={editingSentences.map((s) => s.sentence).join("\n")}
@@ -272,12 +272,7 @@ const Generate: React.FC = () => {
         isLoading={isLoading}
       />
     );
-  }, [
-    editSynonyms.synonyms,
-    handleSynonyms,
-    isLoading,
-    synonymModal,
-  ]);
+  }, [editSynonyms.synonyms, handleSynonyms, isLoading, synonymModal]);
 
   return (
     <Layout>
@@ -293,11 +288,20 @@ const Generate: React.FC = () => {
             }
           }}
           onClickSentence={(content) => {
-            editSentence(
-              sentences.filter(
-                (sentence) => sentence.sentence === content.sentence
-              )[0]
-            );
+            let sentence: Sentence | null = null;
+
+            for (let i = 0; i < joinedSentences.length; i++) {
+              if (!joinedSentences[i].sentences) continue;
+
+              for (let n = 0; n < joinedSentences[i].sentences!.length; n++) {
+                if (joinedSentences[i].sentences![n].sentence === content.sentence) {
+                  sentence = joinedSentences[i].sentences![n];
+                  break;
+                }
+              }
+            }
+
+            if (sentence) editSentence(sentence);
           }}
         />
       </Box>

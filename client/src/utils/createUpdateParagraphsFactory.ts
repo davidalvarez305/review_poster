@@ -16,6 +16,7 @@ export function createUpdateParagraphsFactory(
           template_id,
           order: existingParagraph.order,
           template: null,
+          sentences: null,
         });
         break;
       }
@@ -25,6 +26,7 @@ export function createUpdateParagraphsFactory(
       id: null,
       template_id,
       template: null,
+      sentences: null,
     });
   });
   return paragraphsToKeep;

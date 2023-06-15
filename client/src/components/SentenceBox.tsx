@@ -42,7 +42,7 @@ const SentenceBox: React.FC<Props> = ({
   return (
     <>
       {content.map((spunContent) => {
-        const sentences = spunContent.sentence.split(/[ .?!]/);
+        const sentences = spunContent.sentence.split(/[.?!]/);
         return (
           <div
             onClick={() => {

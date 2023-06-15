@@ -1,4 +1,4 @@
-import { Box, Stack, Button } from "@chakra-ui/react";
+import { Stack, Button } from "@chakra-ui/react";
 import { Form } from "formik";
 import SimpleInputField from "../components/SimpleInputField";
 import RequestErrorMessage from "../components/RequestErrorMessage";

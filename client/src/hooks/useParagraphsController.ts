@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import { useState, useCallback, useContext, useMemo } from "react";
 import { USER_ROUTE } from "../constants";
 import useFetch from "./useFetch";
 import { Paragraph, Template } from "../types/general";

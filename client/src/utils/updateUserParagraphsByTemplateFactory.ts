@@ -24,6 +24,7 @@ export default function updateUserParagraphsByTemplateFactory(
         name: vals[n],
         template_id: userParagraphsByTemplate[0].template_id,
         template: null,
+        sentences: null,
       });
     }
   }

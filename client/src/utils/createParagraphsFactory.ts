@@ -10,6 +10,7 @@ export default function createParagraphsFactory(values: {
       template_id: values.template_id,
       id: null,
       template: null,
+      sentences: null,
     };
   });
 }

@@ -50,6 +50,7 @@ export type Paragraph = {
   order?: number;
   template_id: number;
   template: Template | null;
+  sentences: Sentence[] | null;
 };
 
 export type UpdateParagraph = {

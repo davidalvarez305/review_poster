@@ -19,9 +19,8 @@ const TableRow: React.FC<Props> = ({
 }) => {
   const [tableColumns, setTableColumns] = useState<string[]>(columns);
   useEffect(() => {
-    console.log("rendering table row");
     setTableColumns(columns);
-  }, []);
+  }, [columns]);
   return (
     <Tr>
       {tableColumns.map((column, idx) => {
