@@ -171,7 +171,7 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 
 	// Delete all sub_categories & categories which did not have associated posts
 	var categories []models.Category
-	err = database.DB.Preload("Category.SubCategories.ReviewPosts").Find(&categories).Error
+	err = database.DB.Preload("SubCategories.ReviewPosts").Find(&categories).Error
 	if err != nil {
 		fmt.Printf("Error Preloading Categories, Subcategories & Review Posts: %+v\n", err)
 		return createdPosts, err
@@ -193,16 +193,20 @@ func CreateReviewPosts(categoryName, groupName string, dictionary []models.Word,
 		}
 	}
 
-	err = database.DB.Delete(&deleteCategories).Error
-	if err != nil {
-		fmt.Printf("Error Deleting Categories: %+v\n", err)
-		return createdPosts, err
+	if len(deleteCategories) > 0 {
+		err = database.DB.Delete(&deleteCategories).Error
+		if err != nil {
+			fmt.Printf("Error Deleting Categories: %+v\n", err)
+			return createdPosts, err
+		}
 	}
 
-	err = database.DB.Delete(&deleteSubCategories).Error
-	if err != nil {
-		fmt.Printf("Error Deleting SubCategories: %+v\n", err)
-		return createdPosts, err
+	if len(deleteSubCategories) > 0 {
+		err = database.DB.Delete(&deleteSubCategories).Error
+		if err != nil {
+			fmt.Printf("Error Deleting SubCategories: %+v\n", err)
+			return createdPosts, err
+		}
 	}
 
 	return createdPosts, nil

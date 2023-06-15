@@ -56,3 +56,51 @@ func CreatePosts(c *fiber.Ctx) error {
 		"data": len(products),
 	})
 }
+
+func TestCategories(c *fiber.Ctx) error {
+	var categories []models.Category
+	err := database.DB.Preload("SubCategories.ReviewPosts").Find(&categories).Error
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"data": "Failed to create review posts.",
+		})
+	}
+
+	var deleteCategories []models.Category
+	var deleteSubCategories []models.SubCategory
+
+	for _, category := range categories {
+		if len(category.SubCategories) == 0 {
+			deleteCategories = append(deleteCategories, category)
+			continue
+		}
+
+		for _, subCategory := range category.SubCategories {
+			if len(subCategory.ReviewPosts) == 0 {
+				deleteSubCategories = append(deleteSubCategories, *subCategory)
+			}
+		}
+	}
+
+	if len(deleteCategories) > 0 {
+		err = database.DB.Delete(&deleteCategories).Error
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to create review posts.",
+			})
+		}
+	}
+
+	if len(deleteSubCategories) > 0 {
+		err = database.DB.Delete(&deleteSubCategories).Error
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"data": "Failed to create review posts.",
+			})
+		}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": "EZ.",
+	})
+}
