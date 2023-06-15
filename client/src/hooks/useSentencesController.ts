@@ -56,8 +56,8 @@ export default function useSentencesController() {
           setSentences(res.data.data);
           deleteUserParagraphSentencesByTemplate(
             { ...values },
-            paragraph,
-            template
+            template,
+            paragraph
           );
         }
       );

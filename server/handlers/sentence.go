@@ -106,7 +106,7 @@ func UpdateUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 	updatedSentences, err := actions.GetUserSentencesByParagraphAndTemplate(paragraph, userId, template)
 
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"data": "Failed to fetch sentences by paragraph after updating.",
 		})
 	}
@@ -129,12 +129,20 @@ func DeleteUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 
 	var input types.DeleteUserParagraphSentencesByTemplateInput
 
+	err := c.BodyParser(&input)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"data": "Failed to parse body.",
+		})
+	}
+
 	if len(input.DeleteSentences) > 0 {
-		err := database.DB.Delete(&models.Synonym{}, input.DeleteSentences).Error
+		err := database.DB.Delete(&models.Sentence{}, input.DeleteSentences).Error
 
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{
-				"data": "Failed to delete synonyms.",
+				"data": "Failed to delete sentences.",
 			})
 		}
 	}
@@ -143,7 +151,7 @@ func DeleteUserParagraphSentencesByTemplate(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"data": "Failed to fetch synonyms by word.",
+			"data": "Failed to fetch sentences by paragraph after updating.",
 		})
 	}
 
