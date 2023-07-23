@@ -29,9 +29,7 @@ class MyBaseView(View):
     template_name = 'home.html'
 
     def get(self, request, *args, **kwargs):
-        ctx = self.context
-        ctx['path'] = request.path
-        return render(request, self.template_name, context=ctx)
+        return render(request, self.template_name, context=self.context)
 
 
 class HomeView(MyBaseView):
