@@ -23,7 +23,7 @@ class MyBaseView(View):
         'google_analytics_src': "https://www.googletagmanager.com/gtag/js?id=" + google_analytics_id,
         'meta_description': 'Get reviews for all things sports, fitness, outdoors, and everything in between!',
         'page_title': str(os.environ.get('SITE_NAME')),
-        'site_name': str(os.environ.get('SITE_NAME'))
+        'site_name': str(os.environ.get('SITE_NAME')),
     }
 
     template_name = 'home.html'
