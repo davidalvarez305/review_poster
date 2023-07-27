@@ -21,8 +21,8 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="{{ meta_description }}">
     <!-- <link rel="canonical" href="https://{{ domain }}{{ path }}" /> -->
-    <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
     <!-- <meta property="og:url" content="https://{{ domain }}{{ path }}" /> -->
+    <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="article" />
     <meta property="og:title" content="{{ page_title }}" />
@@ -41,10 +41,10 @@
     <link href="{% static 'blog/assets/css/responsive.css' %}" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link href="{% static 'blog/assets/css/nice-select.css' %}" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-    <noscript><link rel="stylesheet" href="{% static 'blog/assets/css/flaticon.css' %}"></noscript>
-    <noscript><link rel="stylesheet" href="{% static 'blog/assets/css/owl.css' %}"></noscript>
-    <noscript><link rel="stylesheet" href="{% static 'blog/assets/css/responsive.css' %}"></noscript>
-    <noscript><link rel="stylesheet" href="{% static 'blog/assets/css/nice-select.css' %}"></noscript>
+    <link href="{% static 'blog/assets/css/flaticon.css' %}" rel="stylesheet">
+    <link href="{% static 'blog/assets/css/owl.css' %}" rel="stylesheet">
+    <link href="{% static 'blog/assets/css/responsive.css' %}" rel="stylesheet">
+    <link href="{% static 'blog/assets/css/nice-select.css' %}" rel="stylesheet">
 
 </head>
 
@@ -114,8 +114,7 @@
                 <div class="menu-backdrop"></div>
                 <div class="close-btn"><i class="fas fa-times"></i></div>
                 <nav class="menu-box">
-                    <div class="nav-logo"><a href="/"><img src="{% static 'media/misc/logo.webp' %}" alt=""
-                                title=""></a>
+                    <div class="nav-logo"><a href="/"><img src="{% static 'media/misc/logo.webp' %}" height="100" width="100" alt="" title=""></a>
                     </div>
                     <div class="menu-outer">
                         <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
