@@ -63,6 +63,7 @@ class HomeView(MyBaseView):
             for row in rows
         ]
         context['example_posts'] = example_posts[0]['example_posts']
+        context['page_path'] = request.build_absolute_uri()
         return render(request, self.template_name, context=context)
 
 
@@ -77,6 +78,7 @@ class CategoryView(MyBaseView):
         context['sub_categories'] = sub_categories
         context['category'] = category
         context['page_title'] = category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
+        context['page_path'] = request.build_absolute_uri()
 
         return render(request, self.template_name, context)
 
@@ -93,6 +95,7 @@ class SubCategoryView(MyBaseView):
         context['posts'] = posts
         context['sub_category'] = sub_category
         context['page_title'] = sub_category.name.title() + " - " + str(os.environ.get('SITE_NAME'))
+        context['page_path'] = request.build_absolute_uri()
         return render(request, self.template_name, context)
 
 class ReviewPostView(MyBaseView):
@@ -213,6 +216,7 @@ class CreatePost(LoginRequiredMixin, MyBaseView):
         context['api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
         context['page_title'] = "Create Review Posts - " + context['site_name']
         context['auth_header_string'] = os.environ.get('AUTH_HEADER_STRING')
+        context['page_path'] = request.build_absolute_uri()
         return render(request, self.template_name, context)
 
 class Login(MyBaseView):
