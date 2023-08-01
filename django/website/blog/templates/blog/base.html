@@ -58,12 +58,15 @@
                 "@type": "Person",
                 "name": "David Alvarez"
               },
-              "aggregateRating": {
+              "publisher": {
+                "@type": "Organization",
+                "name": "South Florida Athletic Club"
+              }
+            },
+            "aggregateRating": {
                 "@type": "AggregateRating",
-                "name": "{{ review_post.product.product_name }}",
                 "ratingValue": {{ review_post.product.product_ratings }},
                 "reviewCount": {{ review_post.product.product_reviews }}
-              }
             },
             "offers": {
                 "@type": "Offer",
