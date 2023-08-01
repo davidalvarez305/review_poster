@@ -39,6 +39,42 @@
     <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
     <link rel="canonical" href="{{ page_path }}" />
 
+    {% if is_reviewpost == True %}
+    <!-- Rich Structured Data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "{{ review_post.product.product_name }}",
+            "description": "{{ meta_description }}",
+            "review": {
+              "@type": "Review",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": {{ review_post.product.product_ratings }}
+              },
+              "author": {
+                "@type": "Person",
+                "name": "David Alvarez"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": {{ review_post.product.product_ratings }},
+                "reviewCount": {{ review_post.product.product_reviews }}
+              }
+            },
+            "offers": {
+                "@type": "Offer",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "price": {{ review_post.product.product_price }},
+                  "priceCurrency": "USD"
+                },
+            }
+        }
+      
+    </script>
+    {% endif %}
 
     <!-- Google Fonts -->
     <link rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap">

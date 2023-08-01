@@ -24,6 +24,7 @@ class MyBaseView(View):
         'meta_description': 'Get reviews for all things sports, fitness, outdoors, and everything in between!',
         'page_title': str(os.environ.get('SITE_NAME')),
         'site_name': str(os.environ.get('SITE_NAME')),
+        'is_reviewpost': False,
     }
 
     template_name = 'home.html'
@@ -126,6 +127,7 @@ class ReviewPostView(MyBaseView):
         context['sub_category_slug'] = kwargs['sub_category']
         context['category_slug'] = kwargs['category']
         context['page_path'] = request.build_absolute_uri()
+        context['is_reviewpost'] = True
         return render(request, self.template_name, context)
 
 def sitemap(request, *args, **kwargs):
