@@ -99,7 +99,7 @@
     purchaseButton.addEventListener('click', function() {
         gtag('event', 'purchase_click', {
             currency: 'USD',
-            value: productPrice
+            value: parseFloat(productPrice)
         });
     })
 </script>
