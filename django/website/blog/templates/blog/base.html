@@ -16,19 +16,28 @@
     </script>
     <!-- End Google tag -->
 
+    <!-- Essential Meta Tags -->
     <meta charset="utf-8">
     <title>{{ page_title }}</title>
-
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1" />
     <meta name="description" content="{{ meta_description }}">
+
+    <!-- Open Graph -->
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="article" />
     <meta property="og:title" content="{{ page_title }}" />
     <meta property="og:description" content="{{ meta_description }}" />
     <meta property="og:site_name" content="{{ site_name }}" />
 
+    <!-- Twitter -->
+    <meta name="twitter:title" content="{{ page_title }}" />
+    <meta name="twitter:description" content="{{ meta_description }}" />
+    <meta name="twitter:url" content="{{ page_path }}" />
+
+    <!-- Rels -->
     <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
+    <link rel="canonical" href="{{ page_path }}" />
 
 
     <!-- Google Fonts -->
