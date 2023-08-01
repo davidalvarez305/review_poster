@@ -67,7 +67,7 @@
                 "@type": "Offer",
                 "priceSpecification": {
                   "@type": "UnitPriceSpecification",
-                  "price": {{ review_post.product.product_price }},
+                  "price": {{ review_post.product.product_price|cut:'$' }},
                   "priceCurrency": "USD"
                 },
             }
