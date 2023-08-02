@@ -65,6 +65,7 @@ class HomeView(MyBaseView):
         ]
         context['example_posts'] = example_posts[0]['example_posts']
         context['page_path'] = request.build_absolute_uri()
+        context['page_title'] = str(os.environ.get('SITE_NAME'))
         return render(request, self.template_name, context=context)
 
 
@@ -204,8 +205,18 @@ def sitemap_index(request, *args, **kwargs):
 class AffiliateDisclaimer(MyBaseView):
     template_name = 'blog/affiliate_disclaimer.html'
 
+    def get(self, request, *args, **kwargs):
+        context = self.context
+        context['page_title'] = "Affiliate Disclaimer - " + context['site_name']
+        return render(request, self.template_name, context)
+
 class PrivacyPolicy(MyBaseView):
     template_name = 'blog/privacy_policy.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.context
+        context['page_title'] = "Privacy Policy - " + context['site_name']
+        return render(request, self.template_name, context)
 
 class CreatePost(LoginRequiredMixin, MyBaseView):
     login_url="/login"
