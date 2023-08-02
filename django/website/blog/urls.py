@@ -12,6 +12,7 @@ urlpatterns = [
     path('how-often-should-you-train-for-strength/', RedirectView.as_view(url='/'), name='how_often_should_you_train_for_strength'),
     path('5x5-workout/', RedirectView.as_view(url='/'), name='5x5_workout'),
     path('powerlifting-home-gym/', RedirectView.as_view(url='/'), name='powerlifting_home_gym'),
+    path('single/<str:slug>/', RedirectView.as_view(url='/'), name='redirect_single'),
     path('multiple/<str:slug>/', RedirectView.as_view(url='/'), name='redirect_multiple'),
     path('training/<str:slug>/', RedirectView.as_view(url='/'), name='redirect_training'),
     path('<slug:category>/<slug:sub_category>/<slug:slug>', views.ReviewPostView.as_view(), name='review_post'),
