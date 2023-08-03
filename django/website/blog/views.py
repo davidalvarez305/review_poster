@@ -119,7 +119,8 @@ class ReviewPostView(MyBaseView):
             while i < float(review_post.product.product_ratings):
                 product_rating_stars += '<li><i class="flaticon-star"></i></li>'
                 i += 1
-
+        if len(review_post.product.product_price) == 0:
+            review_post.product.product_price = '$0.00'
         context['related_review_posts'] = related_review_posts
         context['review_post'] = review_post
         context['meta_description'] = review_post.description
