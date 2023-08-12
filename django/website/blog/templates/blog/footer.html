@@ -1,70 +1,16 @@
 {% load static %}
-<footer class="main-footer light">
-    <div class="footer-top">
-        <div class="auto-container">
-            <div class="row clearfix">
-                <div class="col-lg-6 col-md-12 col-sm-12 big-column">
-                    <div class="row clearfix">
-                        <div class="col-lg-4 col-md-4 col-sm-12 footer-column">
-                            <div class="footer-widget logo-widget"></div>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 footer-column">
-                            <div class="footer-widget links-widget">
-                                <div class="widget-title">
-                                    <h3>Category</h3>
-                                </div>
-                                <div class="widget-content">
-                                    <ul class="links-list clearfix">
-                                        {% for parent in parent_group %}
-                                        <li><a href="#">{{ parent.name }}</a></li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 footer-column">
-                            <div class="footer-widget links-widget">
-                                <div class="widget-title">
-                                    <h3>Useful Links</h3>
-                                </div>
-                                <div class="widget-content">
-                                    <ul class="links-list clearfix">
-                                        <li><a href="/privacy-policy">Privacy Policy</a></li>
-                                        <li><a href="/disclaimer">Affiliate Disclaimer</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-12 col-sm-12 big-column">
-                    <div class="row clearfix">
-                        <div class="col-lg-6 col-md-6 col-sm-12 footer-column">
-                            <div class="footer-widget newsletter-widget">
-                                <div class="widget-title">
-                                    <h3>Newsletter</h3>
-                                </div>
-                                <div class="widget-content">
-                                    <p>Subscribe for notifications!</p>
-                                    <form action="contact.html" method="post" class="newsletter-form">
-                                        <div class="form-group">
-                                            <input type="email" name="email" placeholder="Enter your email" required="">
-                                            <button type="submit" class="theme-btn-three">Subscribe</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<footer id="page-footer" class="flex flex-none items-center bg-white dark:bg-gray-800">
+    <div class="text-center flex flex-col md:text-left md:flex-row md:justify-between text-sm container xl:max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="pt-4 pb-1 md:pb-4">
+            <p class="font-medium text-blue-600 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300">South Florida Athletic Club</p> © {{ current_year }}
         </div>
-    </div>
-    <div class="footer-bottom">
-        <div class="auto-container clearfix">
-            <div class="copyright pull-right">
-                <p><a href="/">{{ site_name }}</a> &copy; {{ current_year }} All Right Reserved</p>
-            </div>
+        <div class="pb-4 pt-1 md:pt-4 inline-flex items-center justify-center gap-4">
+            <a href="/disclaimer" class="px-3 md:px-5 py-2.5 font-medium transition flex items-center space-x-2 rounded-lg border border-blue-50 text-blue-600 bg-blue-50 dark:text-blue-100 dark:bg-blue-500 dark:bg-opacity-20 dark:border-transparent">
+                <span class="hidden sm:inline-block">Affiliate Disclaimer</span>
+            </a>
+            <a href="/privacy-policy" class="px-3 md:px-5 py-2.5 font-medium transition flex items-center space-x-2 rounded-lg border border-blue-50 text-blue-600 bg-blue-50 dark:text-blue-100 dark:bg-blue-500 dark:bg-opacity-20 dark:border-transparent">
+                <span class="hidden sm:inline-block">Privacy Policy</span>
+            </a>
         </div>
     </div>
 </footer>
