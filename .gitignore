@@ -1,9 +1,8 @@
 *.env
 *.conf
 *.sql
+node_modules
 deploy.sh
-crawler_build
-cms_build
 uwsgi_params
 replicate.sh
 download.sh
