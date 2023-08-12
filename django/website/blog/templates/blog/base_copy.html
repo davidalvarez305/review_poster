@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html id="HtmlTag" xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+{% load static %}
+{{ google_analytics_id|json_script:"google-analytics-id" }}
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="{{ google_analytics_src }}"></script>
+    <script>
+        var googleAnalyticsId = JSON.parse(document.getElementById('google-analytics-id').textContent);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', googleAnalyticsId);
+    </script>
+    <!-- End Google tag -->
+
+    <!-- Essential Meta Tags -->
+    <meta charset="utf-8">
+    <title>{{ page_title }}</title>
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1" />
+    <meta name="description" content="{{ meta_description }}">
+
+    <!-- Open Graph -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ page_title }}" />
+    <meta property="og:description" content="{{ meta_description }}" />
+    <meta property="og:site_name" content="{{ site_name }}" />
+
+    <!-- Twitter -->
+    <meta name="twitter:title" content="{{ page_title }}" />
+    <meta name="twitter:description" content="{{ meta_description }}" />
+    <meta name="twitter:url" content="{{ page_path }}" />
+
+    <!-- Rels -->
+    <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
+    <link rel="canonical" href="{{ page_path }}" />
+
+    {% if is_reviewpost == True %}
+    <!-- Rich Structured Data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "{{ review_post.product.product_name }}",
+            "image": "{{ review_post.product.product_image }}",
+            "description": "{{ meta_description }}",
+            "review": {
+              "@type": "Review",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": {{ review_post.product.product_ratings }}
+              },
+              "author": {
+                "@type": "Person",
+                "name": "David Alvarez"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "South Florida Athletic Club"
+              }
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": {{ review_post.product.product_ratings }},
+                "reviewCount": {{ review_post.product.product_reviews|cut:',' }}
+            },
+            "offers": {
+                "@type": "Offer",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "price": {{ review_post.product.product_price|cut:'$' }},
+                  "priceCurrency": "USD"
+                }
+            }
+        }
+    </script>
+    {% endif %}
+
+    <!-- CSS -->
+    <link href="{% static 'blog/main.css' %}" rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'">
+</head>
+
+
+<!-- page wrapper -->
+
+<body>
+    <div class="boxed_wrapper">
+        <!-- main header -->
+        <header class="main-header">
+            <div class="header-lower">
+                <div class="auto-container">
+                    <div class="outer-box">
+                        <figure class="logo-box"><a href="/"><img src="{% static 'media/misc/logo.webp' %}" width="100" height="100" alt=""></a></figure>
+                        <div class="menu-area">
+                            <!--Mobile Navigation Toggler-->
+                            <div class="mobile-nav-toggler">
+                                <i class="icon-bar"></i>
+                                <i class="icon-bar"></i>
+                                <i class="icon-bar"></i>
+                            </div>
+                            <nav class="main-menu navbar-expand-md navbar-light">
+                                <div class="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
+                                    <ul class="navigation clearfix">
+                                        {% for group in groups %}
+                                        <li class="dropdown">{{ group.name }}
+                                            <div class="megamenu">
+                                                <div class="row clearfix">
+                                                    <div class="col-lg-6 column">
+                                                        <h4>Subcategories</h4>
+                                                        {% for category in group.category_set.all %}
+                                                            <ul>
+                                                                <li>
+                                                                    <a href="/{{ category.slug }}/">
+                                                                        {{ category.name }}
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </nav>
+                        </div>
+                        <ul class="menu-right-content clearfix">
+                            <li>
+                                <div class="search-btn">
+                                    <button type="button" class="search-toggler" aria-label="search toggle"><i class="flaticon-search"></i></button>
+                                </div>
+                            </li>
+                            <li><a href="#"><i class="flaticon-like"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- main-header end -->
+
+            <!-- Mobile Menu  -->
+            <div class="mobile-menu">
+                <div class="menu-backdrop"></div>
+                <div class="close-btn"><i class="fas fa-times"></i></div>
+                <nav class="menu-box">
+                    <div class="nav-logo"><a href="/"><img src="{% static 'media/misc/logo.webp' %}" height="100" width="100" alt="" title=""></a>
+                    </div>
+                    <div class="menu-outer">
+                        <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
+                    </div>
+                </nav>
+            </div><!-- End Mobile Menu -->
+
+
+            <!-- product-details -->
+            {% block content %}{% endblock %}
+            <!-- product-details end -->
+
+
+            <!-- main-footer -->
+            {% include "blog/footer.html" %}
+            <!-- main-footer end -->
+
+
+            <!--Scroll to top-->
+            <button class="scroll-top scroll-to-target" aria-label="scroll to the top of the page" data-target="html">
+                <i class="fas fa-long-arrow-alt-up"></i>
+            </button>
+    </div>
+</body>
+<!-- End of .page_wrapper -->
+</html>

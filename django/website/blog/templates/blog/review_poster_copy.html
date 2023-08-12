@@ -1,0 +1,107 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+<section class="product-details product-details-1">
+    <div class="auto-container">
+        <div class="product-details-content">
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-12 col-sm-12 image-column">
+                    <figure class="product-image">
+                        <img src="{{ review_post.product.product_image }}" alt="{{ review_post.product.product_image_alt }}" height="400" width="268" />
+                        <a href="{{ review_post.product.product_image }}" class="lightbox-image"><i class="flaticon-search-2"></i></a>
+                    </figure>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12 content-column">
+                    <div class="product-info">
+                        <h1>{{ review_post.product.product_name }}</h1>
+                        <div class="customer-review clearfix">
+                            <ul class="rating-box clearfix">
+                                {{ product_rating_stars|safe }}
+                            </ul>
+                            <div class="reviews"><a href="{{ review_post.product.affiliate_url }}">{{ review_post.product.product_reviews }} Reviews</a></div>
+                        </div>
+                        <span class="item-price" id="product-pricing">{{ review_post.product.product_price }}</span>
+                        <div class="text">
+                            <p>{{ review_post.product.product_description }}</p>
+                            <ul class="list clearfix">
+                                <li><b><i>Ratings: </i></b>{{ review_post.product.product_ratings }}</li>
+                                <li>Sub Category: <a href="/{{ category_slug }}/{{ sub_category_slug }}/">{{ review_post.sub_category.name }}</a></li>
+                            </ul>
+                        </div>
+                        <div class="othre-options clearfix">
+                            <a href="{{ review_post.product.affiliate_url }}">
+                                <div class="btn-box">
+                                    <button type="button" id="purchase-button" class="theme-btn-two">PURCHASE</button>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="product-discription">
+            <div class="tabs-box">
+                <div class="tab-btn-box">
+                    <ul class="tab-btns tab-buttons clearfix">
+                        <li class="tab-btn active-btn" data-tab="#tab-1">Description</li>
+                    </ul>
+                </div>
+                <div class="tabs-content">
+                    <div class="tab active-tab" id="tab-1">
+                        <div class="text">
+                            <p>{{ review_post.content|safe }}</p>
+                            <h2>{{ review_post.faq_question_1|safe }}</h2>
+                            <p>{{ review_post.faq_answer_1|safe }}</p>
+                            <h2>{{ review_post.faq_question_2|safe }}</h2>
+                            <p>{{ review_post.faq_answer_2|safe }}</p>
+                            <h2>{{ review_post.faq_question_3|safe }}</h2>
+                            <p>{{ review_post.faq_answer_3|safe }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="related-product">
+            <div class="sec-title style-two">
+                <h2>Related Products</h2>
+                <p>There are some product that we featured for choose your best</p>
+                <span class="separator"
+                    style="background-image: url(https://southfloridaathleticclub.s3.amazonaws.com/blog/assets/images/icons/separator-2.png);"></span>
+            </div>
+            <div class="row clearfix">
+                {% for r in related_review_posts %}
+                <div class="col-lg-3 col-md-6 col-sm-12 shop-block">
+                    <div class="shop-block-one">
+                        <div class="inner-box">
+                            <figure class="image-box">
+                                <img src="{{ r.product.product_image }}" loading="lazy" alt="{{ r.product.product_image_alt }}" height="400" width="268" />
+                                <ul class="info-list clearfix">
+                                    <li><a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}"><i class="flaticon-heart"></i></a></li>
+                                    <li><a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}">Check Product</a></li>
+                                </ul>
+                            </figure>
+                            <div class="lower-content">
+                                <a href="/{{ category_slug }}/{{ sub_category_slug }}/{{ r.slug }}">{{ r.title }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    var productPrice = document.getElementById('product-pricing').textContent.split("$")[1];
+    var purchaseButton = document.getElementById('purchase-button');
+
+    purchaseButton.addEventListener('click', function() {
+        gtag('event', 'purchase_click', {
+            currency: 'USD',
+            value: parseFloat(productPrice)
+        });
+    })
+</script>
+
+{% endblock %}
