@@ -35,6 +35,9 @@
     <meta name="twitter:description" content="{{ meta_description }}" />
     <meta name="twitter:url" content="{{ page_path }}" />
 
+    <!-- CSS -->
+    <link href="{% static 'blog/main.css' %}" rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'">
+
     <!-- Rels -->
     <link rel="shortcut icon" href="{% static 'media/misc/favicon.ico' %}">
     <link rel="canonical" href="{{ page_path }}" />
@@ -79,9 +82,6 @@
         }
     </script>
     {% endif %}
-
-    <!-- CSS -->
-    <link href="{% static 'blog/main.css' %}" rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 
 
@@ -95,7 +95,7 @@
           <div class="flex items-center space-x-2 lg:space-x-6 dark">
             <!-- Logo -->
             <a href="/" class="group inline-flex items-center space-x-2 font-bold text-lg tracking-wide text-gray-900 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300">
-                <link rel="preload" as="image" href="{% static 'media/misc/logo.webp' %}">
+                <link rel="preload" as="image" href="{% static 'media/misc/logo.webp' %}"  onload="this.onload=null">
             </a>
             <!-- END Logo -->
   
