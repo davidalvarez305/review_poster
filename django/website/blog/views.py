@@ -37,33 +37,7 @@ class HomeView(MyBaseView):
     template_name = 'blog/home.html'
 
     def get(self, request, *args, **kwargs):
-        cursor = connection.cursor()
         context = self.context
-
-        sql = '''
-            SELECT JSON_AGG(TO_JSON(r)) AS example_posts FROM (
-                SELECT rp.title, rp.slug, rp.sub_category_id, sub.slug AS sub_category_slug, cg.slug AS category_slug, cg.id AS category_id,
-                ROW_NUMBER() OVER (PARTITION BY cg.id ORDER BY cg.id) row_number
-                FROM review_post AS rp
-                LEFT JOIN sub_category AS sub
-                ON rp.sub_category_id = sub.id
-                LEFT JOIN category AS cg
-                ON cg.id = sub.category_id
-                GROUP BY sub.id, rp.title, sub.slug, cg.slug, rp.slug, cg.id, rp.sub_category_id
-                ORDER BY cg.id
-            ) AS r
-            WHERE r.row_number < 10
-        '''
-
-        cursor.execute(sql)
-        rows = cursor.fetchall()
-        desc = cursor.description
-        columns = [col[0] for col in desc]
-        example_posts = [
-            dict(zip(columns, row))
-            for row in rows
-        ]
-        context['example_posts'] = example_posts[0]['example_posts']
         context['page_path'] = request.build_absolute_uri()
         context['page_title'] = str(os.environ.get('SITE_NAME'))
         return render(request, self.template_name, context=context)

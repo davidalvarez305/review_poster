@@ -1,55 +1,36 @@
 {% extends "blog/base.html" %}
 {% load static %}
 {% block content %}
-
-<section class="shop-page-section sidebar-page-container shop-page-3">
-    <div class="auto-container">
-        <div class="row clearfix">
-            <div class="col-lg-9 col-md-12 col-sm-12 content-side">
-                <div class="sidebar-content">
-                    {% for group in groups %}
-                    <div class="our-shop">
-                        <div class="row clearfix">
-                            {% for category in group.category_set.all %}
-                            <div class="col-lg-4 col-md-6 col-sm-12 shop-block">
-                                <div class="shop-block-one">
-                                    <div class="inner-box">
-                                        <figure class="image-box">
-                                            <img src="{{ category.subcategory_set.first.reviewpost_set.first.product.product_image }}"  height="400" width="268" loading="lazy" alt="{{ category.subcategory_set.first.reviewpost_set.first.product.product_image_alt }}" height="320" width="320" >
-                                            <ul class="info-list clearfix">
-                                                <li><a href="#"><i class="flaticon-heart"></i></a></li>
-                                                <li><a href="/{{ category.slug }}/">Learn More</a></li>
-                                            </ul>
-                                        </figure>
-                                        <div class="lower-content">
-                                            <a href="/{{ category.slug }}/">{{ category.name }}</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endfor %}
+<!-- Product List Section: Products Grid -->
+<div class="text-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold mb-3">
+      {{ site_name }}
+    </h1>
+</div>
+<div class="bg-white dark:text-gray-100 dark:bg-gray-900">
+    <div class="container xl:max-w-7xl mx-auto px-4 py-12 lg:px-8 lg:py-12">
+        <!-- Products -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
+        {% for group in groups %}
+            {% for category in group.category_set.all %}
+                <div>
+                <div class="group relative overflow-hidden mb-2">
+                    <img src="{{ category.subcategory_set.first.reviewpost_set.first.product.product_image }}" height="320" width="320" loading="lazy" alt="{{ category.subcategory_set.first.reviewpost_set.first.product.product_image_alt }}">
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-12 col-sm-12 sidebar-side">
-                <div class="sidebar shop-sidebar">
-                    <div class="sidebar-widget categories-widget">
-                        <div class="widget-title">
-                            <h3>Trending Posts</h3>
-                        </div>
-                        <div class="widget-content">
-                            <ul class="categories-list clearfix">
-                                {% for p in example_posts %}
-                                <li><a href="/{{ p.category_slug }}/{{ p.sub_category_slug }}/{{ p.slug }}">{{ p.title }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                <a href="/{{ category.slug }}/" class="block font-semibold hover:text-gray-500 dark:hover:text-gray-300">
+                    {{ category.name }}
+                </a>
+                <div class="font-medium text-gray-500 dark:text-gray-400">
+                    {{ category.subcategory_set.first.reviewpost_set.first.product.product_price }}
                 </div>
-            </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <!-- END Products -->
         </div>
+  
+      <hr class="my-10 dark:border-gray-700/50">
     </div>
-</section>
+  </div>
+  <!-- END Product List Section: Products Grid -->
 {% endblock %}
