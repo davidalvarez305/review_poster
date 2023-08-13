@@ -21,10 +21,5 @@ urlpatterns = [
     path('<int:int>/sitemap.xml.gz', views.sitemap, name='sitemap'),
     path('sitemap_index.xml', views.sitemap_index, name='sitemap_index'),
     path('disclaimer', views.AffiliateDisclaimer.as_view(), name='disclaimer'),
-    path('privacy-policy', views.PrivacyPolicy.as_view(), name='privacy_policy'),
-    path('create-review-post', views.CreatePost.as_view(), name='create_review_post'),
-    path('login', views.Login.as_view(), name='login'),
-    path('logout', views.Logout.as_view(), name='logout')
+    path('privacy-policy', views.PrivacyPolicy.as_view(), name='privacy_policy')
 ]
-
-#path('create-post', views.CreatePost.as_view(), name='create_post')

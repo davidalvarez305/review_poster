@@ -192,38 +192,3 @@ class PrivacyPolicy(MyBaseView):
         context = self.context
         context['page_title'] = "Privacy Policy - " + context['site_name']
         return render(request, self.template_name, context)
-
-class CreatePost(LoginRequiredMixin, MyBaseView):
-    login_url="/login"
-    template_name = 'blog/create_post.html'
-
-    def get(self, request, *args, **kwargs):
-        context = self.context
-
-        context['templates'] = ['ReviewPost']
-        context['api'] = os.environ.get('REVIEW_POST_API') + "/api/review-post"
-        context['page_title'] = "Create Review Posts - " + context['site_name']
-        context['auth_header_string'] = os.environ.get('AUTH_HEADER_STRING')
-        context['page_path'] = request.build_absolute_uri()
-        return render(request, self.template_name, context)
-
-class Login(MyBaseView):
-    template_name = 'blog/login.html'
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-    
-    def post(self, request, *args, **kwargs):
-        form = request.POST.dict()
-        user = authenticate(request=request, username=form.get('username'), password=form.get('password'))
-
-        if user is not None:
-            login(request, user)
-            return JsonResponse({ 'data': 'Success.'}, status=200)
-        else:
-            return JsonResponse({ 'data': 'Authentication failed.'}, status=400)
-        
-class Logout(MyBaseView):
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        return JsonResponse({ 'data': 'Logged out.'}, status=200)
