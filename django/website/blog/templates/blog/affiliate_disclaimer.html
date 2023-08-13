@@ -1,28 +1,32 @@
 {% extends "blog/base.html" %}
 {% load static %}
 {% block content %}
-<section class="blog-details">
-    <div class="auto-container">
-        <div class="blog-details-content">
-            <div class="inner-box">
-                <div class="text">
-                    <h1>Affiliate Disclaimer</h1>
-                    <p>In compliance with the FTC guidelines, please assume the following about all links, posts,
-                        photos, and other material
-                        on this websote:</p>
-                    <p>Any/all of the links on this website are affiliate links of which {{ site_name }} receives a
-                        small commission from
-                        sales of certain items, but the price is the same for you.</p>
-                    <p>{{ site_name }} is a participant in the Amazon Services LLC Associates Program, an affiliate
-                        advertising program
-                        designed to provide a means for sites to earn advertising fees by advertising and linking to
-                        Amazon.com. Pages on
-                        this site may include affiliate links to Amazon and its affiliate sites on which the owner of
-                        this website will make
-                        a referral commission.</p>
-                </div>
-            </div>
-        </div>
+<!-- Blog Post Section: Modern Post -->
+<div class="bg-white dark:text-gray-100 dark:bg-gray-800">
+    <div class="space-y-16 container xl:max-w-7xl mx-auto px-4 py-16 lg:px-8 lg:py-32">
+      <!-- Heading -->
+      <div class="text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold mb-3">Affiliate Disclaimer</h1>
+      </div>
+      <!-- END Heading -->
+      <!-- Blog Post -->
+      <article class="prose prose-indigo prose-lg mx-auto dark:prose-invert">
+        <p>In compliance with the FTC guidelines, please assume the following about all links, posts,
+            photos, and other material
+            on this websote:</p>
+        <p>Any/all of the links on this website are affiliate links of which {{ site_name }} receives a
+            small commission from
+            sales of certain items, but the price is the same for you.</p>
+        <p>{{ site_name }} is a participant in the Amazon Services LLC Associates Program, an affiliate
+            advertising program
+            designed to provide a means for sites to earn advertising fees by advertising and linking to
+            Amazon.com. Pages on
+            this site may include affiliate links to Amazon and its affiliate sites on which the owner of
+            this website will make
+            a referral commission.</p>
+      </article>
+      <!-- END Blog Post -->
     </div>
-</section>
+  </div>
+  <!-- END Blog Post Section: Modern Post -->
 {% endblock %}
