@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -213,7 +214,7 @@ func QueryGoogle(query types.GoogleQuery) (GoogleKeywordResults, error) {
 	}
 
 	googleCustomerID := os.Getenv("GOOGLE_CUSTOMER_ID")
-	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v12/customers/%s:generateKeywordIdeas", googleCustomerID)
+	googleUrl := fmt.Sprintf("https://googleads.googleapis.com/v13/customers/%s:generateKeywordIdeas", googleCustomerID)
 	developerToken := os.Getenv("GOOGLE_DEVELOPER_TOKEN")
 	authorizationHeader := fmt.Sprintf("Bearer %s", authToken.AccessToken)
 
@@ -241,6 +242,16 @@ func QueryGoogle(query types.GoogleQuery) (GoogleKeywordResults, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("STATUS CODE: %+v\n", resp.Status)
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return results, errors.New("error reading response body")
+		}
+
+		fmt.Printf("RESPONSE BODY: %+v\n", string(body))
+
+		resp.Body.Close()
 		return results, errors.New("request failed")
 	}
 
