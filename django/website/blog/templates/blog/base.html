@@ -85,8 +85,9 @@
 </head>
 
 
-<!-- Page Container -->
-<div id="page-container" class="flex flex-col mx-auto w-full min-h-screen min-w-[320px] bg-gray-100 dark:text-gray-100 dark:bg-gray-900">
+<body>
+  <!-- Page Container -->
+  <div id="page-container" class="flex flex-col mx-auto w-full min-h-screen min-w-[320px] bg-gray-100 dark:text-gray-100 dark:bg-gray-900">
     <!-- Page Header -->
     <header id="page-header" class="flex flex-none items-center shadow-sm z-1 bg-gray-800">
       <div class="container xl:max-w-7xl mx-auto px-4 lg:px-8">
@@ -98,7 +99,7 @@
                 <link rel="preload" as="image" href="{% static 'media/misc/logo.webp' %}" onload="this.onload=null;this.reload=''">
             </a>
             <!-- END Logo -->
-  
+
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex items-center space-x-2">
             {% for group in groups %}
@@ -139,7 +140,7 @@
             <!-- END Desktop Navigation -->
           </div>
           <!-- END Left Section -->
-  
+
           <!-- Right Section -->
           <div class="flex items-center space-x-2">
             <!-- Toggle Mobile Navigation -->
@@ -165,10 +166,10 @@
       </div>
     </header>
     <!-- END Page Header -->
-  
+
     <!-- Page Content -->
     <main id="page-content" class="flex flex-auto flex-col max-w-full">
-  
+
       <!-- Page Section -->
       <div class="container xl:max-w-7xl mx-auto p-4 lg:p-8">
         {% block content %}{% endblock %}
@@ -176,10 +177,11 @@
       <!-- END Page Section -->
     </main>
     <!-- END Page Content -->
-  
+
     <!-- Page Footer -->
     {% include "blog/footer.html" %}
     <!-- END Page Footer -->
   </div>
   <!-- END Page Container -->
+</body>
 </html>
